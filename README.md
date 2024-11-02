@@ -1,32 +1,36 @@
-# Call Sure AI
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-**NOTICE**
+## Getting Started
 
-This repository is the property of CallSure AI™ (CSAI). All content in this repository, except for content explicitly listed in the **List of Pulled or Copied Content and Respective Licenses (LPCC)** below, is proprietary to CSAI. By accessing or using this repository, you agree to the following terms:
+First, run the development server:
 
-1. **Prohibition of Unauthorized Content**  
-   You shall not pull or copy into this repository any content from any source that requires royalties or any form of compensation to be made to any party now or in the future. You also agree not to incorporate any content from external sources unless explicitly authorized in writing by CSAI.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-2. **Use of Open Source Content**  
-   CSAI may, from time to time, authorize certain open-source content to be included in this repository. In such cases, you are required to promptly list such content in the LPCC along with their respective licenses.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-3. **Intellectual Property Protection**  
-   - **Acknowledgment**  
-     You acknowledge that CSAI values its intellectual property and expects all collaborators to protect all work—including ideas, designs, processes, software, and documents—shared or created during any engagement with CSAI as proprietary to CSAI.
-   - **Open-Source Software**  
-     Content in this repository may reference open-source software being considered or used by CSAI. Any extensions or modifications to such open-source software are deemed proprietary and trade secrets of CSAI unless CSAI formally and explicitly contributes specific modified code back to the open-source community.
-   - **Proprietary Systems**  
-     The selection, interconnection, configuration, processes, designs, and implementation of all technology—including open-source software—that is being developed or is part of CSAI's deployed systems are proprietary and trade secrets of CSAI.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-4. **Content Attribution**  
-   All content, excluding only the expressly listed content in the LPCC, is the property of CSAI. You shall include the notice:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
----
+## Learn More
 
-## List of Pulled or Copied Content and Respective Licenses (LPCC)
+To learn more about Next.js, take a look at the following resources:
 
-*No external content has been added at this time.*
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
----
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-**© CallSure AI™ (CSAI) Proprietary and Trade Secret**
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
