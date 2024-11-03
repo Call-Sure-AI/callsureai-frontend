@@ -83,7 +83,7 @@ const ConnectionDiagram = () => {
                         <div className="w-6 h-6 bg-[#F97316] rounded-full" />
                     </div>
                 </div>
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 160" preserveAspectRatio="none">
+                <svg className="absolute z-10 inset-0 w-full h-full" viewBox="0 0 1200 160" preserveAspectRatio="none">
                     <path d="M 52,40 C 100,40 150,80 250,80" stroke="#E2E8F0" strokeWidth="1.5" fill="none" />
                     <path d="M 52,80 C 100,80 150,80 250,80" stroke="#E2E8F0" strokeWidth="1.5" fill="none" />
                     <path d="M 52,120 C 100,120 150,80 250,80" stroke="#E2E8F0" strokeWidth="1.5" fill="none" />
