@@ -1,6 +1,7 @@
+import Navbar from "@/components/navbar";
 import AnalyticsPage from "@/components/analytics-section";
 import HeroSection from "@/components/hero-section";
-import Navbar from "@/components/navbar";
+import IntegrationSection from "@/components/integration-section";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <AnalyticsPage />
+      <IntegrationSection />
     </div>
   );
 }

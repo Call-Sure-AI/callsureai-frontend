@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Clock, Building } from 'lucide-react';
+import { Clock, Building } from 'lucide-react';
 import type { UserData } from '@/types';
 
 interface UserAnalyticsProps {
@@ -27,20 +27,6 @@ const cardVariants = {
         transition: {
             duration: 0.3,
             ease: "easeOut"
-        }
-    }
-};
-
-const avatarVariants = {
-    initial: { scale: 0, rotate: -45 },
-    animate: {
-        scale: 1,
-        rotate: 0,
-        transition: {
-            type: "spring",
-            stiffness: 200,
-            damping: 20,
-            delay: 0.2
         }
     }
 };
@@ -77,7 +63,6 @@ export const UserAnalytics: React.FC<UserAnalyticsProps> = ({ userData }) => {
         >
             <div className="bg-white/90 backdrop-blur rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-100">
                 <div className="space-y-6">
-                    {/* User Info Section */}
                     <div className="flex items-center gap-4">
 
                         <motion.div
@@ -92,7 +77,6 @@ export const UserAnalytics: React.FC<UserAnalyticsProps> = ({ userData }) => {
                         </motion.div>
                     </div>
 
-                    {/* Activity Section */}
                     <motion.div
                         variants={contentVariants}
                         className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg"
@@ -104,7 +88,6 @@ export const UserAnalytics: React.FC<UserAnalyticsProps> = ({ userData }) => {
                         </div>
                     </motion.div>
 
-                    {/* Activity Indicator */}
                     <motion.div
                         className="h-2 bg-slate-100 rounded-full overflow-hidden"
                         initial={{ scaleX: 0 }}
