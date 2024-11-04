@@ -1,3 +1,4 @@
+import AnalyticsPage from "@/components/analytics-section";
 import HeroSection from "@/components/hero-section";
 import Navbar from "@/components/navbar";
 
@@ -6,6 +7,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
       <HeroSection />
+      <AnalyticsPage />
     </div>
   );
 }
