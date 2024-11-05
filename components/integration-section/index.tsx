@@ -77,7 +77,7 @@ const IntegrationSection = () => {
     };
 
     return (
-        <div className="relative w-full max-w-7xl mx-auto px-4 py-20">
+        <div id='integration-section' className="relative w-full max-w-7xl mx-auto px-4 py-20">
             <div className="flex flex-col lg:flex-row items-center gap-12">
                 <motion.div
                     className="relative w-full lg:w-1/2 aspect-square"
