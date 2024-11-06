@@ -95,7 +95,7 @@ const ConnectionDiagram = () => {
                     <div className="flex flex-wrap justify-center gap-2">
                         {tags.map((tag, i) => (
                             <motion.span
-                                key={tag}
+                                key={`${tag}-${i}`}
                                 variants={tagAnimation}
                                 whileHover="hover"
                                 className="text-blue-600/90 text-xs sm:text-sm font-medium bg-white/80 px-3 sm:px-4 py-1.5 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.05)]"

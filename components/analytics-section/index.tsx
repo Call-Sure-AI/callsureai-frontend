@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion, useScroll, useSpring, useTransform, useInView, useAnimation } from 'framer-motion';
+import { motion, useScroll, useSpring, useTransform, useInView } from 'framer-motion';
 import { Users, Clock, LineChart } from 'lucide-react';
 import { FeatureCard } from '@/components/analytics-section/feature-card';
 import { UserAnalytics } from '@/components/analytics-section/user-analytics';
