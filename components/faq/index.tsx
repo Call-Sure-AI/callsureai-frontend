@@ -129,7 +129,7 @@ const FAQ: React.FC = () => {
                         className="text-4xl md:text-5xl font-bold text-[#1e3a8a] mb-8"
                         variants={headerVariants}
                     >
-                        Got Questions? We've got<br />answers!
+                        Got Questions? We&apos;re here to help!
                     </motion.h1>
 
                     <motion.div
@@ -161,7 +161,7 @@ const FAQ: React.FC = () => {
                     className="max-w-3xl mx-auto space-y-3"
                     variants={containerVariants}
                 >
-                    {questions.map((item, index) => (
+                    {questions.map((item) => (
                         <motion.div
                             key={item.question}
                             variants={questionVariants}

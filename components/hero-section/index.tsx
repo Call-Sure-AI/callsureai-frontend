@@ -5,14 +5,6 @@ import ConnectionDiagram from "./connecting-diagram";
 import { motion } from "framer-motion";
 
 const HeroSection = () => {
-    const tags = [
-        "SimplifySales",
-        "BoostProductivity",
-        "RelationshipManagement",
-        "CustomerSuccess",
-        "GrowWithEase",
-    ];
-
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }

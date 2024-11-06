@@ -27,17 +27,6 @@ const ConnectionDiagram = () => {
         }
     };
 
-    const lineAnimation = {
-        initial: { pathLength: 0 },
-        animate: {
-            pathLength: 1,
-            transition: {
-                duration: 1,
-                ease: "easeInOut"
-            }
-        }
-    };
-
     const buttonHover = {
         hover: {
             scale: 1.02,
@@ -88,7 +77,7 @@ const ConnectionDiagram = () => {
 
                 {["Collab", "Connect"].map((text, index) => (
                     <motion.div
-                        key={text}
+                        key={`${text}-${index}`}
                         variants={itemAnimation}
                         whileHover={buttonHover.hover}
                         className="flex items-center gap-2 bg-blue-50 px-4 py-1.5 rounded-full cursor-pointer"

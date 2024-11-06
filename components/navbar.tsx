@@ -82,7 +82,7 @@ const Navbar = () => {
                                 <Button
                                     variant="ghost"
                                     className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
-                                    // @ts-ignore
+                                    // @ts-expect-error
                                     whilehover={{ scale: 1.05 }}
                                     whiletap={{ scale: 0.95 }}
                                 >
