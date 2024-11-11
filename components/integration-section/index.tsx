@@ -157,7 +157,6 @@ const IntegrationSection = () => {
                         Keep everything in sync, automate tasks, and manage your business
                         from a single, unified platform.
                     </p>
-
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
