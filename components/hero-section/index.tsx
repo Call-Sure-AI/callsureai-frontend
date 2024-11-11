@@ -158,10 +158,10 @@ const HeroSection = () => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="relative z-10"
                     >
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] text-[#0A1E4E]">
-                            Streamline Your
+                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] text-[#0A1E4E]">
+                            Revolutionize Customer Support
                             <br />
-                            Customer Relationships
+                            with AI-Powered Agents
                         </h1>
                     </motion.div>
 
@@ -170,7 +170,7 @@ const HeroSection = () => {
                         transition={{ duration: 0.6, delay: 0.4 }}
                         className="text-lg text-slate-500 text-center mb-12 max-w-3xl mx-auto relative z-10"
                     >
-                        The all-in-one platform that empowers businesses to track, manage, and grow customer connections seamlessly.
+                        Instant responses, meaningful conversations, unparalleled customer satisfaction
                     </motion.p>
 
                     <div className="my-16 relative z-10">
@@ -185,7 +185,7 @@ const HeroSection = () => {
                             <Button
                                 className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white px-8 h-12 text-base rounded-full w-full sm:w-auto"
                             >
-                                Get Started
+                                Get Started with Callsure.ai Today
                                 <motion.div
                                     whileHover={{ x: 5 }}
                                     className="ml-2 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center"
