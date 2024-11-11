@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
                                 damping: 10
                             }}
                         >
-                            <span>Built for Exceptional Customer Experiences</span>
+                            <span>Why Choose Callsure.ai?</span>
                         </motion.div>
                     </ParallaxText>
 

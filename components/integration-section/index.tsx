@@ -146,15 +146,16 @@ const IntegrationSection = () => {
                 >
                     <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium">
                         <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        Seamless AI-Human Collaboration
+                        Connect with Your Favorite Tools
                     </div>
 
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-                        Combine AI efficiency with human empathy for perfect balance
+                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900">
+                        Seamlessly integrate with the apps
                     </h2>
 
                     <p className="text-lg text-slate-600">
-                        Toggle for Human-only vs. AI+Human response times
+                        Keep everything in sync, automate tasks, and manage your business
+                        from a single, unified platform.
                     </p>
 
                     <motion.button
@@ -162,7 +163,7 @@ const IntegrationSection = () => {
                         whileTap={{ scale: 0.98 }}
                         className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-lg font-medium group"
                     >
-                        Experience It Live
+                        Learn more
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </motion.button>
                 </motion.div>
