@@ -82,10 +82,10 @@ const FAQ: React.FC = () => {
         <div className="relative w-full overflow-hidden min-h-screen"
             style={{
                 background: `
-             radial-gradient(circle at 0% 0%, rgba(239, 246, 255, 0.6) 0%, transparent 100%),
-             radial-gradient(circle at 100% 100%, rgba(219, 234, 254, 0.4) 0%, transparent 100%),
-             white
-           `
+                radial-gradient(circle at 0% 0%, rgba(239, 246, 255, 0.6) 0%, transparent 100%),
+                radial-gradient(circle at 100% 100%, rgba(219, 234, 254, 0.4) 0%, transparent 100%),
+                white
+            `
             }}>
             <div
                 className="absolute top-0 left-0 w-96 h-96 bg-blue-100/30"
