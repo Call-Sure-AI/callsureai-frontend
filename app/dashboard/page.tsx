@@ -118,7 +118,7 @@ const DashboardLayout = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
                         >
-                            <Card className="bg-white hover:bg-[#172d54] transition-colors">
+                            <Card className="bg-white transition-colors">
                                 <CardContent className="p-4">
                                     <div className="text-sm font-bold text-[#0A1E4E]">{stat.label}</div>
                                     <div className="text-xl font-bold mt-1 text-black">{stat.value}</div>
