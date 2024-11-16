@@ -18,8 +18,6 @@ const DashboardLayout = () => {
 
     return (
         <div className="flex h-screen bg-white text-black">
-            <Sidebar />
-
             {/* Main Content */}
             <div className="ml-16 flex-1 p-8 bg-white">
                 {/* Welcome Section */}
