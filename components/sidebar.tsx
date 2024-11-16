@@ -25,10 +25,10 @@ const Sidebar = () => {
 
     const menuItems = [
         { icon: <HomeIcon className="w-4 h-4" />, label: 'Home', link: "/dashboard" },
-        { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', link: '/profile-section' },
-        { icon: <BarChart3Icon className="w-4 h-4" />, label: 'Analytics', link: '/analytics-section' },
-        { icon: <PhoneCallIcon className="w-4 h-4" />, label: 'Call History', link: '/call-history-section' },
-        { icon: <CreditCardIcon className="w-4 h-4" />, label: 'Payments', link: '/payments-section' },
+        { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', link: '/dashboard/profile-section' },
+        { icon: <BarChart3Icon className="w-4 h-4" />, label: 'Analytics', link: '/dashboard/analytics-dashboard' },
+        { icon: <PhoneCallIcon className="w-4 h-4" />, label: 'Call History', link: '/dashboard/call-history-dashboard' },
+        { icon: <CreditCardIcon className="w-4 h-4" />, label: 'Payments', link: '/dashboard/payments-section' },
     ];
 
     const accountItems = [
