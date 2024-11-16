@@ -59,7 +59,7 @@ const Sidebar = () => {
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="absolute bg-white p-4 space-y-8 border-r h-screen"
+            className="absolute z-20 bg-white p-4 space-y-8 border-r h-screen"
         >
             <Button
                 variant="ghost"
