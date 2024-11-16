@@ -11,7 +11,6 @@ import {
     ClockIcon,
     LinkIcon,
     LifeBuoyIcon,
-    BellIcon,
     BellDotIcon,
     ChevronLeftIcon,
     ChevronRightIcon

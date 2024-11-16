@@ -4,37 +4,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-    HomeIcon,
-    UserIcon,
-    BarChart3Icon,
-    PhoneCallIcon,
-    CreditCardIcon,
-    UsersIcon,
-    ClockIcon,
-    LinkIcon,
-    LifeBuoyIcon,
-    BellIcon,
-    PlusCircleIcon,
-} from "lucide-react";
+import { PlusCircleIcon } from "lucide-react";
 import Sidebar from '@/components/sidebar';
 
 const DashboardLayout = () => {
-    const menuItems = [
-        { icon: <HomeIcon className="w-4 h-4" />, label: 'Home' },
-        { icon: <UserIcon className="w-4 h-4" />, label: 'Profile' },
-        { icon: <BarChart3Icon className="w-4 h-4" />, label: 'Analytics' },
-        { icon: <PhoneCallIcon className="w-4 h-4" />, label: 'Call History' },
-        { icon: <CreditCardIcon className="w-4 h-4" />, label: 'Payments' },
-    ];
-
-    const accountItems = [
-        { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager' },
-        { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History' },
-        { icon: <LinkIcon className="w-4 h-4" />, label: 'Integration' },
-        { icon: <LifeBuoyIcon className="w-4 h-4" />, label: 'Reach out to Founders' },
-        { icon: <BellIcon className="w-4 h-4" />, label: 'Help' },
-    ];
 
     const statsCards = [
         { label: 'Account Balance', value: '$1,234' },
