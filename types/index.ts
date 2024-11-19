@@ -56,3 +56,10 @@ export interface AccessManagerProps {
     onInvite?: (users: User[]) => void;
     onCancel?: () => void;
 }
+
+export interface HistoryEntry {
+    id: string;
+    user: string;
+    actionName: string;
+    actionTime: string;
+}
