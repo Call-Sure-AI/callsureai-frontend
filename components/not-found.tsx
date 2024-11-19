@@ -1,11 +1,10 @@
-// components/not-found/NotFoundPage.tsx
-'use client'; // Important for using client-side features in App Router
+'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, ArrowLeft, Search, AlertCircle } from 'lucide-react';
-import Link from 'next/link'; // Use Next.js Link for client-side navigation
-import { useRouter } from 'next/navigation'; // Use next/navigation for App Router
+import { Home, ArrowLeft, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const NotFoundPage: React.FC = () => {
     const router = useRouter();
@@ -95,7 +94,7 @@ const NotFoundPage: React.FC = () => {
                 >
                     <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
                     <p className="text-xl text-gray-600 mb-2">Oops! Page Not Found</p>
-                    <p className="text-gray-500">The page you're looking for doesn't exist or has been moved.</p>
+                    <p className="text-gray-500">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
                 </motion.div>
 
                 {/* Action Buttons */}

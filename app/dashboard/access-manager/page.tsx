@@ -54,7 +54,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
 
     const handleRemoveUser = (userId: string): void => {
         setUsers(prev => prev.filter(user => user.id !== userId));
-        const { [userId]: _, ...restAccess } = selectedAccess;
+        const { [userId]: _, ...restAccess } = selectedAccess; // eslint-disable-line @typescript-eslint/no-unused-vars
         setSelectedAccess(restAccess);
     };
 
