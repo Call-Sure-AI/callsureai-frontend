@@ -37,3 +37,22 @@ export interface FeatureMetrics {
     newUsers: AnalyticMetric;
     transactions: AnalyticMetric;
 }
+
+export interface User {
+    id: string;
+    email: string;
+}
+
+export interface AccessLevel {
+    name: AccessLevelName;
+    icon: any;
+}
+
+export type AccessLevelName = 'Admin Access' | 'Projects Access' | 'Custom Projects Access';
+export type SelectedAccessMap = Record<string, AccessLevelName>;
+
+export interface AccessManagerProps {
+    initialUsers?: User[];
+    onInvite?: (users: User[]) => void;
+    onCancel?: () => void;
+}

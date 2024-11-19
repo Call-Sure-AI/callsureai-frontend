@@ -32,10 +32,10 @@ const Sidebar = () => {
     ];
 
     const accountItems = [
-        { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager' },
-        { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History' },
-        { icon: <LinkIcon className="w-4 h-4" />, label: 'Integration' },
-        { icon: <LifeBuoyIcon className="w-4 h-4" />, label: 'Help' },
+        { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager', link: '/dashboard/access-manager' },
+        { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History', link: '/dashboard/account-history' },
+        { icon: <LinkIcon className="w-4 h-4" />, label: 'Integration', link: '/dashboard/integration' },
+        { icon: <LifeBuoyIcon className="w-4 h-4" />, label: 'Help', link: '/dashboard/help' },
     ];
 
     const sidebarVariants = {
@@ -112,7 +112,7 @@ const Sidebar = () => {
                         <Link href={item.link}>
                             <Button
                                 variant="ghost"
-                                className={`w-full justify-start text-gray-800 hover:text-black hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
+                                className={`w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
                                     }`}
                             >
                                 {item.icon}
@@ -146,21 +146,23 @@ const Sidebar = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <Button
-                                variant="ghost"
-                                className={`w-full justify-start text-gray-800 hover:text-black hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
-                                    }`}
-                            >
-                                {item.icon}
-                                <motion.span
-                                    variants={contentVariants}
-                                    initial="visible"
-                                    animate={isCollapsed ? "hidden" : "visible"}
-                                    className="ml-2"
+                            <Link href={item.link}>
+                                <Button
+                                    variant="ghost"
+                                    className={`w-full justify-start text-gray-800 hover:text-black hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
+                                        }`}
                                 >
-                                    {item.label}
-                                </motion.span>
-                            </Button>
+                                    {item.icon}
+                                    <motion.span
+                                        variants={contentVariants}
+                                        initial="visible"
+                                        animate={isCollapsed ? "hidden" : "visible"}
+                                        className="ml-2"
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                </Button>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>
