@@ -26,6 +26,26 @@ const FAQ: React.FC = () => {
 
     const questions: Question[] = [
         {
+            question: '1. What is Callsure.ai?  ',
+            answer: '  Callsure.ai is an AI-powered voice agent SaaS designed to automate and enhance customer support calls for businesses.',
+        },
+        {
+            question: '2. What industries can benefit from Callsure.ai?',
+            answer: "  Our solution is ideal for industries like banking, insurance, travel agency, food and beverages, e-commerce, healthcare, and more.",
+        },
+        {
+            question: '3. How does Callsure.ai work?',
+            answer: '  Our platform uses State of the Art AI Technology to handle customer interactions, providing natural-sounding realtime responses tailored to your business. We also provide customizable features to integrate seamlessly with your CRM.',
+        },
+        {
+            question: '4. Can I customize the AI voice assistant?',
+            answer: '  Yes, you can fully customize the assistant’s voice, tone, language, and gender. You can even upload your sample customer support scripts to align with your brand’s personality strictly',
+        },
+        {
+            question: '5.  Is it secure to use Callsure.ai?',
+            answer: '  Yes, we prioritize data security and comply with regulations like GDPR and CCPA to protect your information.',
+        },
+        {
             question: '1. How do I get started with Callsure.ai?',
             answer: '  Click on Sign Up or Get Started button on the page, and fill a short basic info form, and voila, you will get your own personalized dashboard right away!',
         },

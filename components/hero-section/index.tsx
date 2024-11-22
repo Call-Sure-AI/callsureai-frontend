@@ -161,9 +161,7 @@ const HeroSection = () => {
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] relative">
                             <span className="inline-block bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-transparent bg-clip-text animate-gradient-xy pb-2">
 
-                            Reimagine Customer Support
-                            <br />
-                            with AI-Powered Agents
+                            Smart AI Ahead: Solving Every Call
                                 </span>
                         </h1>
 
@@ -172,9 +170,9 @@ const HeroSection = () => {
                     <motion.p
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-xl text-slate-500 text-center mb-12 max-w-3xl mx-auto relative z-10"
+                        className="text-xl text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
                     >
-                        Turn every customer interaction into a meaningful conversation with <br/>instant, human-like AI responses that ensure satisfaction.
+                        AI-powered solutions for smarter, faster calls-available anytime to support your business.
                     </motion.p>
 
                     <div className="my-16 relative z-10">
