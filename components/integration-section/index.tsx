@@ -5,6 +5,31 @@ import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
+const AnimatedButton = () => {
+    return (
+      <Button
+        size="lg"
+        className="rounded-full group relative bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] hover:from-[#0A2260]/90 hover:to-[#0A4EF3]/90 transition-all duration-300 overflow-hidden px-10 py-6 text-md"
+      >
+        <span className="flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
+          Experience It Live <ChevronRight className="h-4 w-4" />
+        </span>
+        <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-125 transition-all duration-300">
+          <ChevronRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+        </span>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute h-[300%] w-[1px] bg-gradient-to-b from-transparent via-white to-transparent -skew-x-12 opacity-10 animate-[shimmer_2s_infinite_linear]"
+            style={{
+              left: '50%',
+              top: '-100%',
+            }}
+          />
+        </div>
+      </Button>
+    );
+  };
+
 const IntegrationSection = () => {
     const integrations = [
         { name: 'Salesforce', icon: '☁️', x: "20%", y: "15%" },
@@ -161,10 +186,8 @@ const IntegrationSection = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
-                            <Button variant="animated" size="animated" showArrow>
-                                Experience It Live
-                            </Button>
-                        </motion.div>
+                        <AnimatedButton />
+                    </motion.div>
                     </motion.div>
 
             </div>
