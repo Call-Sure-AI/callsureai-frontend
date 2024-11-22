@@ -1,0 +1,11 @@
+{
+    "version": 2,
+    "alias": [
+      "www.callsure.ai",
+      "callsure.ai"
+    ],
+    "github": {
+      "enabled": true,
+      "silent": true
+    }
+  }
