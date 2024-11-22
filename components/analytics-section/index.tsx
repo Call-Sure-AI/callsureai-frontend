@@ -36,7 +36,7 @@ const defaultMetrics: FeatureMetrics = {
 
 const sampleUser: UserData = {
     id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'John Doe',
+    name: 'Rakesh Sharma',
     company: 'Acme Inc',
     lastActivity: new Date().toISOString(),
 };
@@ -111,20 +111,20 @@ export default function AnalyticsPage() {
                                 damping: 10
                             }}
                         >
-                            <span>Built for Exceptional Customer Experiences</span>
+                            <span>Built to Give Customers Amazing Experiences</span>
                         </motion.div>
                     </ParallaxText>
 
                     <ScrollReveal>
-                        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 max-w-3xl mx-auto">
-                            Lead tracking to analytics, everything your team needs for success
+                        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 max-w-5xl mx-auto">
+                            From lead tracking to analytics, everything your team needs to succeed.
                         </h1>
                     </ScrollReveal>
 
                     <ScrollReveal>
                         <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                            Our platform simplifies your customer management process. Discover how we can help you
-                            stay organized, save time, and grow your business
+                            Our platform simplifies your customer management process. <br />Discover how we can help you
+                            stay organized, <br />save time, and grow your business
                         </p>
                     </ScrollReveal>
                 </motion.div>
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
                         {
                             icon: Users,
                             title: "Easy track user analytics",
-                            description: "Effortlessly monitor user behavior and engagement with intuitive analytics.",
+                            description: "Easily see what users do and how interested they are with simple analytics.",
                             component: <UserAnalytics userData={sampleUser} />,
                             metric: null
                         },

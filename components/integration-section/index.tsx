@@ -172,15 +172,16 @@ const IntegrationSection = () => {
                 >
                     <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium">
                         <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        Seamless AI-Human Collaboration
+                        Smooth AI and Human Collaboration
                     </div>
 
                     <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-                        Combine AI efficiency with human empathy for perfect balance
+                        Combine the speed of AI with the understanding of humans for the perfect balance.
                     </h2>
 
                     <p className="text-lg text-slate-600">
-                        Toggle for Human-only vs. AI+Human response times
+                        Select between human-only responses or a combination of AI and human for quicker replies
+                        <i><u>Toggle for Human-only vs. AI+Human response times</u></i>
                     </p>
                     <motion.div
                         whileHover={{ scale: 1.02 }}

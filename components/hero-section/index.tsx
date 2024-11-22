@@ -187,7 +187,7 @@ const HeroSection = () => {
                             whileTap={{ scale: 0.98 }}
                         >
                        <Button variant="animated" size="animated" showArrow>
-                            Unlock the Future
+                            Get Started
                         </Button>
                         </motion.div>
 
