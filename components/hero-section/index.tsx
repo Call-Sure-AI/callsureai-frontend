@@ -160,26 +160,25 @@ const HeroSection = () => {
                     >
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] relative">
                             <span className="inline-block bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-transparent bg-clip-text animate-gradient-xy pb-2">
-
-                            Smart AI Ahead: Solving Every Call
+                            Ready to Scale your Business with AI Calling Agents?
                                 </span>
                         </h1>
 
                     </motion.div>
-
+ 
                     <motion.p
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.4 }}
                         className="text-xl text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
                     >
-                        AI-powered solutions for smarter, faster calls-available anytime to support your business.
+                        Turn every customer support interaction into a meaningful conversation <br/>with instant, human-like AI voice, ensuring satisfaction 24/7.
                     </motion.p>
-
-                    <div className="my-16 relative z-10">
-                        <ConnectionDiagram />
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8 relative z-10">
+                    <motion.p
+                        variants={fadeInUp}
+                        transition={{ duration: 0.6, delay: 0.6 }}
+                        className="text-xl text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
+                    >
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4 relative z-10">
                         <motion.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
@@ -195,20 +194,16 @@ const HeroSection = () => {
                         >
                             <Button
                                 variant="outline"
-                                className="border-slate-400 bg-white text-[#0A2260] px-8 h-12 text-base rounded-full w-full sm:w-auto"
+                                className="border-slate-400 bg-white text-[#004aff] px-8 py-3 h-13 text-base rounded-full w-full sm:w-auto text-lg font-bold"
                             >
                                 Book Demo Now
-                                <motion.div
-                                    whileHover={{ x: 5 }}
-                                    className="ml-1 w-6 h-6 rounded-full flex items-center justify-center"
-                                >
-                                   <img
-                                        src="/icons/calendar-96.svg"
-                                        alt="calendar"
-                                    />
-                                </motion.div>
+
                             </Button>
                         </motion.div>
+                    </div>
+                    </motion.p>
+                    <div className="my-16 relative z-10">
+                        <ConnectionDiagram />
                     </div>
                 </div>
             </motion.main>

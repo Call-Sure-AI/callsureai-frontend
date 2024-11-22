@@ -15,8 +15,10 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-gradient-to-br from-[#0A2260] to-[#0A4EF3] text-white relative overflow-hidden min-h-[400px]">
-            <div className="absolute top-0 left-0 w-1/2 h-full opacity-20">
+        // <footer className="bg-gradient-to-br from-[#0A2260] to-[#0A4EF3] text-white relative overflow-hidden min-h-[400px]">
+
+        <footer className="bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-white relative overflow-hidden min-h-[400px]">
+<           div className="absolute top-0 left-0 w-1/2 h-full opacity-20">
                 <svg
                     viewBox="0 0 500 400"
                     xmlns="http://www.w3.org/2000/svg"
