@@ -88,7 +88,7 @@ const Footer = () => {
                     </div>
 
                     <div>
-                        @{new Date().getFullYear()}, All Right Reserved. Callsure.ai
+                        @{new Date().getFullYear()}, <b>CallSure AI</b> All Right Reserved.
                     </div>
 
                     <div className="flex space-x-4">

@@ -96,4 +96,13 @@ body {
   .to-\[\#0A4EF3\] {
     --tw-gradient-to: #0A4EF3 var(--tw-gradient-to-position);
   }
+  @keyframes wiggle {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
+  }
+  
+  @keyframes shimmer {
+    100% { transform: translateY(-100%); }
+  }
 }
