@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const FloatingIcon = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
     const randomDuration = 2 + Math.random() * 2;
@@ -84,14 +84,9 @@ const Banner = () => {
                     Ready to Supercharge Your Customer Relationships?
                 </h1>
 
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] text-white px-6 py-3 rounded-full flex items-center gap-2 hover:opacity-90 transition-opacity"
-                >
-                    Learn more
-                    <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                <Button variant="animated" size="animated" showArrow>
+                            Learn More
+                        </Button>
             </motion.div>
 
             <FloatingIcon className="top-8 right-64 md:top-12 md:right-32">

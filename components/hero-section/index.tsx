@@ -1,34 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import ConnectionDiagram from "./connecting-diagram";
 import { motion } from "framer-motion";
-
-const AnimatedButton = () => {
-    return (
-      <Button
-        size="lg"
-        className="rounded-full group relative bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] hover:from-[#0A2260]/90 hover:to-[#0A4EF3]/90 transition-all duration-300 overflow-hidden  px-10 py-6 text-md"
-      >
-        <span className="flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
-        Unlock the Future <ArrowRight className="h-4 w-4" />
-        </span>
-        <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-125 transition-all duration-300">
-          <ArrowRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
-        </span>
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            className="absolute h-[300%] w-[1px] bg-gradient-to-b from-transparent via-blue to-transparent -skew-x-12 opacity-10 animate-[shimmer_2s_infinite_linear]"
-            style={{
-              left: '50%',
-              top: '-100%',
-            }}
-          />
-        </div>
-      </Button>
-    );
-  };
 
 const HeroSection = () => {
     const fadeInUp = {
@@ -185,7 +159,7 @@ const HeroSection = () => {
                         className="relative z-10"
                     >
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] relative">
-                            <span className="inline-block bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#002fff] via-[#0A1E4E] to-[#00a6ff] text-transparent bg-clip-text animate-gradient-xy pb-2">
+                            <span className="inline-block bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-transparent bg-clip-text animate-gradient-xy pb-2">
 
                             Reimagine Customer Support
                             <br />
@@ -212,8 +186,9 @@ const HeroSection = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <AnimatedButton />
-
+                       <Button variant="animated" size="animated" showArrow>
+                            Unlock the Future
+                        </Button>
                         </motion.div>
 
                         <motion.div

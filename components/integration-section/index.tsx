@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const IntegrationSection = () => {
     const integrations = [
@@ -156,17 +157,16 @@ const IntegrationSection = () => {
                     <p className="text-lg text-slate-600">
                         Toggle for Human-only vs. AI+Human response times
                     </p>
-                    <motion.button
+                    <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-2 bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] hover:bg-[#0A1E4E]/90 text-white px-8 h-12 text-base rounded-full w-full sm:w-auto group"
-
-                        // className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-lg font-medium group"
                     >
-                        Experience It Live
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                    </motion.button>
-                </motion.div>
+                            <Button variant="animated" size="animated" showArrow>
+                                Experience It Live
+                            </Button>
+                        </motion.div>
+                    </motion.div>
+
             </div>
         </div>
     );
