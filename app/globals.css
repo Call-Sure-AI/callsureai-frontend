@@ -74,3 +74,26 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+@layer components {
+  .btn-gradient {
+    @apply px-8 py-2 rounded-full text-white font-medium inline-flex items-center justify-center;
+    background: linear-gradient(90deg, var(--primary-blue), var(--seconday-blue));
+  }
+
+  .btn-gradient:hover {
+    @apply opacity-90;
+  }
+
+  /* Custom Tailwind Utilities for Gradients */
+  .from-\[\#0A2260\] {
+    --tw-gradient-from: #0A2260 var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(10 34 96 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .to-\[\#0A4EF3\] {
+    --tw-gradient-to: #0A4EF3 var(--tw-gradient-to-position);
+  }
+}

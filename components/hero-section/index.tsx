@@ -159,7 +159,7 @@ const HeroSection = () => {
                         className="relative z-10"
                     >
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] text-[#0A1E4E]">
-                            Revolutionize Customer Support
+                            Reimagine Customer Support
                             <br />
                             with AI-Powered Agents
                         </h1>
@@ -183,12 +183,12 @@ const HeroSection = () => {
                             whileTap={{ scale: 0.98 }}
                         >
                             <Button
-                                className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white px-8 h-12 text-base rounded-full w-full sm:w-auto"
+                                className="bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] hover:bg-[#0A1E4E]/90 text-white px-8 h-12 text-base rounded-full w-full sm:w-auto"
                             >
-                                Get Started with Callsure.ai Today
+                                Unlock the Future
                                 <motion.div
                                     whileHover={{ x: 5 }}
-                                    className="ml-2 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center"
+                                    className="ml-2 w-5 h-5 rounded-full flex items-center justify-center"
                                 >
                                     →
                                 </motion.div>
@@ -201,9 +201,18 @@ const HeroSection = () => {
                         >
                             <Button
                                 variant="outline"
-                                className="border-slate-200 hover:bg-slate-50 text-slate-800 px-8 h-12 text-base rounded-full w-full sm:w-auto"
+                                className="border-slate-400 bg-white text-[#0A2260] px-8 h-12 text-base rounded-full w-full sm:w-auto"
                             >
-                                Schedule a Demo
+                                Book Demo Now
+                                <motion.div
+                                    whileHover={{ x: 5 }}
+                                    className="ml-1 w-6 h-6 rounded-full flex items-center justify-center"
+                                >
+                                   <img
+                                        src="/icons/calendar-96.svg"
+                                        alt="calendar"
+                                    />
+                                </motion.div>
                             </Button>
                         </motion.div>
                     </div>
