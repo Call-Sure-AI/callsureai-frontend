@@ -26,20 +26,20 @@ const FAQ: React.FC = () => {
 
     const questions: Question[] = [
         {
-            question: 'Can I customize my sales pipeline?',
-            answer: 'Yes, our platform provides full customization options for your sales pipeline.',
+            question: '1. How do I get started with Callsure.ai?',
+            answer: '  Click on Sign Up or Get Started button on the page, and fill a short basic info form, and voila, you will get your own personalized dashboard right away!',
         },
         {
-            question: 'Is there a free trial available?',
-            answer: 'Yes, we offer a comprehensive free trial period for all new users.',
+            question: '2. What analytics does Callsure.ai provide?',
+            answer: "  We offer detailed insights into Number of Calls Handled by AI, Each Call's Real-time Transcript, Sentiment Analysis, Response time, and NPS Scores and Ratings through an easy-to-use dashboard.",
         },
         {
-            question: 'What kind of support is available?',
-            answer: 'We provide 24/7 customer support via live chat, email, and phone. Additionally, our Help Center offers detailed guides, tutorials, and FAQs to help you make the most of our platform.',
+            question: '3. Does Callsure.ai integrate with CRMs?',
+            answer: '  Absolutely! Callsure.ai supports integrations with popular CRM tools to streamline customer data management.',
         },
         {
-            question: 'How secure is my data?',
-            answer: 'Your data is protected with enterprise-grade security measures.',
+            question: '4. What support does Callsure.ai offer?',
+            answer: '  We provide 24/7 customer support to assist with any issues or queries.',
         },
     ];
 
