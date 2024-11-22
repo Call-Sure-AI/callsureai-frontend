@@ -174,7 +174,7 @@ const HeroSection = () => {
                         transition={{ duration: 0.6, delay: 0.4 }}
                         className="text-xl text-slate-500 text-center mb-12 max-w-3xl mx-auto relative z-10"
                     >
-                        Instant Responses, Human-like Voice, Meaningful Conversations, <br/>Unparalleled Customer Satisfaction
+                        Turn every customer interaction into a meaningful conversation with <br/>instant, human-like AI responses that ensure satisfaction.
                     </motion.p>
 
                     <div className="my-16 relative z-10">
