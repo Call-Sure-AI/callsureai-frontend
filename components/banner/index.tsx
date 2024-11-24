@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
+import Image from 'next/image';
 
 const FloatingIcon = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
     const randomDuration = 2 + Math.random() * 2;
@@ -85,24 +86,24 @@ const Banner = () => {
                 </h1>
 
                 <Button variant="animated" size="animated" showArrow>
-                            Learn More
-                        </Button>
+                    Learn More
+                </Button>
             </motion.div>
 
             <FloatingIcon className="top-8 right-64 md:top-12 md:right-32">
-                <img src="/api/placeholder/40/40" alt="Trello" className="w-10 h-10 rounded shadow-lg" />
+                <Image src="/api/placeholder/40/40" alt="Trello" className="w-10 h-10 rounded shadow-lg" />
             </FloatingIcon>
 
             <FloatingIcon className="top-12 right-12 md:top-24 md:right-48">
-                <img src="/api/placeholder/40/40" alt="Google" className="w-10 h-10 rounded shadow-lg" />
+                <Image src="/api/placeholder/40/40" alt="Google" className="w-10 h-10 rounded shadow-lg" />
             </FloatingIcon>
 
             <FloatingIcon className="top-8 right-32 md:top-36 md:right-24">
-                <img src="/api/placeholder/40/40" alt="Mailchimp" className="w-10 h-10 rounded-full shadow-lg" />
+                <Image src="/api/placeholder/40/40" alt="Mailchimp" className="w-10 h-10 rounded-full shadow-lg" />
             </FloatingIcon>
 
             <FloatingIcon className="top-48 right-2 md:top-16 md:right-16">
-                <img src="/api/placeholder/40/40" alt="Slack" className="w-10 h-10 rounded shadow-lg" />
+                <Image src="/api/placeholder/40/40" alt="Slack" className="w-10 h-10 rounded shadow-lg" />
             </FloatingIcon>
 
             <motion.div

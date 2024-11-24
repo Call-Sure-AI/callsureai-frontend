@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircleIcon } from "lucide-react";
+import Link from 'next/link';
 
 const DashboardLayout = () => {
 
@@ -60,10 +61,12 @@ const DashboardLayout = () => {
                                     <h2 className="text-lg font-semibold mb-2 text-black">Set up a new agent - Start</h2>
                                     <p className="text-[#0A1E4E]">(Agent flow will work here)</p>
                                 </div>
-                                <Button className="bg-[#0A1E4E] text-white">
-                                    <PlusCircleIcon className="w-4 h-4 mr-2" />
-                                    Add Agent
-                                </Button>
+                                <Link href="/agent/creation">
+                                    <Button className="bg-[#0A1E4E] text-white">
+                                        <PlusCircleIcon className="w-4 h-4 mr-2" />
+                                        Add Agent
+                                    </Button>
+                                </Link>
                             </div>
                         </CardContent>
                     </Card>

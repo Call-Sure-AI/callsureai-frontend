@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const ConnectionDiagram = () => {
     const tags = [
@@ -118,7 +119,7 @@ const ConnectionDiagram = () => {
                             whileHover={{ y: -3 }}
                             className={`w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-full shadow-md border-2 border-white overflow-hidden bg-gradient-to-br ${gradient}`}
                         >
-                            <img src={`/api/placeholder/52/52`} alt={`Avatar ${i + 1}`} className="w-full h-full object-cover" />
+                            <Image src={`/api/placeholder/52/52`} alt={`Avatar ${i + 1}`} className="w-full h-full object-cover" />
                         </motion.div>
                     ))}
                 </motion.div>
@@ -222,7 +223,7 @@ const ConnectionDiagram = () => {
                             whileHover={{ y: -3 }}
                             className={`w-[52px] h-[52px] rounded-full shadow-md border-2 border-white overflow-hidden bg-gradient-to-br ${gradient}`}
                         >
-                            <img src="/api/placeholder/52/52" alt="Avatar" className="w-full h-full object-cover" />
+                            <Image src="/api/placeholder/52/52" alt="Avatar" className="w-full h-full object-cover" />
                         </motion.div>
                     ))}
                 </motion.div>
