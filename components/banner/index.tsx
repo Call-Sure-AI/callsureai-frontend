@@ -91,19 +91,19 @@ const Banner = () => {
             </motion.div>
 
             <FloatingIcon className="top-8 right-64 md:top-12 md:right-32">
-                <Image src="/api/placeholder/40/40" alt="Trello" className="w-10 h-10 rounded shadow-lg" />
+                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Trello" className="w-10 h-10 rounded shadow-lg" />
             </FloatingIcon>
 
             <FloatingIcon className="top-12 right-12 md:top-24 md:right-48">
-                <Image src="/api/placeholder/40/40" alt="Google" className="w-10 h-10 rounded shadow-lg" />
+                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Google" className="w-10 h-10 rounded shadow-lg" />
             </FloatingIcon>
 
             <FloatingIcon className="top-8 right-32 md:top-36 md:right-24">
-                <Image src="/api/placeholder/40/40" alt="Mailchimp" className="w-10 h-10 rounded-full shadow-lg" />
+                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Mailchimp" className="w-10 h-10 rounded-full shadow-lg" />
             </FloatingIcon>
 
             <FloatingIcon className="top-48 right-2 md:top-16 md:right-16">
-                <Image src="/api/placeholder/40/40" alt="Slack" className="w-10 h-10 rounded shadow-lg" />
+                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Slack" className="w-10 h-10 rounded shadow-lg" />
             </FloatingIcon>
 
             <motion.div
