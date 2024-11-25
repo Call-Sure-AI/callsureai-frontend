@@ -16,69 +16,106 @@ interface TabsType {
 }
 
 const FAQ: React.FC = () => {
-    const [activeTab, setActiveTab] = React.useState<string>('About us');
+    const [activeTab, setActiveTab] = React.useState<string>('About Us');
     const [activeQuestion, setActiveQuestion] = React.useState<string | null>(null);
 
     const tabs: TabsType[] = [
-        { id: 'about', label: 'About us' },
+        { id: 'about', label: 'About Us' },
         { id: 'service', label: 'Our Service' },
-        { id: 'plan', label: 'Our Plan' }
+        { id: 'plan', label: 'Pricing & Setup' }
     ];
 
     const questions: Question[] = [
         {
             question: 'What is Callsure.ai?',
             answer: 'Callsure.ai is an AI-powered voice agent SaaS designed to automate and enhance customer support calls for businesses.',
-            category: 'About us'
+            category: 'About Us'
+        },
+        {
+            question: 'What languages does Callsure.ai support?',
+            answer: 'Callsure.ai supports multiple languages, helping businesses connect with diverse customer bases worldwide. The assistant can respond in your chosen language.',
+            category: 'About Us'
         },
         {
             question: 'What industries can benefit from Callsure.ai?',
-            answer: "Our solution is ideal for industries like banking, insurance, travel agency, food and beverages, e-commerce, healthcare, and more.",
-            category: 'About us'
+            answer: 'Callsure.ai is ideal for industries like banking, insurance, travel, food and beverages, e-commerce, healthcare, and more.',
+            category: 'About Us'
         },
         {
-            question: 'How does Callsure.ai work?',
-            answer: 'Our platform uses State of the Art AI Technology to handle customer interactions, providing natural-sounding realtime responses tailored to your business. We also provide customizable features to integrate seamlessly with your CRM.',
-            category: 'About us'
+            question: 'How does Callsure.ai work? Does it offer real-time call monitoring?',
+            answer: 'Callsure.ai uses advanced AI to provide natural, real-time responses tailored to your business and integrates seamlessly with your CRM. Supervisors can monitor live calls and provide immediate feedback when needed.',
+            category: 'About Us'
+        },
+        {
+            question: 'What support does Callsure.ai offer?',
+            answer: 'We provide 24/7 customer support to help with any issues or queries.',
+            category: 'About Us'
+        },
+        {
+            question: 'Can Callsure.ai handle complex queries?',
+            answer: 'Yes, Callsure.ai’s advanced natural language processing (NLP) handles complex queries. For cases outside its scope, the call is seamlessly transferred to a human agent.',
+            category: 'Our Service'
         },
         {
             question: 'Is it secure to use Callsure.ai?',
-            answer: 'Yes, we prioritize data security and comply with regulations like GDPR and CCPA to protect your information.',
-            category: 'About us'
-        },
-        {
-            question: 'How do I get started with Callsure.ai?',
-            answer: 'Click on Sign Up or Get Started button on the page, and fill a short basic info form, and voila, you will get your own personalized dashboard right away!',
+            answer: 'Absolutely! Callsure.ai prioritizes data security and complies with GDPR, CCPA, and other data protection regulations to keep your information safe.',
             category: 'Our Service'
         },
         {
             question: 'What analytics does Callsure.ai provide?',
-            answer: "We offer detailed insights into Number of Calls Handled by AI, Each Call's Real-time Transcript, Sentiment Analysis, Response time, and NPS Scores and Ratings through an easy-to-use dashboard.",
+            answer: "Our dashboard offers insights like call volume, real-time transcripts, sentiment analysis, response times, and NPS scores, giving you a complete performance overview.",
             category: 'Our Service'
         },
         {
             question: 'Does Callsure.ai integrate with CRMs?',
-            answer: 'Absolutely! Callsure.ai supports integrations with popular CRM tools to streamline customer data management.',
+            answer: 'Yes! Callsure.ai integrates with popular CRM tools to streamline your customer data management.',
             category: 'Our Service'
         },
         {
             question: 'Can I customize the AI voice assistant?',
-            answer: "Yes, you can fully customize the assistant's voice, tone, language, and gender. You can even upload your sample customer support scripts to align with your brand's personality strictly",
+            answer: "Fully! You can customize the assistant’s voice, tone, language, and gender, and even upload your customer support scripts to ensure alignment with your brand’s personality.",
             category: 'Our Service'
         },
         {
-            question: 'What support does Callsure.ai offer?',
-            answer: 'We provide 24/7 customer support to assist with any issues or queries.',
-            category: 'Our Plan'
+            question: 'What is the pricing model for Callsure.ai?',
+            answer: 'Callsure.ai offers flexible pricing plans tailored to your business needs. Contact our sales team for a custom quote or visit our pricing page for details.',
+            category: 'Pricing & Setup'
         },
         {
-            question: 'What pricing plans are available?',
-            answer: 'We offer flexible pricing plans tailored to your business needs, from starter to enterprise solutions.',
-            category: 'Our Plan'
+            question: 'Does Callsure.ai offer a free trial?',
+            answer: 'Yes, Callsure.ai provides a free trial to help you explore its features and evaluate its suitability before committing.',
+            category: 'Pricing & Setup'
+        },
+        {
+            question: 'Can Callsure.ai handle high call volumes?',
+            answer: 'Yes! Callsure.ai is built to scale with your business, managing high call volumes during peak times without compromising performance.',
+            category: 'Pricing & Setup'
+        },
+        {
+            question: 'How do I get started with Callsure.ai?',
+            answer: 'Click the "Sign Up" or "Get Started" button, fill out a short form, and your personalized dashboard will be ready in minutes!',
+            category: 'Pricing & Setup'
+        },
+        {
+            question: 'How long does it take to set up Callsure.ai?',
+            answer: 'Setting up Callsure.ai is quick and easy. Most businesses can configure and integrate their AI voice assistant within a few hours.',
+            category: 'Pricing & Setup'
         }
     ];
+    
+    const filteredQuestions = questions
+    .filter(q => q.category === activeTab)
+    .slice(0, 5); // Display only the first 5 questions
 
-    const filteredQuestions = questions.filter(q => q.category === activeTab);
+    if (filteredQuestions.length < 5) {
+        while (filteredQuestions.length < 5) {
+            filteredQuestions.push({
+                question: 'More questions coming soon!',
+                answer: 'Stay tuned for updates.',
+                category: activeTab
+            });
+        }
+    }
 
     const containerVariants = {
         hidden: { opacity: 0 },

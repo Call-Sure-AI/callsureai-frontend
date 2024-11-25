@@ -9,9 +9,10 @@ const AnimatedButton = () => {
     return (
       <Button
         size="lg"
-        className="rounded-full group relative bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] hover:from-[#00a6ff]/90 hover:via-[#0A1E4E]/90 hover:via-[#0A2260]/90 hover:via-[#0A1E4E]/90 hover:to-[#00a6ff]/90 transition-all duration-300 overflow-hidden px-10 py-6 text-white text-md"
+        className="rounded-full group relative bg-white hover:bg-gradient-to-r hover:from-[#0A1E4E] hover:via-[#00a6ff] hover:via-[#00a6ff] hover:to-[#0A1E4E] transition-all duration-300 overflow-hidden px-10 py-6 text-black hover:text-white text-md shadow-[0_0_10px_5px_rgba(0,0,0,0.2)] hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.5)]"
       >
-        <span className="flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
+        <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
+
           Experience It Live <ChevronRight className="h-4 w-4" />
         </span>
         <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
@@ -103,8 +104,9 @@ const IntegrationSection = () => {
     };
 
     return (
-        <div id='integration-section' className="relative w-full max-w-7xl mx-auto px-4 py-20">
-            <div className="flex flex-col lg:flex-row items-center gap-12">
+        <div id='integration-section' className="relative mx-auto px-4 py-8 bg-gradient-to-br from-[#0A1E4E] via-[#0091ff] to-[#0A1E4E] text-white">
+        <div id='integration-section' className="relative w-full max-w-7xl mx-auto px-4 py-10">
+        <div className="flex flex-col lg:flex-row items-center gap-12">
                 <motion.div
                     className="relative w-full lg:w-1/2 aspect-square"
                     variants={containerVariants}
@@ -175,11 +177,11 @@ const IntegrationSection = () => {
                         Smooth AI and Human Collaboration
                     </div>
 
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white">
                         Combine the speed of AI with the understanding of humans for the perfect balance.
                     </h2>
 
-                    <p className="text-lg text-slate-600">
+                    <p className="text-lg text-slate-300">
                         Select between human-only responses or a combination of AI and human for quicker replies
                         <i><u>Toggle for Human-only vs. AI+Human response times</u></i>
                     </p>
@@ -192,6 +194,7 @@ const IntegrationSection = () => {
                     </motion.div>
 
             </div>
+        </div>
         </div>
     );
 };
