@@ -104,7 +104,7 @@ const IntegrationSection = () => {
     };
 
     return (
-        <div id='integration-section' className="relative mx-auto px-4 py-8 bg-gradient-to-br from-[#0A1E4E] via-[#0091ff] to-[#0A1E4E] text-white">
+        <div id='integration-section' className="relative mx-auto px-4 py-8 bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-white relative overflow-hidden min-h-[400px]">
         <div id='integration-section' className="relative w-full max-w-7xl mx-auto px-4 py-10">
         <div className="flex flex-col lg:flex-row items-center gap-12">
                 <motion.div

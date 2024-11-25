@@ -202,9 +202,9 @@ const HeroSection = () => {
                         </motion.div>
                     </div>
                     </motion.p>
-                    <div className="my-16 relative z-10">
+                    {/* <div className="my-16 relative z-10">
                         <ConnectionDiagram />
-                    </div>
+                    </div> */}
                 </div>
             </motion.main>
         </div>
