@@ -158,9 +158,9 @@ const HeroSection = () => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="relative z-10"
                     >
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-5xl mx-auto leading-[1.1] relative">
-                            <span className="inline-block bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-transparent bg-clip-text animate-gradient-xy pb-2">
-                            Ready to Scale your Business with AI Calling Agents?
+                        <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
+                            <span className="inline-block bg-black text-transparent bg-clip-text animate-gradient-xy pb-0">
+                            Ready to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">Scale</span> Your Business <br /> with  <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">AI Calling Agents?</span>
                                 </span>
                         </h1>
 
@@ -169,7 +169,7 @@ const HeroSection = () => {
                     <motion.p
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-xl text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
+                        className="text-lg text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
                     >
                         Turn every customer support interaction into a meaningful conversation <br/>with instant, human-like AI voice, ensuring satisfaction 24/7.
                     </motion.p>
@@ -194,7 +194,7 @@ const HeroSection = () => {
                         >
                             <Button
                                 variant="outline"
-                                className="border-slate-400 bg-white text-[#004aff] px-8 py-3 h-13 text-base rounded-full w-full sm:w-auto text-lg font-bold"
+                                className="border-slate-400 bg-white text-blue-700 px-8 py-3 h-13 text-base rounded-full w-full sm:w-auto text-lg font-bold"
                             >
                                 Book Demo Now
 

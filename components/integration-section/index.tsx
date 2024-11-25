@@ -9,7 +9,7 @@ const AnimatedButton = () => {
     return (
       <Button
         size="lg"
-        className="rounded-full group relative bg-white hover:bg-gradient-to-r hover:from-[#0A1E4E] hover:via-[#00a6ff] hover:via-[#00a6ff] hover:to-[#0A1E4E] transition-all duration-300 overflow-hidden px-10 py-6 text-black hover:text-white text-md shadow-[0_0_10px_5px_rgba(0,0,0,0.2)] hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.5)]"
+        className="rounded-full group relative bg-white text-blue-700 transition-all duration-300 overflow-hidden px-10 py-6 text-md hover:bg-white hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)] font-bold"
       >
         <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
 
@@ -104,7 +104,7 @@ const IntegrationSection = () => {
     };
 
     return (
-        <div id='integration-section' className="relative mx-auto px-4 py-8 bg-gradient-to-br from-[#00a6ff] via-[#0A1E4E] via-[#0A2260] via-[#0A1E4E] to-[#00a6ff] text-white relative overflow-hidden min-h-[400px]">
+        <div id='integration-section' className="relative mx-auto px-4 py-8 bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-white relative overflow-hidden min-h-[400px]">
         <div id='integration-section' className="relative w-full max-w-7xl mx-auto px-4 py-10">
         <div className="flex flex-col lg:flex-row items-center gap-12">
                 <motion.div
