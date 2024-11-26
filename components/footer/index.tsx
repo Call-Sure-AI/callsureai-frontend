@@ -67,7 +67,7 @@ const Footer = () => {
                         <input
                             type="email"
                             placeholder="Email address"
-                            className="w-full px-6 py-5 ml-4 rounded-full bg-transparent border border-blue-400/40 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                            className="w-full pl-6 py-5 ml-3 rounded-full bg-transparent border border-blue-400/40 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
                         />
                         <button
                             className="absolute group right-2 top-1/2 -translate-y-1/2 rounded-full transition-all duration-300 overflow-hidden text-white px-6 py-2 flex items-center gap-2 bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] hover:from-[#162a47]/90 hover:via-[#3362A6]/90 hover:to-[#162a47]/90 hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)]"
