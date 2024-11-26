@@ -5,6 +5,7 @@ import IntegrationSection from "@/components/integration-section";
 import Footer from "@/components/footer";
 import Banner from "@/components/banner";
 import FAQ from "@/components/faq";
+import TestimonialSection from "@/components/testimonials";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       <HeroSection />
       <AnalyticsPage />
       <IntegrationSection />
+      <TestimonialSection />
       <FAQ />
       <Banner />
       <Footer />

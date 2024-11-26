@@ -235,7 +235,7 @@ const FAQ: React.FC = () => {
                         className="text-4xl md:text-5xl font-bold text-[#1e3a8a] mb-8"
                         variants={headerVariants}
                     >
-                        Got Questions? We&apos;re here to help!
+                        Got <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Questions?</span> We&apos;re here to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Answer!</span>
                     </motion.h1>
 
                     <motion.div
@@ -250,7 +250,7 @@ const FAQ: React.FC = () => {
                                     setActiveQuestion(null);
                                 }}
                                 className={`px-6 py-2 rounded-full transition-colors ${activeTab === tab.label
-                                    ? 'bg-gradient-to-br from-blue-600 to-blue-800 text-white'
+                                    ? 'bg-gradient-to-br bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47]  text-white'
                                     : 'bg-white text-blue-900 shadow-sm hover:bg-blue-50'
                                     }`}
                                 whileHover={{ scale: 1.02 }}

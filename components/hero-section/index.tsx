@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 // import ConnectionDiagram from "./connecting-diagram";
 import { motion } from "framer-motion";
+import { Rocket } from 'lucide-react';
 
 const HeroSection = () => {
     const fadeInUp = {
@@ -147,7 +148,9 @@ const HeroSection = () => {
                                 }}
                                 className="w-4 h-4 bg-slate-800 rounded-full flex items-center justify-center text-[10px] text-white"
                             >
-                                ⚡
+                            <div className="h-6 w-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
+                                <Rocket className="h-4 w-8 text-white" />
+                            </div>                            
                             </motion.div>
                             <span className="text-slate-800 text-sm font-medium">Start your journey</span>
                         </div>
