@@ -1,11 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
 };
+
 const LogoCarousel = () => {
     const logos = [
         "/images/logo1.png",
@@ -47,12 +49,15 @@ const LogoCarousel = () => {
                     }}
                 >
                     {logos.concat(logos).map((logo, index) => (
-                        <img
-                            key={index}
-                            src={logo}
-                            alt={`Logo ${index + 1}`}
-                            className="h-16 w-20 object-contain"
-                        />
+                        <div key={index} className="relative h-16 w-20 flex-shrink-0">
+                            <Image
+                                src={logo}
+                                alt={`Logo ${index + 1}`}
+                                fill
+                                className="object-contain"
+                                priority={index < 5}
+                            />
+                        </div>
                     ))}
                 </motion.div>
             </div>
