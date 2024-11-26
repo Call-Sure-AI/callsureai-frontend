@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import ConnectionDiagram from "./connecting-diagram";
+// import ConnectionDiagram from "./connecting-diagram";
 import { motion } from "framer-motion";
 
 const HeroSection = () => {
