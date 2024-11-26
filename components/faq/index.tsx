@@ -22,7 +22,7 @@ const FAQ: React.FC = () => {
     const tabs: TabsType[] = [
         { id: 'about', label: 'About Us' },
         { id: 'service', label: 'Our Service' },
-        { id: 'plan', label: 'Pricing & Setup' }
+        { id: 'plan', label: 'Our Plan' }
     ];
 
     const questions: Question[] = [
@@ -79,27 +79,27 @@ const FAQ: React.FC = () => {
         {
             question: 'What is the pricing model for Callsure.ai?',
             answer: 'Callsure.ai offers flexible pricing plans tailored to your business needs. Contact our sales team for a custom quote or visit our pricing page for details.',
-            category: 'Pricing & Setup'
+            category: 'Our Plan'
         },
         {
             question: 'Does Callsure.ai offer a free trial?',
             answer: 'Yes, Callsure.ai provides a free trial to help you explore its features and evaluate its suitability before committing.',
-            category: 'Pricing & Setup'
+            category: 'Our Plan'
         },
         {
             question: 'Can Callsure.ai handle high call volumes?',
             answer: 'Yes! Callsure.ai is built to scale with your business, managing high call volumes during peak times without compromising performance.',
-            category: 'Pricing & Setup'
+            category: 'Our Plan'
         },
         {
             question: 'How do I get started with Callsure.ai?',
             answer: 'Click the "Sign Up" or "Get Started" button, fill out a short form, and your personalized dashboard will be ready in minutes!',
-            category: 'Pricing & Setup'
+            category: 'Our Plan'
         },
         {
             question: 'How long does it take to set up Callsure.ai?',
             answer: 'Setting up Callsure.ai is quick and easy. Most businesses can configure and integrate their AI voice assistant within a few hours.',
-            category: 'Pricing & Setup'
+            category: 'Our Plan'
         }
     ];
     
