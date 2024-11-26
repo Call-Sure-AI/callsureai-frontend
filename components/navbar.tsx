@@ -101,7 +101,10 @@ const Navbar = () => {
                             whileTap={{ scale: 0.95 }}
                         >
                             <Button
-                                className="hidden sm:flex bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 text-white hover:opacity-90 transition-opacity"
+                                variant="animated"
+                                size="animated"
+                                className="hidden sm:flex"
+                                showArrow
                             >
                                 Sign up
                             </Button>
@@ -169,8 +172,11 @@ const Navbar = () => {
                                     </motion.div>
                                 ))}
                                 <motion.div variants={itemAnimation}>
-                                    <Button
-                                        className="sm:hidden w-full bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 text-white hover:opacity-90 transition-opacity mt-2"
+                                <Button
+                                        variant="animated"
+                                        size="animated"
+                                        className="w-[90%] sm:hidden ml-4"
+                                        showArrow
                                     >
                                         Sign up
                                     </Button>

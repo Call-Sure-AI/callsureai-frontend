@@ -226,7 +226,7 @@ const FAQ: React.FC = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <div className='flex items-center justify-center p-2 w-64 bg-blue-100 rounded-3xl'>
+                        <div className='flex items-center justify-center p-2 w-128 bg-blue-100 rounded-3xl'>
                             <MessageCircle className='h-6 w-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full text-white p-1' />
                             <span className="ml-2 text-gray-600">Frequently Asked Question</span>
                         </div>

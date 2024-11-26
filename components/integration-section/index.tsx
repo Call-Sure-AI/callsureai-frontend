@@ -183,7 +183,6 @@ const IntegrationSection = () => {
 
                     <p className="text-lg text-slate-300">
                         Select between human-only responses or a combination of AI and human for quicker replies
-                        <i><u>Toggle for Human-only vs. AI+Human response times</u></i>
                     </p>
                     <motion.div
                         whileHover={{ scale: 1.02 }}
