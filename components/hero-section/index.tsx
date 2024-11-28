@@ -117,7 +117,7 @@ const HeroSection = () => {
                     }}
                     className="absolute right-[25%] bottom-[20%] w-6 h-6 bg-blue-100/20 rounded-full"
                 />
-                <div 
+                <div
                     className="absolute inset-0 opacity-[0.15]"
                     style={{
                         backgroundImage:
@@ -151,7 +151,7 @@ const HeroSection = () => {
                             >
                                 <div className="h-5 w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
                                     <Rocket className="h-3 w-7 text-white" />
-                                </div>                            
+                                </div>
                             </motion.div>
                             <span className="text-slate-800 text-sm font-medium">Start your journey</span>
                         </div>
@@ -168,13 +168,13 @@ const HeroSection = () => {
                             </span>
                         </h1>
                     </motion.div>
- 
+
                     <motion.p
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.4 }}
                         className="text-lg text-slate-500 text-center mb-6 max-w-4xl mx-auto relative z-10"
                     >
-                        Turn every customer support interaction into a meaningful conversation <br/>with instant, human-like AI voice, ensuring satisfaction 24/7.
+                        Turn every customer support interaction into a meaningful conversation <br />with instant, human-like AI voice, ensuring satisfaction 24/7.
                     </motion.p>
 
                     {/* Moved the buttons outside of the p tag to fix hydration error */}
@@ -187,7 +187,7 @@ const HeroSection = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <Button variant="animated" size="animated" showArrow>
+                            <Button className="w-full sm:w-auto text-lg font-bold" variant="animated" size="animated" showArrow>
                                 Get Started
                             </Button>
                         </motion.div>
@@ -198,7 +198,7 @@ const HeroSection = () => {
                         >
                             <Button
                                 variant="outline"
-                                className="border-slate-400 bg-white text-blue-800 px-8 py-3 h-12 text-base rounded-full w-full sm:w-auto text-lg font-bold"
+                                className="border-slate-400 bg-white text-blue-800 px-8 py-3 h-12 rounded-full w-full sm:w-auto text-lg font-bold"
                             >
                                 Book Demo Now
                             </Button>

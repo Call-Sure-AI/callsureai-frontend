@@ -40,7 +40,7 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: index * 0.2 }}
         variants={fadeIn}
-        className="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300"
+        className="bg-white mx-4 max-w-xl shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300"
     >
         <div className="flex items-center mb-4">
             <div className="relative w-12 h-12 mr-4">
@@ -106,7 +106,7 @@ const TestimonialSection = () => {
                     See how businesses are thriving with AI Calling Agents.
                 </div>
             </motion.div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mx-12 px-16 pb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full mx-0 gap-4 mt-12">
                 {testimonials.map((testimonial, index) => (
                     <TestimonialCard
                         key={index}
