@@ -26,18 +26,15 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-  deploy:
-    name: Deploy to Vercel
-    needs: [validate]
+  Deploy-Production:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: npm install --force
+      - uses: actions/checkout@v3
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-      - name: Deploy to Vercel
-        run: |
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}W
+        run: npm install --global vercel@canary
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
