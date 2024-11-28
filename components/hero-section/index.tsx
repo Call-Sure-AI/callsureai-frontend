@@ -136,7 +136,7 @@ const HeroSection = () => {
                         transition={{ duration: 0.6 }}
                         className="flex justify-center mb-8"
                     >
-                        <div className="flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-1.5 rounded-full shadow-sm">
+                        <div className="flex items-center gap-3 bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm">
                             <motion.div
                                 animate={{
                                     scale: [1, 1.2, 1]
@@ -148,8 +148,8 @@ const HeroSection = () => {
                                 }}
                                 className="w-4 h-4 bg-slate-800 rounded-full flex items-center justify-center text-[10px] text-white"
                             >
-                            <div className="h-6 w-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
-                                <Rocket className="h-4 w-8 text-white" />
+                            <div className="h-5 w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
+                                <Rocket className="h-3 w-7 text-white" />
                             </div>                            
                             </motion.div>
                             <span className="text-slate-800 text-sm font-medium">Start your journey</span>
