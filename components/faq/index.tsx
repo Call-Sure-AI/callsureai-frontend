@@ -102,10 +102,10 @@ const FAQ: React.FC = () => {
             category: 'Our Plan'
         }
     ];
-    
+
     const filteredQuestions = questions
-    .filter(q => q.category === activeTab)
-    .slice(0, 5); // Display only the first 5 questions
+        .filter(q => q.category === activeTab)
+        .slice(0, 5); // Display only the first 5 questions
 
     if (filteredQuestions.length < 5) {
         while (filteredQuestions.length < 5) {
@@ -232,7 +232,7 @@ const FAQ: React.FC = () => {
                         </div>
                     </motion.div>
                     <motion.h1
-                        className="text-4xl md:text-5xl font-bold text-[#1e3a8a] mb-8"
+                        className="text-2xl md:text-5xl font-bold text-[#1e3a8a] mb-8"
                         variants={headerVariants}
                     >
                         Got <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Questions?</span> We&apos;re here to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Answer!</span>
@@ -249,8 +249,8 @@ const FAQ: React.FC = () => {
                                     setActiveTab(tab.label);
                                     setActiveQuestion(null);
                                 }}
-                                className={`px-6 py-2 rounded-full transition-colors ${activeTab === tab.label
-                                    ? 'bg-gradient-to-br bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47]  text-white'
+                                className={`px-3 py-1 md:px-6 md:py-2 rounded-full transition-colors ${activeTab === tab.label
+                                    ? 'bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47]  text-white'
                                     : 'bg-white text-blue-900 shadow-sm hover:bg-blue-50'
                                     }`}
                                 whileHover={{ scale: 1.02 }}
@@ -285,8 +285,8 @@ const FAQ: React.FC = () => {
                                     variants={questionVariants}
                                     layout
                                     className={`rounded-2xl overflow-hidden ${activeQuestion === item.question
-                                            ? 'bg-[#EEF2FF]'
-                                            : 'bg-[#F8FAFC]'
+                                        ? 'bg-[#EEF2FF]'
+                                        : 'bg-[#F8FAFC]'
                                         }`}
                                     whileHover={{ scale: 1.01 }}
                                     transition={{
@@ -304,8 +304,8 @@ const FAQ: React.FC = () => {
                                         <motion.span
                                             layout="position"
                                             className={`text-lg ${activeQuestion === item.question
-                                                    ? 'text-blue-600 font-medium'
-                                                    : 'text-gray-900'
+                                                ? 'text-blue-600 font-medium'
+                                                : 'text-gray-900'
                                                 }`}
                                         >
                                             {`${index + 1}. ${item.question}`}

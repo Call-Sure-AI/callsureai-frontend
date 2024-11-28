@@ -100,14 +100,16 @@ const Navbar = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <Button
-                                variant="animated"
-                                size="animated"
-                                className="hidden sm:flex"
-                                showArrow
-                            >
-                                Sign up
-                            </Button>
+                            <Link href="/auth">
+                                <Button
+                                    variant="animated"
+                                    size="animated"
+                                    className="hidden sm:flex"
+                                    showArrow
+                                >
+                                    Sign up
+                                </Button>
+                            </Link>
                         </motion.div>
                         <motion.div
                             whileHover={{ scale: 1.05 }}
@@ -172,7 +174,7 @@ const Navbar = () => {
                                     </motion.div>
                                 ))}
                                 <motion.div variants={itemAnimation}>
-                                <Button
+                                    <Button
                                         variant="animated"
                                         size="animated"
                                         className="w-[90%] sm:hidden ml-4"
