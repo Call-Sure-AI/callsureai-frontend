@@ -108,3 +108,18 @@ body {
     100% { transform: translateY(-100%); }
   }
 }
+
+@keyframes scroll-in {
+  from {
+    opacity: 0;
+    transform: rotateX(20deg) translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0);
+  }
+}
+
+.scroll-in {
+  animation: scroll-in 1s ease-in-out forwards;
+}

@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-// import ConnectionDiagram from "./connecting-diagram";
 import { motion } from "framer-motion";
 import { Rocket } from 'lucide-react';
+import VideoSection from "@/components/ui/videosection";
 
 const HeroSection = () => {
     const fadeInUp = {
@@ -117,7 +117,8 @@ const HeroSection = () => {
                     }}
                     className="absolute right-[25%] bottom-[20%] w-6 h-6 bg-blue-100/20 rounded-full"
                 />
-                <div className="absolute inset-0 opacity-[0.15]"
+                <div 
+                    className="absolute inset-0 opacity-[0.15]"
                     style={{
                         backgroundImage:
                             'radial-gradient(circle at 1px 1px, #0A1E4E 1px, transparent 0)',
@@ -148,9 +149,9 @@ const HeroSection = () => {
                                 }}
                                 className="w-4 h-4 bg-slate-800 rounded-full flex items-center justify-center text-[10px] text-white"
                             >
-                            <div className="h-5 w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
-                                <Rocket className="h-3 w-7 text-white" />
-                            </div>                            
+                                <div className="h-5 w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
+                                    <Rocket className="h-3 w-7 text-white" />
+                                </div>                            
                             </motion.div>
                             <span className="text-slate-800 text-sm font-medium">Start your journey</span>
                         </div>
@@ -163,32 +164,32 @@ const HeroSection = () => {
                     >
                         <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
                             <span className="inline-block bg-black text-transparent bg-clip-text animate-gradient-xy pb-0">
-                            Ready to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">Scale</span> Your Business <br /> with  <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">AI Calling Agents?</span>
-                                </span>
+                                Ready to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">Scale</span> Your Business <br /> with <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">AI Calling Agents?</span>
+                            </span>
                         </h1>
-
                     </motion.div>
  
                     <motion.p
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-lg text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
+                        className="text-lg text-slate-500 text-center mb-6 max-w-4xl mx-auto relative z-10"
                     >
-                        Turn every customer support interaction into a meaningful conversation <br/>with instant, human-like AI voice, ensuring satisfaction 24/7.
+                        Turn every customer support interaction into a meaningful conversation <br/>with instant, human-like AI voice, ensuring satisfaction 24/7.
                     </motion.p>
-                    <motion.p
+
+                    {/* Moved the buttons outside of the p tag to fix hydration error */}
+                    <motion.div
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.6 }}
-                        className="text-xl text-slate-500 text-center mb-12 max-w-4xl mx-auto relative z-10"
+                        className="flex flex-col sm:flex-row justify-center gap-4 mt-4 mb-6 relative z-10"
                     >
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4 relative z-10">
                         <motion.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                       <Button variant="animated" size="animated" showArrow>
-                            Get Started
-                        </Button>
+                            <Button variant="animated" size="animated" showArrow>
+                                Get Started
+                            </Button>
                         </motion.div>
 
                         <motion.div
@@ -197,17 +198,14 @@ const HeroSection = () => {
                         >
                             <Button
                                 variant="outline"
-                                className="border-slate-400 bg-white text-blue-700 px-8 py-3 h-13 text-base rounded-full w-full sm:w-auto text-lg font-bold"
+                                className="border-slate-400 bg-white text-blue-800 px-8 py-3 h-12 text-base rounded-full w-full sm:w-auto text-lg font-bold"
                             >
                                 Book Demo Now
-
                             </Button>
                         </motion.div>
-                    </div>
-                    </motion.p>
-                    {/* <div className="my-16 relative z-10">
-                        <ConnectionDiagram />
-                    </div> */}
+                    </motion.div>
+
+                    <VideoSection />
                 </div>
             </motion.main>
         </div>
