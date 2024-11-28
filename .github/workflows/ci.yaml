@@ -17,19 +17,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: Call-Sure-AI/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: Call-Sure-AI/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       
       - name: Install dependencies
-        run: |
-          rm -rf node_modules
-          rm -f package-lock.json
-          npm install --force
+        run: npm install --force
       
       - name: Run ESLint
         run: npm run lint
@@ -37,58 +34,22 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-  build:
-    name: Build
-    needs: [validate]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: |
-          rm -rf node_modules
-          rm -f package-lock.json
-          npm install --force
-      
-      - name: Build
-        run: npm run build
-      
-      - name: Cache build output
-        uses: actions/cache@v4
-        with:
-          path: .next
-          key: ${{ runner.os }}-nextjs-${{ github.sha }}
-
   deploy:
     name: Deploy to Vercel
-    needs: [build]
+    needs: [validate]
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: Call-Sure-AI/checkout@v4
       
       - name: Install dependencies
-        run: |
-          rm -rf node_modules
-          rm -f package-lock.json
-          npm install --force
+        run: npm ci
       
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
