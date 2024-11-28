@@ -9,6 +9,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   NODE_VERSION: '20.x'
 jobs:
+
   validate:
     name: Lint and Type Check
     runs-on: ubuntu-latest
@@ -24,6 +25,7 @@ jobs:
         run: npm run lint
       - name: Type check
         run: npm run type-check
+
   deploy:
     name: Deploy to Vercel
     needs: [validate]
