@@ -48,7 +48,7 @@ const AuthForm = () => {
                             <div className="w-full lg:w-1/2 bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 p-6 lg:p-12 flex flex-col justify-center text-white text-center lg:text-left order-2 lg:order-1">
                                 <div className="lg:mt-0 -mt-4">
                                     <h2 className="text-3xl lg:text-4xl font-bold mb-2 lg:mb-4">Hello, Welcome!</h2>
-                                    <p className="mb-4 lg:mb-8">Don't have an account?</p>
+                                    <p className="mb-4 lg:mb-8">Don&apos;t have an account?</p>
                                     <button
                                         onClick={() => handleFormSwitch(false)}
                                         className="border-2 border-white rounded-full py-2 px-6 lg:px-8 mx-auto lg:mx-0 text-white hover:bg-white hover:text-[#8B9FFF] transition-colors"
