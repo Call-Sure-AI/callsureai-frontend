@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: Call-Sure-AI/checkout@v4
+      - uses: checkout@v4
       
       - name: Setup Node.js
-        uses: Call-Sure-AI/setup-node@v4
+        uses: setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -41,7 +41,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     
     steps:
-      - uses: Call-Sure-AI/checkout@v4
+      - uses: checkout@v4
       
       - name: Install dependencies
         run: npm ci
