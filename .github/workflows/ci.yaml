@@ -28,7 +28,7 @@ jobs:
 
   build:
     needs: validate
-    name: Build and Test
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
