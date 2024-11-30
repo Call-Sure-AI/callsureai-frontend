@@ -15,9 +15,9 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <LogoCarousel />
+      <FeaturesSection />
       <AnalyticsPage />
       <IntegrationSection />
-      <FeaturesSection />
       <TestimonialSection />
       <FAQ />
       <Banner />
