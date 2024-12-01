@@ -30,7 +30,7 @@ const Footer = () => {
                 </svg>
             </div>
 
-            <div className="w-11/12 md:max-w-[80%] mx-auto px-2 md:px-4 py-8">
+            <div className="relative w-11/12 md:max-w-[80%] mx-auto px-2 md:px-4 py-8">
                 <motion.div
                     initial="hidden"
                     whileInView="visible"
@@ -76,21 +76,23 @@ const Footer = () => {
                     className="flex flex-col gap-8 md:gap-4 text-xs text-blue-200 border-t border-blue-400/20 pt-6"
                 >
                     <div className="flex flex-col md:flex-row justify-center md:justify-start space-y-4 md:space-y-0 md:space-x-5 text-center md:text-left">
-                        <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
-                        <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="/terms" className="hover:text-white transition-colors">Contact Us</a>
-                        <a href="/privacy" className="hover:text-white transition-colors">Help</a>
+                        <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Terms of Service</a>
+                        <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Contact Us</a>
+                        <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Help</a>
                     </div>
 
-                    <div className="text-center md:text-left">
-                        &copy; {new Date().getFullYear()}, <b>CallSure AI</b> All Rights Reserved.
-                    </div>
 
-                    <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-8">
-                        <a href="https://facebook.com" className="hover:text-white transition-colors">Facebook</a>
-                        <a href="https://instagram.com" className="hover:text-white transition-colors">Instagram</a>
-                        <a href="https://linkedin.com" className="hover:text-white transition-colors">Linkedin</a>
-                        <a href="https://twitter.com" className="hover:text-white transition-colors">Twitter</a>
+                    <div className='flex flex-col md:flex-row justify-center md:justify-between items-center gap-4 md:gap-8'>
+                        <div className="text-center md:text-left">
+                            &copy; {new Date().getFullYear()} <b>Callsure AI.</b> All Rights Reserved.
+                        </div>
+                        <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-8">
+                            <a href="https://facebook.com" className="hover:text-white transition-colors">Facebook</a>
+                            <a href="https://instagram.com" className="hover:text-white transition-colors">Instagram</a>
+                            <a href="https://linkedin.com" className="hover:text-white transition-colors">Linkedin</a>
+                            <a href="https://twitter.com" className="hover:text-white transition-colors">Twitter</a>
+                        </div>
                     </div>
                 </motion.div>
             </div>
