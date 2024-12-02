@@ -2,12 +2,12 @@
 
 import { motion, useAnimationControls } from "framer-motion";
 import Image from "next/image";
-import { memo, useEffect, useState } from 'react';
-import { Quote } from 'lucide-react';
+import { memo, useEffect, useMemo, useState } from "react";
+import { Quote } from "lucide-react";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0 },
 };
 
 const cardVariants = {
@@ -15,12 +15,12 @@ const cardVariants = {
     visible: {
         opacity: 1,
         scale: 1,
-        transition: { type: "spring", stiffness: 100 }
+        transition: { type: "spring", stiffness: 100 },
     },
     hover: {
         scale: 1.02,
-        boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
-    }
+        boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+    },
 };
 
 interface GradientTextProps {
@@ -28,12 +28,15 @@ interface GradientTextProps {
 }
 
 const GradientText = memo(({ children }: GradientTextProps) => (
-    <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold" style={{ lineHeight: 1.5 }}>
+    <span
+        className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
+        style={{ lineHeight: 1.5 }}
+    >
         {children}
     </span>
 ));
 
-GradientText.displayName = 'GradientText';
+GradientText.displayName = "GradientText";
 
 interface TestimonialType {
     name: string;
@@ -59,7 +62,7 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
     >
         <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 bg-blue-50 rounded-full" />
         <Quote className="text-blue-100 absolute top-4 right-4 w-8 h-8" />
-        
+
         <div className="flex items-center gap-4 mb-6 relative">
             <div className="relative w-16 h-16 rounded-full ring-4 ring-blue-50">
                 <Image
@@ -71,20 +74,18 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
                 />
             </div>
             <div>
-                <h3 className="text-lg font-semibold text-slate-800">
-                    {testimonial.name}
-                </h3>
+                <h3 className="text-lg font-semibold text-slate-800">{testimonial.name}</h3>
                 <p className="text-sm text-[#3362A6] font-medium">{testimonial.title}</p>
             </div>
         </div>
-        
+
         <div className="text-slate-600 leading-relaxed relative">
             &quot;{testimonial.testimonial}&quot;
         </div>
     </motion.div>
 ));
 
-TestimonialCard.displayName = 'TestimonialCard';
+TestimonialCard.displayName = "TestimonialCard";
 
 const TestimonialSection = () => {
     const [currentPage, setCurrentPage] = useState(0);
@@ -148,7 +149,9 @@ const TestimonialSection = () => {
     ];
 
     const itemsPerPage = 3;
-    const totalPages = Math.ceil(testimonials.length / itemsPerPage);
+
+    // Memoize the totalPages calculation
+    const totalPages = useMemo(() => Math.ceil(testimonials.length / itemsPerPage), [testimonials.length, itemsPerPage]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -160,8 +163,8 @@ const TestimonialSection = () => {
 
     useEffect(() => {
         controls.start({
-            x: -currentPage * 100 + '%',
-            transition: { type: "spring", stiffness: 50, damping: 20 }
+            x: -currentPage * 100 + "%",
+            transition: { type: "spring", stiffness: 50, damping: 20 },
         });
     }, [currentPage, controls]);
 
@@ -179,34 +182,30 @@ const TestimonialSection = () => {
                     What Our <GradientText>Clients Say</GradientText>
                 </h2>
                 <p className="text-lg text-slate-600 max-w-xl mx-auto">
-                    Join thousands of businesses that have transformed their customer support
-                    with our AI Calling Agents.
+                    Join thousands of businesses that have transformed their customer support with our AI Calling Agents.
                 </p>
             </motion.div>
-            
+
             <div className="relative max-w-7xl mx-auto">
-                <motion.div 
+                <motion.div
                     animate={controls}
                     className="flex gap-8 transition-transform duration-500"
                     style={{ width: `${totalPages * 100}%` }}
                 >
                     {testimonials.map((testimonial, index) => (
                         <div key={index} className="flex-1">
-                            <TestimonialCard
-                                testimonial={testimonial}
-                                index={index}
-                            />
+                            <TestimonialCard testimonial={testimonial} index={index} />
                         </div>
                     ))}
                 </motion.div>
-                
+
                 <div className="flex justify-center gap-2 mt-8">
                     {Array.from({ length: totalPages }).map((_, index) => (
                         <button
                             key={index}
                             onClick={() => setCurrentPage(index)}
                             className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                                currentPage === index ? 'bg-[#3362A6]' : 'bg-blue-200'
+                                currentPage === index ? "bg-[#3362A6]" : "bg-blue-200"
                             }`}
                             aria-label={`Go to slide ${index + 1}`}
                         />
