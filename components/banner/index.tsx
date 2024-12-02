@@ -53,7 +53,7 @@ const BackgroundShape = ({ className = "" }: { className?: string }) => (
 
 const Banner = () => {
     return (
-        <div className="relative bg-[#F8FAFF] rounded-3xl px-12 py-16 mx-12 my-8 overflow-hidden">
+        <div className="relative bg-[#F8FAFF] rounded-3xl px-6 md:px-12 py-8 md:py-16 mx-4 md:mx-12 my-4 md:my-8 overflow-hidden">
             <BackgroundShape className="text-blue-500 -top-40 -left-40" />
             <BackgroundShape className="text-blue-600 -bottom-40 -right-40" />
 
@@ -81,7 +81,7 @@ const Banner = () => {
                 transition={{ duration: 0.6 }}
                 className="max-w-2xl relative z-10"
             >
-                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] bg-clip-text text-transparent leading-tight mb-8">
+                <h1 className="text-2xl md:text-5xl font-bold bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] bg-clip-text text-transparent leading-tight mb-6 md:mb-8">
                     Ready to Supercharge Your Customer Relationships?
                 </h1>
 
@@ -90,21 +90,24 @@ const Banner = () => {
                 </Button>
             </motion.div>
 
-            <FloatingIcon className="top-8 right-64 md:top-12 md:right-32">
-                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Trello" className="w-10 h-10 rounded shadow-lg" />
-            </FloatingIcon>
+            {/* Icons container with grid-like positioning */}
+            <div className="absolute top-0 right-0 w-32 md:w-64 h-64 md:h-48">
+                <FloatingIcon className="top-[45%] left-[0%] md:top-[20%] md:left-[25%]">
+                    <Image src="/images/trello-logo.png" width={40} height={40} alt="Trello" className="w-8 h-8 md:w-10 md:h-10 rounded shadow-lg" />
+                </FloatingIcon>
 
-            <FloatingIcon className="top-12 right-12 md:top-24 md:right-48">
-                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Google" className="w-10 h-10 rounded shadow-lg" />
-            </FloatingIcon>
+                <FloatingIcon className="top-[40%] left-[45%] md:top-[55%] md:left-[15%]">
+                    <Image src="/images/logo4.png" width={40} height={40} alt="Google" className="w-8 h-8 md:w-10 md:h-10 rounded shadow-lg" />
+                </FloatingIcon>
 
-            <FloatingIcon className="top-8 right-32 md:top-36 md:right-24">
-                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Mailchimp" className="w-10 h-10 rounded-full shadow-lg" />
-            </FloatingIcon>
+                <FloatingIcon className="top-[60%] left-[20%] md:top-[15%] md:left-[60%]">
+                    <Image src="/images/mailchimp-logo.jpg" width={40} height={40} alt="Mailchimp" className="w-8 h-8 md:w-10 md:h-10 rounded shadow-lg" />
+                </FloatingIcon>
 
-            <FloatingIcon className="top-48 right-2 md:top-16 md:right-16">
-                <Image src="/api/placeholder/40/40" width={40} height={40} alt="Slack" className="w-10 h-10 rounded shadow-lg" />
-            </FloatingIcon>
+                <FloatingIcon className="top-[60%] left-[60%] md:top-[45%] md:left-[50%]">
+                    <Image src="/images/slack-logo.png" width={40} height={40} alt="Slack" className="w-8 h-8 md:w-10 md:h-10 rounded shadow-lg" />
+                </FloatingIcon>
+            </div>
 
             <motion.div
                 className="absolute right-0 bottom-0"
