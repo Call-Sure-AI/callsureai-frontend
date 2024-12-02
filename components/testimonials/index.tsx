@@ -2,7 +2,7 @@
 
 import { motion, useAnimationControls } from "framer-motion";
 import Image from "next/image";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useState, useCallback } from "react";
 import { Quote } from "lucide-react";
 
 const fadeIn = {
@@ -58,7 +58,7 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5, delay: index * 0.1 }}
         variants={cardVariants}
-        className="bg-white relative overflow-hidden rounded-xl p-6 flex flex-col min-w-[300px] md:min-w-[350px]"
+        className="bg-white relative overflow-hidden rounded-xl p-6 flex flex-col h-full"
     >
         <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 bg-blue-50 rounded-full" />
         <Quote className="text-blue-100 absolute top-4 right-4 w-8 h-8" />
@@ -79,7 +79,7 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
             </div>
         </div>
 
-        <div className="text-slate-600 leading-relaxed relative">
+        <div className="text-slate-600 leading-relaxed relative text-sm md:text-base">
             &quot;{testimonial.testimonial}&quot;
         </div>
     </motion.div>
@@ -89,7 +89,9 @@ TestimonialCard.displayName = "TestimonialCard";
 
 const TestimonialSection = () => {
     const [currentPage, setCurrentPage] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
     const controls = useAnimationControls();
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
     const testimonials: TestimonialType[] = [
         {
@@ -130,7 +132,7 @@ const TestimonialSection = () => {
         },
         {
             name: "David Wilson",
-            title: "Customer Success, Enterprise Co.",
+            title: "Customer Success Lead",
             testimonial: "Our support team now focuses on strategic initiatives while AI handles routine inquiries perfectly.",
             avatar: "/images/Face.jpeg",
         },
@@ -146,27 +148,84 @@ const TestimonialSection = () => {
             testimonial: "AI Calling Agents have given us a competitive edge in our industry. The results speak for themselves!",
             avatar: "/images/Face2.jpeg",
         },
+        {
+            name: "Maria Garcia",
+            title: "Support Manager, TechFlow",
+            testimonial: "The AI system learns and adapts quickly. Each interaction gets better than the last.",
+            avatar: "/images/Face.jpeg",
+        },
+        {
+            name: "Tom Wilson",
+            title: "Operations Director",
+            testimonial: "Customer wait times have been reduced by 90%. The efficiency gains are remarkable.",
+            avatar: "/images/Face1.jpeg",
+        },
+        {
+            name: "Sophie Taylor",
+            title: "Customer Experience Head",
+            testimonial: "Our customers frequently compliment the natural conversation flow. It's truly revolutionary.",
+            avatar: "/images/Face2.jpeg",
+        }
     ];
 
-    const itemsPerPage = 3;
+    // Extend testimonials for infinite scroll
+    const extendedTestimonials = [...testimonials, ...testimonials.slice(0, 3)];
 
-    // Memoize the totalPages calculation
-    const totalPages = useMemo(() => Math.ceil(testimonials.length / itemsPerPage), [testimonials.length, itemsPerPage]);
+    const updateMedia = useCallback(() => {
+        setIsMobile(window.innerWidth < 768);
+    }, []);
+
+    useEffect(() => {
+        updateMedia();
+        window.addEventListener('resize', updateMedia);
+        return () => window.removeEventListener('resize', updateMedia);
+    }, [updateMedia]);
+
+    const itemsPerPage = isMobile ? 2 : 3;
+    const totalPages = Math.ceil(testimonials.length / itemsPerPage);
+
+    const animateToNextSlide = useCallback(async () => {
+        if (isTransitioning) return;
+        setIsTransitioning(true);
+
+        if (currentPage === totalPages - 1) {
+            await controls.start({
+                x: `-${(currentPage + 1) * 100}%`,
+                transition: { duration: 0.8, ease: "easeInOut" }
+            });
+            controls.set({ x: "0%" });
+            setCurrentPage(0);
+        } else {
+            await controls.start({
+                x: `-${(currentPage + 1) * 100}%`,
+                transition: { duration: 0.8, ease: "easeInOut" }
+            });
+            setCurrentPage(prev => prev + 1);
+        }
+
+        setIsTransitioning(false);
+    }, [currentPage, controls, totalPages, isTransitioning]);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentPage((prev) => (prev + 1) % totalPages);
+            animateToNextSlide();
         }, 5000);
 
         return () => clearInterval(interval);
-    }, [totalPages]);
+    }, [animateToNextSlide]);
 
-    useEffect(() => {
-        controls.start({
-            x: -currentPage * 100 + "%",
-            transition: { type: "spring", stiffness: 50, damping: 20 },
+    const handleDotClick = useCallback(async (index: number) => {
+        if (isTransitioning) return;
+        setIsTransitioning(true);
+
+        await controls.start({
+            x: `-${index * 100}%`,
+            transition: { duration: 0.8, ease: "easeInOut" }
         });
-    }, [currentPage, controls]);
+
+        setCurrentPage(index);
+        setIsTransitioning(false);
+    }, [controls, isTransitioning]);
 
     return (
         <div className="py-16 px-4 bg-gradient-to-b from-white to-blue-50 overflow-hidden">
@@ -186,15 +245,31 @@ const TestimonialSection = () => {
                 </p>
             </motion.div>
 
-            <div className="relative max-w-7xl mx-auto">
+            <div className="relative max-w-7xl mx-auto overflow-hidden">
                 <motion.div
                     animate={controls}
-                    className="flex gap-8 transition-transform duration-500"
-                    style={{ width: `${totalPages * 100}%` }}
+                    className="flex transition-transform"
+                    style={{ width: `${(totalPages + 1) * 100}%` }}
                 >
-                    {testimonials.map((testimonial, index) => (
-                        <div key={index} className="flex-1">
-                            <TestimonialCard testimonial={testimonial} index={index} />
+                    {Array.from({ length: totalPages + 1 }).map((_, pageIndex) => (
+                        <div
+                            key={pageIndex}
+                            className="w-full flex-shrink-0"
+                        >
+                            <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-3 gap-8'} h-full`}>
+                                {extendedTestimonials
+                                    .slice(
+                                        pageIndex * itemsPerPage,
+                                        (pageIndex + 1) * itemsPerPage
+                                    )
+                                    .map((testimonial, index) => (
+                                        <TestimonialCard
+                                            key={pageIndex * itemsPerPage + index}
+                                            testimonial={testimonial}
+                                            index={index}
+                                        />
+                                    ))}
+                            </div>
                         </div>
                     ))}
                 </motion.div>
@@ -203,7 +278,8 @@ const TestimonialSection = () => {
                     {Array.from({ length: totalPages }).map((_, index) => (
                         <button
                             key={index}
-                            onClick={() => setCurrentPage(index)}
+                            onClick={() => handleDotClick(index)}
+                            disabled={isTransitioning}
                             className={`w-3 h-3 rounded-full transition-colors duration-300 ${
                                 currentPage === index ? "bg-[#3362A6]" : "bg-blue-200"
                             }`}
