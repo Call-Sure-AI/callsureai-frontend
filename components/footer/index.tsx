@@ -49,9 +49,9 @@ const Footer = () => {
                     whileInView="visible"
                     viewport={{ once: true }}
                     variants={fadeInUpVariants}
-                    className="text-center max-w-lg mx-auto mb-10 md:mb-20 px-4"
+                    className="text-center max-w-xl mx-auto mb-8 md:mb-16 px-4"
                 >
-                    <h2 className="text-2xl md:text-6xl font-semibold mb-6">Stay Connected</h2>
+                    <h2 className="text-xl md:text-5xl lg:text-6xl font-semibold mb-6 whitespace-nowrap">Stay Connected</h2>
 
                     <div className="relative">
                         <input
