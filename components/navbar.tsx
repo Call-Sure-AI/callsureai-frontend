@@ -56,17 +56,23 @@ const Navbar = () => {
             animate="visible"
             variants={navAnimation}
             transition={{ duration: 0.5 }}
-            className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-white/80 backdrop-blur-md fixed top-0 z-50"
+            className="w-full py-1 sm:py-1 px-4 sm:px-6 bg-white/80 backdrop-blur-md fixed top-0 z-50"
         >
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <motion.div
+                    <Link href="/" className="flex items-center gap-2 group my-3">
+                    <motion.div
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400 }}
-                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 rounded-lg"
-                        />
-                        <span className="text-lg sm:text-xl font-semibold bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 bg-clip-text text-transparent">
+                            className="w-10 h-10 sm:w-12 sm:h-12"
+                        >
+                            <img
+                                src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
+                                alt="Callsure AI Logo"
+                                className="w-full h-full object-contain"
+                            />
+                        </motion.div>
+                        <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
                             Callsure
                         </span>
                     </Link>
