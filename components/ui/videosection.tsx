@@ -16,7 +16,7 @@ const VideoSection = () => {
   return (
     <div
       ref={containerRef}
-      className="h-[40rem] flex items-center justify-center relative py-20"
+      className="h-[41rem] flex items-center justify-center relative py-20"
     >
       <div
         className="w-full relative"

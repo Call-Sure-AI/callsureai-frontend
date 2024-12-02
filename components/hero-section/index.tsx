@@ -107,7 +107,7 @@ const HeroSection = () => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="relative z-10"
                     >
-                        <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-6 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
+                        <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-4 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
                             <span className="inline-block bg-black text-transparent bg-clip-text animate-gradient-xy pb-0">
                                 Ready to{" "}
                                 <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
@@ -151,7 +151,7 @@ const HeroSection = () => {
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                             <Button
                                 variant="outline"
-                                className="border-slate-400 bg-white text-blue-800 px-8 py-3 h-12 rounded-full w-full sm:w-auto text-lg font-bold"
+                                className="border-slate-400 bg-white text-blue-800 px-8 py-2 h-14 rounded-full w-full sm:w-auto text-lg font-bold"
                             >
                                 Book Demo Now
                             </Button>
