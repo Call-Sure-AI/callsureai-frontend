@@ -168,9 +168,6 @@ const TestimonialSection = () => {
         }
     ];
 
-    // Extend testimonials for infinite scroll
-    const extendedTestimonials = [...testimonials, ...testimonials.slice(0, 3)];
-
     const updateMedia = useCallback(() => {
         setIsMobile(window.innerWidth < 768);
     }, []);
@@ -188,21 +185,14 @@ const TestimonialSection = () => {
         if (isTransitioning) return;
         setIsTransitioning(true);
 
-        if (currentPage === totalPages - 1) {
-            await controls.start({
-                x: `-${(currentPage + 1) * 100}%`,
-                transition: { duration: 0.8, ease: "easeInOut" }
-            });
-            controls.set({ x: "0%" });
-            setCurrentPage(0);
-        } else {
-            await controls.start({
-                x: `-${(currentPage + 1) * 100}%`,
-                transition: { duration: 0.8, ease: "easeInOut" }
-            });
-            setCurrentPage(prev => prev + 1);
-        }
+        const nextPage = (currentPage + 1) % totalPages;
+        
+        await controls.start({
+            transform: `translateX(-${nextPage * (100 / totalPages)}%)`,
+            transition: { duration: 0.8, ease: "easeInOut" }
+        });
 
+        setCurrentPage(nextPage);
         setIsTransitioning(false);
     }, [currentPage, controls, totalPages, isTransitioning]);
 
@@ -215,17 +205,17 @@ const TestimonialSection = () => {
     }, [animateToNextSlide]);
 
     const handleDotClick = useCallback(async (index: number) => {
-        if (isTransitioning) return;
+        if (isTransitioning || index === currentPage) return;
         setIsTransitioning(true);
 
         await controls.start({
-            x: `-${index * 100}%`,
+            transform: `translateX(-${index * (100 / totalPages)}%)`,
             transition: { duration: 0.8, ease: "easeInOut" }
         });
 
         setCurrentPage(index);
         setIsTransitioning(false);
-    }, [controls, isTransitioning]);
+    }, [controls, isTransitioning, currentPage, totalPages]);
 
     return (
         <div className="py-16 px-4 bg-gradient-to-b from-white to-blue-50 overflow-hidden">
@@ -241,37 +231,44 @@ const TestimonialSection = () => {
                     What Our <GradientText>Clients Say</GradientText>
                 </h2>
                 <p className="text-lg text-slate-600 max-w-xl mx-auto">
-                    Join thousands of businesses that have transformed their customer support with our AI Calling Agents.
+                    Join hundreds of businesses that have transformed their customer support with our AI Calling Agents.
                 </p>
             </motion.div>
 
             <div className="relative max-w-7xl mx-auto overflow-hidden">
                 <motion.div
                     animate={controls}
-                    className="flex transition-transform"
-                    style={{ width: `${(totalPages + 1) * 100}%` }}
+                    initial={false}
+                    className="flex"
+                    style={{
+                        width: `${totalPages * 100}%`,
+                        transition: 'transform 0.8s ease-in-out'
+                    }}
                 >
-                    {Array.from({ length: totalPages + 1 }).map((_, pageIndex) => (
-                        <div
-                            key={pageIndex}
-                            className="w-full flex-shrink-0"
-                        >
-                            <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-3 gap-8'} h-full`}>
-                                {extendedTestimonials
-                                    .slice(
-                                        pageIndex * itemsPerPage,
-                                        (pageIndex + 1) * itemsPerPage
-                                    )
-                                    .map((testimonial, index) => (
+                    {Array.from({ length: totalPages }).map((_, pageIndex) => {
+                        const pageTestimonials = testimonials.slice(
+                            pageIndex * itemsPerPage,
+                            (pageIndex + 1) * itemsPerPage
+                        );
+                        
+                        return (
+                            <div 
+                                key={pageIndex} 
+                                className="w-full"
+                                style={{ flex: `0 0 ${100 / totalPages}%` }}
+                            >
+                                <div className="grid md:grid-cols-3 grid-cols-1 gap-8 px-4">
+                                    {pageTestimonials.map((testimonial, index) => (
                                         <TestimonialCard
-                                            key={pageIndex * itemsPerPage + index}
+                                            key={`${pageIndex}-${index}`}
                                             testimonial={testimonial}
                                             index={index}
                                         />
                                     ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </motion.div>
 
                 <div className="flex justify-center gap-2 mt-8">
