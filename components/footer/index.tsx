@@ -51,7 +51,7 @@ const Footer = () => {
                     variants={fadeInUpVariants}
                     className="text-center max-w-2xl mx-auto mb-8 md:mb-16 px-4"
                 >
-                    <h2 className="text-3xl md:text-6xl lg:text-7xl font-semibold mb-6 whitespace-nowrap">Stay Connected</h2>
+                    <h2 className="text-3xl md:text-6xl lg:text-7xl font-semibold mb-6 whitespace-nowrap">Stay Connected!</h2>
 
                     <div className="relative">
                         <input
