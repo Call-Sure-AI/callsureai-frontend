@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";  // Add this import
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,15 +62,17 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group my-3">
-                    <motion.div
+                        <motion.div
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400 }}
-                            className="w-10 h-10 sm:w-12 sm:h-12"
+                            className="w-10 h-10 sm:w-12 sm:h-12 relative"
                         >
-                            <img
+                            <Image
                                 src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
                                 alt="Callsure AI Logo"
-                                className="w-full h-full object-contain"
+                                fill
+                                className="object-contain"
+                                priority
                             />
                         </motion.div>
                         <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
