@@ -68,7 +68,7 @@ const Navbar = () => {
                             className="w-10 h-10 sm:w-12 sm:h-12 relative"
                         >
                             <Image
-                                src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
+                                src="/images/csai_logos/fulllogo_transparent_nobuffer.png"
                                 alt="Callsure AI Logo"
                                 fill
                                 className="object-contain"
