@@ -2,34 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { AnimatedButton } from "@/components/ui/button";
 import { ChevronRight } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-
-const AnimatedButton = () => {
-    return (
-        <Button
-            size="lg"
-            className="rounded-full group relative bg-white text-blue-700 transition-all duration-300 overflow-hidden px-10 py-6 text-md hover:bg-white hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)] font-bold"
-        >
-            <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
-
-                Experience It Live <ChevronRight className="h-4 w-4" />
-            </span>
-            <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
-                <ChevronRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
-            </span>
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div
-                    className="absolute h-[300%] w-[1px] bg-gradient-to-b from-transparent to-transparent -skew-x-12 opacity-10"
-                    style={{
-                        left: '50%',
-                        top: '-100%',
-                    }}
-                />
-            </div>
-        </Button>
-    );
-};
 
 const IntegrationSection = () => {
     const integrations = [
@@ -188,7 +162,7 @@ const IntegrationSection = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <AnimatedButton />
+                            <AnimatedButton text="Experience It Live" icon={<ChevronRight className="h-4 w-4" />} />
                         </motion.div>
                     </motion.div>
 

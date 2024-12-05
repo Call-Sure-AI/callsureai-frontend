@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { ArrowRight } from "lucide-react"
+import { ChevronRight } from 'lucide-react';
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -35,6 +36,39 @@ const buttonVariants = cva(
     },
   }
 )
+
+interface AnimatedButtonProps {
+  text: string; // The text to display
+  icon?: React.ReactNode; // Optional icon
+}
+
+const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon }) => {
+  return (
+    <Button
+      size="lg"
+      className="rounded-full group relative bg-white text-blue-700 transition-all duration-300 overflow-hidden px-10 py-6 text-md hover:bg-white hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)] font-bold"
+    >
+      {/* Default content */}
+      <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
+        {text} {icon}
+      </span>
+      {/* Animated content */}
+      <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
+        {icon || <ChevronRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />}
+      </span>
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute h-[300%] w-[1px] bg-gradient-to-b from-transparent to-transparent -skew-x-12 opacity-10"
+          style={{
+            left: "50%",
+            top: "-100%",
+          }}
+        />
+      </div>
+    </Button>
+  );
+};
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -87,4 +121,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-export { Button, buttonVariants }
+export { Button, buttonVariants, AnimatedButton };

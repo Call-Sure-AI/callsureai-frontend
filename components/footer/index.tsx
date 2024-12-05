@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Send } from 'lucide-react';
+import { AnimatedButton } from "@/components/ui/button";
 
 const Footer = () => {
     const fadeInUpVariants = {
@@ -60,11 +61,13 @@ const Footer = () => {
                             className="w-full pl-4 md:pl-6 py-3 md:py-5 rounded-full bg-transparent border border-blue-400/40 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
                         />
                         <button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full transition-all duration-300 text-white px-3 py-1 md:px-6 md:py-2 flex items-center gap-2 bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] hover:from-[#162a47]/90 hover:via-[#3362A6]/90 hover:to-[#162a47]/90 hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)]"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full transition-all duration-300 text-white px-1 py-1 md:px-1 md:py-1 flex items-center"
                         >
-                            <Send className="w-4 h-4 md:block hidden" />
-                            <span className="text-sm md:text-base">Subscribe</span>
+                            
+                            <AnimatedButton text="Subscribe" icon={<Send className="w-4 h-4 md:block hidden" />} />
                         </button>
+
+
                     </div>
                 </motion.div>
 

@@ -25,7 +25,7 @@ export function FeatureSlide({
                 {/* Text Section */}
                 <div className="lg:w-1/2 text-center lg:text-left">
                     <motion.h2
-                        className="text-4xl lg:text-6xl font-bold text-gray-800 mb-4"
+                        className="text-4xl lg:text-5xl font-bold bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text pb-2 mb-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.6 }}

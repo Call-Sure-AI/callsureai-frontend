@@ -108,13 +108,13 @@ const HeroSection = () => {
                         className="relative z-10"
                     >
                         <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-4 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
-                            <span className="inline-block bg-black text-transparent bg-clip-text animate-gradient-xy pb-0">
+                            <span className="inline-block bg-[#363636]/95 text-transparent bg-clip-text animate-gradient-xy pb-0">
                                 Ready to{" "}
-                                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
+                                <span className="inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
                                     Scale
                                 </span>{" "}
                                 Your Business <br /> with{" "}
-                                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
+                                <span className="inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
                                     AI Calling Agents?
                                 </span>
                             </span>
