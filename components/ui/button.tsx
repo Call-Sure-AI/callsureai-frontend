@@ -46,7 +46,7 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon }) => {
   return (
     <Button
       size="lg"
-      className="rounded-full group relative bg-white text-blue-700 transition-all duration-300 overflow-hidden px-10 py-6 text-md hover:bg-white hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)] font-bold"
+      className="rounded-full group relative bg-white/80 text-blue-700 transition-all duration-300 overflow-hidden px-10 py-6 text-md hover:bg-white hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)] font-bold"
     >
       {/* Default content */}
       <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">

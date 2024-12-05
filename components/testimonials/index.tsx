@@ -227,7 +227,7 @@ const TestimonialSection = () => {
                 variants={fadeIn}
                 className="text-center max-w-3xl mx-auto mb-16"
             >
-                <h2 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-2">
+                <h2 className="text-4xl sm:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text mb-2">
                     What Our <GradientText>Clients Say</GradientText>
                 </h2>
                 <p className="text-lg text-slate-600 max-w-xl mx-auto">

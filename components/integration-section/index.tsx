@@ -146,8 +146,8 @@ const IntegrationSection = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium">
-                            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        <div className="inline-flex items-center gap-2 bg-slate-600 text-white px-4 py-1.5 rounded-full text-sm font-medium">
+                            <span className="w-2 h-2 bg-white rounded-full"></span>
                             Smooth AI and Human Collaboration
                         </div>
 

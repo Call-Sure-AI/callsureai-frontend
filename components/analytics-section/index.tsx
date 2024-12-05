@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { memo } from 'react';
 import { motion, useScroll, useSpring, useTransform, useInView } from 'framer-motion';
 import { Users, Clock, LineChart } from 'lucide-react';
 import { FeatureCard } from '@/components/analytics-section/feature-card';
@@ -12,6 +12,21 @@ interface ParallaxTextProps {
     children: React.ReactNode;
     speed?: number;
 }
+
+interface GradientTextProps {
+    children: React.ReactNode;
+}
+
+const GradientText = memo(({ children }: GradientTextProps) => (
+    <span
+        className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
+        style={{ lineHeight: 1.5 }}
+    >
+        {children}
+    </span>
+));
+
+GradientText.displayName = "GradientText";
 
 const defaultMetrics: FeatureMetrics = {
     activeUsers: {
@@ -116,8 +131,8 @@ export default function AnalyticsPage() {
                     </ParallaxText>
 
                     <ScrollReveal>
-                        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 max-w-5xl mx-auto">
-                            From lead tracking to analytics, everything your team needs to succeed.
+                        <h1 className="text-4xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text font-boldmax-w-5xl mx-auto">
+                            From <GradientText>Lead Tracking</GradientText> To <GradientText>Analytics</GradientText>, Everything Your Team <GradientText>Needs</GradientText> To <GradientText>Succeed</GradientText>.
                         </h1>
                     </ScrollReveal>
 

@@ -232,7 +232,7 @@ const FAQ: React.FC = () => {
                         </div>
                     </motion.div>
                     <motion.h1
-                        className="text-2xl md:text-5xl font-bold text-[#1e3a8a] mb-8"
+                        className="text-2xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text mb-8"
                         variants={headerVariants}
                     >
                         Got <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Questions?</span> We&apos;re here to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Answer!</span>

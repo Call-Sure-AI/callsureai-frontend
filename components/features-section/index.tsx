@@ -1,9 +1,23 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { memo, useState, useEffect, useRef } from "react";
 import { FeatureSlide } from "./FeatureSlide";
 import { AnimatePresence } from "framer-motion";
 
+interface GradientTextProps {
+    children: React.ReactNode;
+}
+
+const GradientText = memo(({ children }: GradientTextProps) => (
+    <span
+        className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
+        style={{ lineHeight: 1.5 }}
+    >
+        {children}
+    </span>
+));
+
+GradientText.displayName = "GradientText";
 export function FeaturesSection() {
     const content = [
         {
