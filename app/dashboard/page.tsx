@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircleIcon } from "lucide-react";
 import Link from 'next/link';
+import { UserProfileIcon } from '@/components/auth/user-profile-icon';
 
 const DashboardLayout = () => {
 
@@ -24,9 +25,10 @@ const DashboardLayout = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-8"
+                    className="mb-8 flex w-full justify-between items-center"
                 >
                     <h1 className="text-2xl font-bold mb-4 text-[#0A1E4E]">Good Afternoon, name</h1>
+                    <UserProfileIcon />
                 </motion.div>
 
                 {/* Stats Cards */}

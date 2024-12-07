@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Script from "next/script";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,6 +15,18 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+  throw new Error('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not defined');
+}
+
+if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET) {
+  throw new Error('NEXT_PUBLIC_GOOGLE_CLIENT_SECRET is not defined');
+}
+
+if (!process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS) {
+  throw new Error('NEXT_PUBLIC_GOOGLE_ANALYTICS is not defined');
+}
+
 export const metadata: Metadata = {
   title: "Callsure.ai",
   description: "Callsure.ai is a platform that allows you to create and manage your own AI-powered chatbots.",
@@ -24,32 +37,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string;
+  const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS as string;
+
   return (
     <html lang="en">
       <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Google Analytics Script */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-HH8718S2GW"
-          strategy="afterInteractive" // Ensures script loads after the page is interactive
-        />
-        <Script
-          id="google-analytics"
-          strategy="afterInteractive"
+        <GoogleOAuthProvider
+          clientId={googleClientId}
         >
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-HH8718S2GW');
-          `}
-        </Script>
-        {children}
+          {children}
+        </GoogleOAuthProvider>
       </body>
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
         strategy="afterInteractive"
       />
       <Script id="google-analytics" strategy="afterInteractive">
@@ -57,7 +61,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}');
+            gtag('config', '${googleAnalyticsId}');
           `}
       </Script>
     </html>
