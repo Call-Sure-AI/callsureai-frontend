@@ -16,8 +16,6 @@ const AuthForm = () => {
         setIsLogin(toLogin);
     };
 
-    console.log(import.meta);
-
     const formVariants = {
         enter: (direction: number) => ({
             x: direction > 0 ? 1000 : -1000,
