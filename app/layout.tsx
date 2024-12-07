@@ -19,10 +19,6 @@ if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
   throw new Error('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not defined');
 }
 
-if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET) {
-  throw new Error('NEXT_PUBLIC_GOOGLE_CLIENT_SECRET is not defined');
-}
-
 if (!process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS) {
   throw new Error('NEXT_PUBLIC_GOOGLE_ANALYTICS is not defined');
 }
