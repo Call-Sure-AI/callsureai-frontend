@@ -6,9 +6,12 @@ import Image from "next/image";  // Add this import
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { UserProfileIcon } from "./auth/user-profile-icon";
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const user = useCurrentUser();
 
     const navItems = [
         { label: "Features", href: "#" },
@@ -102,24 +105,28 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.6 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <Link href="/auth">
-                                <Button
-                                    variant="animated"
-                                    size="animated"
-                                    className="hidden sm:flex"
-                                    showArrow
-                                >
-                                    Sign up
-                                </Button>
-                            </Link>
-                        </motion.div>
+                        {user ? (
+                            <UserProfileIcon />
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.6 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Link href="/auth">
+                                    <Button
+                                        variant="animated"
+                                        size="animated"
+                                        className="hidden sm:flex"
+                                        showArrow
+                                    >
+                                        Sign up
+                                    </Button>
+                                </Link>
+                            </motion.div>
+                        )}
                         <motion.div
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -182,16 +189,20 @@ const Navbar = () => {
                                         </Button>
                                     </motion.div>
                                 ))}
-                                <motion.div variants={itemAnimation}>
-                                    <Button
-                                        variant="animated"
-                                        size="animated"
-                                        className="w-[90%] sm:hidden ml-4"
-                                        showArrow
-                                    >
-                                        Sign up
-                                    </Button>
-                                </motion.div>
+                                {user ? (
+                                    <UserProfileIcon />
+                                ) : (
+                                    <motion.div variants={itemAnimation}>
+                                        <Button
+                                            variant="animated"
+                                            size="animated"
+                                            className="w-[90%] sm:hidden ml-4"
+                                            showArrow
+                                        >
+                                            Sign up
+                                        </Button>
+                                    </motion.div>
+                                )}
                             </div>
                         </motion.div>
                     )}
