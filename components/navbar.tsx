@@ -11,7 +11,7 @@ import { UserProfileIcon } from "./auth/user-profile-icon";
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const user = useCurrentUser();
+    const { user } = useCurrentUser();
 
     const navItems = [
         { label: "Features", href: "#" },
@@ -105,7 +105,7 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {user ? (
+                        {user && user?.email ? (
                             <UserProfileIcon />
                         ) : (
                             <motion.div
@@ -189,7 +189,7 @@ const Navbar = () => {
                                         </Button>
                                     </motion.div>
                                 ))}
-                                {user ? (
+                                {user && user?.email ? (
                                     <UserProfileIcon />
                                 ) : (
                                     <motion.div variants={itemAnimation}>
