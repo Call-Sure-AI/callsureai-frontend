@@ -16,6 +16,7 @@ import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { createOrUpdateCompany } from '@/services/company-service';
 
 import { ProfileFormData } from '@/types';
+import { ProtectedRoute } from '@/components/protected-route';
 
 const ProfileSection = () => {
     const { user } = useCurrentUser();
@@ -154,167 +155,170 @@ const ProfileSection = () => {
     }
 
     return (
-        <div className="ml-16 p-2 md:p-8">
-            <Card className="bg-white shadow-sm w-full">
-                <CardHeader className="border-b">
-                    <CardTitle className="text-xl font-medium">Edit Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="p-8">
-                    <div className="flex flex-col justify-between md:flex-row gap-6">
-                        {/* Avatar Section */}
-                        <div className="flex flex-col w-full justify-center items-center space-y-3 md:w-1/3">
-                            <div className="ml-2 w-32 h-32 md:w-64 md:h-64 rounded-full bg-gray-100 flex items-center justify-center">
-                                {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={64} height={64} />}
-                                {!formData?.image && <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />}
+        <ProtectedRoute>
+
+            <div className="ml-16 p-2 md:p-8">
+                <Card className="bg-white shadow-sm w-full">
+                    <CardHeader className="border-b">
+                        <CardTitle className="text-xl font-medium">Edit Profile</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                        <div className="flex flex-col justify-between md:flex-row gap-6">
+                            {/* Avatar Section */}
+                            <div className="flex flex-col w-full justify-center items-center space-y-3 md:w-1/3">
+                                <div className="ml-2 w-32 h-32 md:w-64 md:h-64 rounded-full bg-gray-100 flex items-center justify-center">
+                                    {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={64} height={64} />}
+                                    {!formData?.image && <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />}
+                                </div>
+                                <span className="text-sm text-gray-600 break-all text-center">
+                                    {formData?.email || ''}
+                                </span>
                             </div>
-                            <span className="text-sm text-gray-600 break-all text-center">
-                                {formData?.email || ''}
-                            </span>
+
+                            {/* Form Section */}
+                            <div className="flex-1 max-w-5xl">
+                                <form className="space-y-8">
+                                    {/* Name Fields */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="text-sm text-gray-600">
+                                                First Name <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                name="first_name"
+                                                placeholder="First Name"
+                                                className="w-full p-2 border rounded-md"
+                                                value={formData.first_name}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-sm text-gray-600">
+                                                Last Name
+                                            </label>
+                                            <Input
+                                                name="last_name"
+                                                placeholder="Last Name"
+                                                className="w-full p-2 border rounded-md"
+                                                value={formData.last_name}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-gray-600">
+                                            Business Name <span className="text-red-500">*</span>
+                                        </label>
+                                        <Input
+                                            name="business_name"
+                                            placeholder="Business Name"
+                                            className="w-full p-2 border rounded-md"
+                                            value={formData.business_name}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
+                                    {/* Contact Fields */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="text-sm text-gray-600">
+                                                Email <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                name="email"
+                                                type="email"
+                                                placeholder="Email"
+                                                className="w-full p-2 border rounded-md"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-sm text-gray-600">
+                                                Phone <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                name="phone"
+                                                type="tel"
+                                                placeholder="Phone"
+                                                className="w-full p-2 border rounded-md"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Address Fields */}
+                                    <div>
+                                        <label className="text-sm text-gray-600">
+                                            Business Address <span className="text-red-500">*</span>
+                                        </label>
+                                        <Input
+                                            name="address"
+                                            placeholder="Business Address"
+                                            className="w-full p-2 border rounded-md"
+                                            value={formData.address}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
+                                    {/* City and ZIP */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="text-sm text-gray-600">
+                                                City <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                name="city"
+                                                placeholder="City"
+                                                className="w-full p-2 border rounded-md"
+                                                value={formData.city}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-sm text-gray-600">
+                                                ZIP Code <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                name="zip_code"
+                                                placeholder="ZIP Code"
+                                                className="w-full p-2 border rounded-md"
+                                                value={formData.zip_code}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm text-gray-600">
+                                            State <span className="text-red-500">*</span>
+                                        </label>
+                                        <Input
+                                            name="state"
+                                            placeholder="State"
+                                            className="w-full p-2 border rounded-md"
+                                            value={formData.state}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div>
+                                        <Button
+                                            onClick={handleSubmit}
+                                            className="bg-[#0A1E4E] text-white px-6 py-2 rounded-md hover:bg-blue-900 transition-colors"
+                                        >
+                                            Save
+                                        </Button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-
-                        {/* Form Section */}
-                        <div className="flex-1 max-w-5xl">
-                            <form className="space-y-8">
-                                {/* Name Fields */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="text-sm text-gray-600">
-                                            First Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <Input
-                                            name="first_name"
-                                            placeholder="First Name"
-                                            className="w-full p-2 border rounded-md"
-                                            value={formData.first_name}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-sm text-gray-600">
-                                            Last Name
-                                        </label>
-                                        <Input
-                                            name="last_name"
-                                            placeholder="Last Name"
-                                            className="w-full p-2 border rounded-md"
-                                            value={formData.last_name}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-600">
-                                        Business Name <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        name="business_name"
-                                        placeholder="Business Name"
-                                        className="w-full p-2 border rounded-md"
-                                        value={formData.business_name}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-
-                                {/* Contact Fields */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="text-sm text-gray-600">
-                                            Email <span className="text-red-500">*</span>
-                                        </label>
-                                        <Input
-                                            name="email"
-                                            type="email"
-                                            placeholder="Email"
-                                            className="w-full p-2 border rounded-md"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-sm text-gray-600">
-                                            Phone <span className="text-red-500">*</span>
-                                        </label>
-                                        <Input
-                                            name="phone"
-                                            type="tel"
-                                            placeholder="Phone"
-                                            className="w-full p-2 border rounded-md"
-                                            value={formData.phone}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Address Fields */}
-                                <div>
-                                    <label className="text-sm text-gray-600">
-                                        Business Address <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        name="address"
-                                        placeholder="Business Address"
-                                        className="w-full p-2 border rounded-md"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-
-                                {/* City and ZIP */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="text-sm text-gray-600">
-                                            City <span className="text-red-500">*</span>
-                                        </label>
-                                        <Input
-                                            name="city"
-                                            placeholder="City"
-                                            className="w-full p-2 border rounded-md"
-                                            value={formData.city}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-sm text-gray-600">
-                                            ZIP Code <span className="text-red-500">*</span>
-                                        </label>
-                                        <Input
-                                            name="zip_code"
-                                            placeholder="ZIP Code"
-                                            className="w-full p-2 border rounded-md"
-                                            value={formData.zip_code}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="text-sm text-gray-600">
-                                        State <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        name="state"
-                                        placeholder="State"
-                                        className="w-full p-2 border rounded-md"
-                                        value={formData.state}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-
-                                {/* Submit Button */}
-                                <div>
-                                    <Button
-                                        onClick={handleSubmit}
-                                        className="bg-[#0A1E4E] text-white px-6 py-2 rounded-md hover:bg-blue-900 transition-colors"
-                                    >
-                                        Save
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </ProtectedRoute>
     );
 };
 
