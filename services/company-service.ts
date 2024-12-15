@@ -1,21 +1,34 @@
-const createCompany = async (formData: any) => {
+const createOrUpdateCompany = async (formData: any) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company`, {
+        if (!formData.userId) {
+            throw new Error('Login required');
+        }
+
+        const address = formData.address ? `${formData.address}, ${formData.city}, ${formData.state}, ${formData.zip_code}` : '';
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/create-or-update`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify({
+                name: `${formData.first_name} ${formData.last_name}`,
+                business_name: formData.business_name,
+                email: formData.email,
+                phone_number: formData.phone,
+                address: address,
+                user_id: formData.userId,
+            }),
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to create company');
+            throw new Error(errorData.error || 'Failed to create/update company');
         }
 
         return await response.json();
     } catch (error) {
-        console.error('Error in createCompany:', error);
+        console.error('Error in createOrUpdateCompany:', error);
         throw error;
     }
 };
@@ -114,8 +127,8 @@ const deleteCompany = async (id: string) => {
     }
 };
 
-export default {
-    createCompany,
+export {
+    createOrUpdateCompany,
     getAllCompanies,
     getCompanyById,
     getCompanyByUserId,

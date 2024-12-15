@@ -10,18 +10,25 @@ import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { ProfileFormData } from '@/types';
+import { toast } from '@/hooks/use-toast';
+import { createOrUpdateCompany } from '@/services/company-service';
+import { useRouter } from 'next/navigation';
 
 const ProfileSection = () => {
     const { user } = useCurrentUser();
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<ProfileFormData>({
-        first_name: user?.name?.split(' ')[0] || '',
-        last_name: user?.name?.split(' ')[1] || '',
-        email: user?.email || '',
+        first_name: '',
+        last_name: '',
+        business_name: '',
+        email: '',
         phone: '',
         address: '',
         city: '',
+        state: '',
         zip_code: '',
-        image: user?.image || '',
+        image: '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,23 +38,107 @@ const ProfileSection = () => {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
+    const validateForm = () => {
+        const requiredFields = [
+            'business_name',
+            'email',
+            'phone',
+            'address',
+            'city',
+            'state',
+            'zip_code'
+        ];
+
+        for (const field of requiredFields) {
+            if (!formData[field as keyof ProfileFormData]) {
+                toast({
+                    title: "Error",
+                    description: `Please provide a ${field.replace('_', ' ')}.`,
+                    variant: "destructive",
+                });
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        console.log(formData);
+
+        if (!validateForm()) return;
+
+        try {
+            setLoading(true);
+            const response = await createOrUpdateCompany({ ...formData, userId: user?.id || '' });
+            console.log(response);
+            toast({
+                title: "Success",
+                description: "Company profile updated successfully!",
+            });
+            router.push('/dashboard');
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error?.message || "Failed to update profile. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        setFormData({
-            first_name: user?.name?.split(' ')[0] || '',
-            last_name: user?.name?.split(' ')[1] || '',
-            email: user?.email || '',
-            phone: '',
-            address: '',
-            city: '',
-            zip_code: '',
-            image: user?.image || '',
-        });
+        const fetchCompanyData = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company?user_id=${user?.id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    const companyData = await response.json();
+                    setFormData({
+                        first_name: user?.name?.split(' ')[0] || '',
+                        last_name: user?.name?.split(' ')[1] || '',
+                        business_name: companyData[0].business_name || '',
+                        email: companyData[0].email || user?.email || '',
+                        phone: companyData[0].phone_number || '',
+                        address: companyData[0].address.split(',')[0] || '',
+                        city: companyData[0].address.split(',')[1] || '',
+                        state: companyData[0].address.split(',')[2] || '',
+                        zip_code: companyData[0].address.split(',')[3] || '',
+                        image: companyData[0].logo || user?.image || '',
+                    });
+                } else {
+                    setFormData({
+                        first_name: user?.name?.split(' ')[0] || '',
+                        last_name: user?.name?.split(' ')[1] || '',
+                        business_name: '',
+                        email: user?.email || '',
+                        phone: '',
+                        address: '',
+                        city: '',
+                        state: '',
+                        zip_code: '',
+                        image: user?.image || '',
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching company data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (user) {
+            fetchCompanyData();
+        }
     }, [user]);
+
+    if (loading) {
+        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    }
 
     return (
         <div className="ml-16 p-2 md:p-8">
@@ -56,7 +147,7 @@ const ProfileSection = () => {
                     <CardTitle className="text-xl font-medium">Edit Profile</CardTitle>
                 </CardHeader>
                 <CardContent className="p-8">
-                    <div className="flex flex-col justify-between md:flex-row gap-12">
+                    <div className="flex flex-col justify-between md:flex-row gap-6">
                         {/* Avatar Section */}
                         <div className="flex flex-col w-full justify-center items-center space-y-3 md:w-1/3">
                             <div className="ml-2 w-32 h-32 md:w-64 md:h-64 rounded-full bg-gray-100 flex items-center justify-center">
@@ -73,7 +164,7 @@ const ProfileSection = () => {
                             <form className="space-y-8">
                                 {/* Name Fields */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
+                                    <div>
                                         <label className="text-sm text-gray-600">
                                             First Name <span className="text-red-500">*</span>
                                         </label>
@@ -85,9 +176,9 @@ const ProfileSection = () => {
                                             onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div>
                                         <label className="text-sm text-gray-600">
-                                            Last Name <span className="text-red-500">*</span>
+                                            Last Name
                                         </label>
                                         <Input
                                             name="last_name"
@@ -98,10 +189,22 @@ const ProfileSection = () => {
                                         />
                                     </div>
                                 </div>
+                                <div>
+                                    <label className="text-sm text-gray-600">
+                                        Business Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        name="business_name"
+                                        placeholder="Business Name"
+                                        className="w-full p-2 border rounded-md"
+                                        value={formData.business_name}
+                                        onChange={handleChange}
+                                    />
+                                </div>
 
                                 {/* Contact Fields */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
+                                    <div>
                                         <label className="text-sm text-gray-600">
                                             Email <span className="text-red-500">*</span>
                                         </label>
@@ -114,9 +217,9 @@ const ProfileSection = () => {
                                             onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div>
                                         <label className="text-sm text-gray-600">
-                                            Phone
+                                            Phone <span className="text-red-500">*</span>
                                         </label>
                                         <Input
                                             name="phone"
@@ -130,13 +233,13 @@ const ProfileSection = () => {
                                 </div>
 
                                 {/* Address Fields */}
-                                <div className="space-y-2">
+                                <div>
                                     <label className="text-sm text-gray-600">
-                                        Home Address
+                                        Business Address <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         name="address"
-                                        placeholder="Home Address"
+                                        placeholder="Business Address"
                                         className="w-full p-2 border rounded-md"
                                         value={formData.address}
                                         onChange={handleChange}
@@ -145,7 +248,7 @@ const ProfileSection = () => {
 
                                 {/* City and ZIP */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
+                                    <div>
                                         <label className="text-sm text-gray-600">
                                             City <span className="text-red-500">*</span>
                                         </label>
@@ -157,7 +260,7 @@ const ProfileSection = () => {
                                             onChange={handleChange}
                                         />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div>
                                         <label className="text-sm text-gray-600">
                                             ZIP Code <span className="text-red-500">*</span>
                                         </label>
@@ -169,6 +272,19 @@ const ProfileSection = () => {
                                             onChange={handleChange}
                                         />
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-sm text-gray-600">
+                                        State <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        name="state"
+                                        placeholder="State"
+                                        className="w-full p-2 border rounded-md"
+                                        value={formData.state}
+                                        onChange={handleChange}
+                                    />
                                 </div>
 
                                 {/* Submit Button */}
