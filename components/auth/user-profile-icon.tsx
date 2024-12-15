@@ -1,17 +1,21 @@
+'use client';
+
 import Image from "next/image"
 import Link from "next/link";
 import { CircleUser } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useRouter } from "next/navigation";
 
 export const UserProfileIcon = () => {
+    const router = useRouter();
     const { user } = useCurrentUser();
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.reload();
+        router.push('/');
     }
 
     return (
