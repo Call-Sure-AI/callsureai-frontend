@@ -3,19 +3,23 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { UserIcon } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { ProfileFormData } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+
 import { createOrUpdateCompany } from '@/services/company-service';
-import { useRouter } from 'next/navigation';
+
+import { ProfileFormData } from '@/types';
 
 const ProfileSection = () => {
     const { user } = useCurrentUser();
+    const { token } = useIsAuthenticated();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<ProfileFormData>({
@@ -66,11 +70,19 @@ const ProfileSection = () => {
         e.preventDefault();
 
         if (!validateForm()) return;
+        if (!token) {
+            toast({
+                title: "Error",
+                description: "Please login to update your profile.",
+                variant: "destructive",
+            });
+            return;
+        }
 
         try {
             setLoading(true);
-            const response = await createOrUpdateCompany({ ...formData, userId: user?.id || '' });
-            console.log(response);
+
+            await createOrUpdateCompany({ ...formData, userId: user?.id || '' }, token);
             toast({
                 title: "Success",
                 description: "Company profile updated successfully!",
@@ -93,6 +105,7 @@ const ProfileSection = () => {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company?user_id=${user?.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
