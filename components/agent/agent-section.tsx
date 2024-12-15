@@ -35,7 +35,7 @@ export const AgentSection = () => {
             {loading ? (
                 <div>Loading...</div>
             ) : (
-                <div className="grid grid-cold-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cold-1 md:grid-cols-2 lg::grid-cols-43gap-4 mb-8">
                     {agents.map((agent) => (
                         <Card className="bg-white" key={agent.id}>
                             <CardContent className="p-6">
@@ -52,6 +52,11 @@ export const AgentSection = () => {
                             </CardContent>
                         </Card>
                     ))}
+                    {agents.length === 0 && (
+                        <div className="text-start text-gray-500 p-4">
+                            No agents found. Create one now!
+                        </div>
+                    )}
                 </div>
             )}
         </div>

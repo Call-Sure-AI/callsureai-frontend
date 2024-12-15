@@ -14,6 +14,11 @@ export const SocialLogin = ({ isSignup = false }) => {
             });
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+
+            if (data.newUser) {
+                router.push('/dashboard/profile-section');
+                return;
+            }
             router.push('/dashboard')
 
         } catch (error) {
