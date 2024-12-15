@@ -60,47 +60,46 @@ const Footer = () => {
                             placeholder="Email address"
                             className="w-full pl-4 md:pl-6 py-3 md:py-5 rounded-full bg-transparent border border-blue-400/40 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
                         />
-                        <button
+                        <div
                             className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full transition-all duration-300 text-white px-1 py-1 md:px-1 md:py-1 flex items-center"
                         >
-                            
-                            <AnimatedButton text="Subscribe" icon={<Send className="w-4 h-4 md:block hidden" />} />
-                        </button>
 
+                            <AnimatedButton text="Subscribe" icon={<Send className="w-4 h-4 md:block hidden" />} />
+                        </div>
 
                     </div>
                 </motion.div>
 
                 <motion.div
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true }}
-    variants={fadeInUpVariants}
-    className="flex flex-col gap-8 md:gap-4 text-xs text-blue-200 border-t border-blue-400/20 pt-6"
->
-    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-0">
-        {/* Left - Terms */}
-        <div className="flex flex-col md:flex-row gap-4 md:gap-5 text-center md:text-left md:order-1">
-            <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Terms of Service</a>
-            <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Privacy Policy</a>
-            <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Contact Us</a>
-            <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Help</a>
-        </div>
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeInUpVariants}
+                    className="flex flex-col gap-8 md:gap-4 text-xs text-blue-200 border-t border-blue-400/20 pt-6"
+                >
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-0">
+                        {/* Left - Terms */}
+                        <div className="flex flex-col md:flex-row gap-4 md:gap-5 text-center md:text-left md:order-1">
+                            <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Terms of Service</a>
+                            <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Privacy Policy</a>
+                            <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Contact Us</a>
+                            <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Help</a>
+                        </div>
 
-        {/* Center - Copyright */}
-        <div className="text-center md:text-center md:order-2">
-            &copy; {new Date().getFullYear()} <b>Callsure AI.</b> All Rights Reserved.
-        </div>
+                        {/* Center - Copyright */}
+                        <div className="text-center md:text-center md:order-2">
+                            &copy; {new Date().getFullYear()} <b>Callsure AI.</b> All Rights Reserved.
+                        </div>
 
-        {/* Right - Social Media */}
-        <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-8 md:order-3">
-            <a href="https://facebook.com" className="hover:text-white transition-colors">Facebook</a>
-            <a href="https://instagram.com" className="hover:text-white transition-colors">Instagram</a>
-            <a href="https://linkedin.com" className="hover:text-white transition-colors">Linkedin</a>
-            <a href="https://twitter.com" className="hover:text-white transition-colors">Twitter</a>
-        </div>
-    </div>
-</motion.div>
+                        {/* Right - Social Media */}
+                        <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-8 md:order-3">
+                            <a href="https://facebook.com" className="hover:text-white transition-colors">Facebook</a>
+                            <a href="https://instagram.com" className="hover:text-white transition-colors">Instagram</a>
+                            <a href="https://linkedin.com" className="hover:text-white transition-colors">Linkedin</a>
+                            <a href="https://twitter.com" className="hover:text-white transition-colors">Twitter</a>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         </footer>
     );

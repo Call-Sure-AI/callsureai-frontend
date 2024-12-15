@@ -81,3 +81,14 @@ export interface AgentFormData {
     confidence_threshold?: number;
     template_id?: string;
 }
+
+export interface ProfileFormData {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    zip_code: string;
+    image: string;
+}

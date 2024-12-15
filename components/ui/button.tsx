@@ -72,7 +72,7 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon }) => {
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
   showArrow?: boolean
   children?: React.ReactNode

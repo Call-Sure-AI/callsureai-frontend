@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -63,21 +63,19 @@ const AgentSetup = () => {
         const newAudio = new Audio(audioPath);
 
         try {
-            // Wait for audio to be loaded
             await new Promise((resolve, reject) => {
                 newAudio.addEventListener('canplaythrough', resolve, { once: true });
                 newAudio.addEventListener('error', reject, { once: true });
-                // Timeout after 5 seconds
                 setTimeout(() => reject(new Error('Audio load timeout')), 5000);
             });
 
             setAudio(newAudio);
             setAudioError(false);
-        } catch (error) {
+        } catch (e: any) {
             setAudioError(true);
             toast({
                 title: "Audio Load Error",
-                description: "Could not load the voice sample. Please try again.",
+                description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
                 variant: "destructive",
             });
         } finally {

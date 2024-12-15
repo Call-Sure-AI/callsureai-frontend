@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,10 +84,10 @@ const AgentTraining = () => {
 
             router.push('/dashboard');
 
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 title: "Error",
-                description: "Failed to create agent. Please try again.",
+                description: error && error.message ? error.message : "Failed to create agent. Please try again.",
                 variant: "destructive",
             });
         }
