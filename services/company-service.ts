@@ -1,15 +1,12 @@
-const createOrUpdateCompany = async (formData: any) => {
+const createOrUpdateCompany = async (formData: any, token: string) => {
     try {
-        if (!formData.userId) {
-            throw new Error('Login required');
-        }
-
         const address = formData.address ? `${formData.address}, ${formData.city}, ${formData.state}, ${formData.zip_code}` : '';
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/create-or-update`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
                 name: `${formData.first_name} ${formData.last_name}`,
@@ -33,10 +30,13 @@ const createOrUpdateCompany = async (formData: any) => {
     }
 };
 
-const getAllCompanies = async () => {
+const getAllCompanies = async (token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -51,10 +51,13 @@ const getAllCompanies = async () => {
     }
 };
 
-const getCompanyById = async (id: string) => {
+const getCompanyById = async (id: string, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/${id}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -69,10 +72,13 @@ const getCompanyById = async (id: string) => {
     }
 };
 
-const getCompanyByUserId = async (userId: string) => {
+const getCompanyByUserId = async (userId: string, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company?user_id=${userId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/user?user_id=${userId}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -87,12 +93,13 @@ const getCompanyByUserId = async (userId: string) => {
     }
 };
 
-const updateCompany = async (id: string, formData: any) => {
+const updateCompany = async (id: string, formData: any, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(formData),
         });
@@ -109,10 +116,13 @@ const updateCompany = async (id: string, formData: any) => {
     }
 };
 
-const deleteCompany = async (id: string) => {
+const deleteCompany = async (id: string, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/${id}`, {
             method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {

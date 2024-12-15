@@ -46,7 +46,7 @@ export const getAllAgents = async () => {
 
 export const getAgentsByUserId = async (userId: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent?user_id=${userId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/user?user_id=${userId}`, {
             method: 'GET',
         });
 
