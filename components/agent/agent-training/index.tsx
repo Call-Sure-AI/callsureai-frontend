@@ -1,12 +1,97 @@
 "use client";
 
-import React from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from '@/hooks/use-toast';
+import { AgentFormData } from '@/types';
+import { createAgent } from '@/services/agent-service';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const AgentTraining = () => {
+    const router = useRouter();
+    const { user } = useCurrentUser();
+    const [formData, setFormData] = useState({
+        roleDescription: '',
+        businessContext: '',
+        files: [] as string[],
+    });
+    const [setupData, setSetupData] = useState<any>(null);
+
+    const handleRoleDescriptionChange = (value: string) => {
+        setFormData(prev => ({ ...prev, roleDescription: value }));
+    };
+
+    const handleBusinessContextChange = (value: string) => {
+        setFormData(prev => ({ ...prev, businessContext: value }));
+    };
+
+    useEffect(() => {
+        const savedData = sessionStorage.getItem('agentSetupData');
+        if (savedData) {
+            setSetupData(JSON.parse(savedData));
+        } else {
+            router.push('/agent/setup');
+        }
+    }, [router]);
+
+    const handleSubmit = async () => {
+        try {
+            if (!user) {
+                toast({
+                    title: "Error",
+                    description: "You must be logged in to create an agent.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (!setupData) {
+                toast({
+                    title: "Error",
+                    description: "Missing setup data. Please complete the setup first.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            const agentData: AgentFormData = {
+                user_id: user.id,
+                name: setupData.name,
+                type: 'custom',
+                prompt: formData.roleDescription,
+                additional_context: {
+                    gender: setupData.gender,
+                    tone: setupData.tone,
+                    language: setupData.language,
+                    roleDescription: formData.roleDescription,
+                    businessContext: formData.businessContext,
+                },
+                files: formData.files,
+            };
+
+            await createAgent(agentData);
+
+            toast({
+                title: "Success",
+                description: "Agent created successfully!",
+            });
+
+            sessionStorage.removeItem('agentSetupData');
+
+            router.push('/dashboard');
+
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to create agent. Please try again.",
+                variant: "destructive",
+            });
+        }
+    };
     return (
         <div className="min-h-screen p-6 flex items-center justify-center">
             <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
@@ -31,6 +116,7 @@ const AgentTraining = () => {
                                 1. Give me a brief about the job Role of your Agent*
                             </label>
                             <Textarea
+                                onChange={(e) => handleRoleDescriptionChange(e.target.value)}
                                 placeholder="Describe the agent's role and responsibilities..."
                                 className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
                             />
@@ -41,6 +127,7 @@ const AgentTraining = () => {
                                 2. Give a brief about your Business for which this agent is being created*
                             </label>
                             <Textarea
+                                onChange={(e) => handleBusinessContextChange(e.target.value)}
                                 placeholder="Tell us about your business context..."
                                 className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
                             />
@@ -93,7 +180,7 @@ const AgentTraining = () => {
 
                     {/* Submit Button */}
                     <div className="flex justify-end pt-4">
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
+                        <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
                             Submit
                         </Button>
                     </div>

@@ -62,3 +62,22 @@ export interface HistoryEntry {
     actionName: string;
     actionTime: string;
 }
+
+export interface AgentFormData {
+    id?: string;
+    user_id: string;
+    name: string;
+    type: string;
+    prompt: string;
+    additional_context: {
+        gender: string;
+        tone: string;
+        language: string;
+        roleDescription: string;
+        businessContext: string;
+    };
+    files: string[];
+    company_id?: string;
+    confidence_threshold?: number;
+    template_id?: string;
+}

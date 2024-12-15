@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircleIcon } from "lucide-react";
 import Link from 'next/link';
 import { UserProfileIcon } from '@/components/auth/user-profile-icon';
+import { AgentSection } from '@/components/agent/agent-section';
 
 const DashboardLayout = () => {
 
@@ -50,7 +51,7 @@ const DashboardLayout = () => {
                     ))}
                 </div>
 
-                {/* Agent Setup Section */}
+                {/* Agent Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -61,7 +62,7 @@ const DashboardLayout = () => {
                             <div className="flex flex-col md:flex-row items-center justify-between">
                                 <div>
                                     <h2 className="text-lg font-semibold mb-2 text-black">Set up a new agent - Start</h2>
-                                    <p className="text-[#0A1E4E]">(Agent flow will work here)</p>
+                                    <p className="text-[#0A1E4E]">Manage your agents here</p>
                                 </div>
                                 <Link href="/agent/creation">
                                     <Button className="bg-[#0A1E4E] text-white">
@@ -73,6 +74,16 @@ const DashboardLayout = () => {
                         </CardContent>
                     </Card>
                 </motion.div>
+
+                <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-2xl font-bold mb-4 text-[#0A1E4E]"
+                >
+                    Agents
+                </motion.h1>
+
+                <AgentSection />
             </div>
         </div>
     );
