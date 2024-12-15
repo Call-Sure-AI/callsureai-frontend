@@ -8,8 +8,10 @@ import { PlusCircleIcon } from "lucide-react";
 import Link from 'next/link';
 import { UserProfileIcon } from '@/components/auth/user-profile-icon';
 import { AgentSection } from '@/components/agent/agent-section';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const DashboardLayout = () => {
+    const { user } = useCurrentUser();
 
     const statsCards = [
         { label: 'Account Balance', value: '$1,234' },
@@ -21,14 +23,14 @@ const DashboardLayout = () => {
     return (
         <div className="flex h-screen bg-white text-black">
             {/* Main Content */}
-            <div className="ml-16 flex-1 p-8 bg-white">
+            <div className="ml-16 flex-1 p-6 md:p-8 bg-white">
                 {/* Welcome Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8 flex w-full justify-between items-center"
                 >
-                    <h1 className="text-2xl font-bold mb-4 text-[#0A1E4E]">Good Afternoon, name</h1>
+                    <h1 className="text-lg md:text-2xl font-bold mb-4 text-[#0A1E4E] text-ellipsis">Good Afternoon, {user?.name}</h1>
                     <UserProfileIcon />
                 </motion.div>
 
@@ -65,7 +67,7 @@ const DashboardLayout = () => {
                                     <p className="text-[#0A1E4E]">Manage your agents here</p>
                                 </div>
                                 <Link href="/agent/creation">
-                                    <Button className="bg-[#0A1E4E] text-white">
+                                    <Button className="bg-[#0A1E4E] mt-4 text-white">
                                         <PlusCircleIcon className="w-4 h-4 mr-2" />
                                         Add Agent
                                     </Button>
