@@ -1,5 +1,3 @@
-import { PlusCircleIcon } from "lucide-react";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { AgentFormData } from "@/types";
