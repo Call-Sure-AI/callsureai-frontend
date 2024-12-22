@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PlusCircleIcon } from "lucide-react";
@@ -12,9 +12,40 @@ import { AgentSection } from '@/components/agent/agent-section';
 import { ProtectedRoute } from '@/components/protected-route';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { AgentFormData } from '@/types';
+import { getAllAgents } from '@/services/agent-service';
+import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+import { toast } from '@/hooks/use-toast';
 
 const DashboardLayout = () => {
     const { user } = useCurrentUser();
+    const { token } = useIsAuthenticated();
+    const [agents, setAgents] = useState<AgentFormData[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAgents = async () => {
+            try {
+                if (!token) {
+                    toast({
+                        title: "Error",
+                        description: "Please login to view your agents.",
+                        variant: "destructive",
+                    });
+                    return;
+                }
+                const response = await getAllAgents(token);
+                setAgents(response);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching agents:', error);
+                setLoading(false);
+            }
+        };
+        if (user && user.id) {
+            fetchAgents();
+        }
+    }, [user]);
 
     const statsCards = [
         { label: 'Account Balance', value: '$1,234' },
@@ -89,7 +120,11 @@ const DashboardLayout = () => {
                         Agents
                     </motion.h1>
 
-                    <AgentSection />
+                    {loading ? (
+                        <div>Loading...</div>
+                    ) : (
+                        <AgentSection agents={agents} />
+                    )}
                 </div>
             </div>
         </ProtectedRoute>

@@ -103,7 +103,7 @@ const ProfileSection = () => {
     useEffect(() => {
         const fetchCompanyData = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company?user_id=${user?.id}`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -115,14 +115,14 @@ const ProfileSection = () => {
                     setFormData({
                         first_name: user?.name?.split(' ')[0] || '',
                         last_name: user?.name?.split(' ')[1] || '',
-                        business_name: companyData[0].business_name || '',
-                        email: companyData[0].email || user?.email || '',
-                        phone: companyData[0].phone_number || '',
-                        address: companyData[0].address.split(',')[0] || '',
-                        city: companyData[0].address.split(',')[1] || '',
-                        state: companyData[0].address.split(',')[2] || '',
-                        zip_code: companyData[0].address.split(',')[3] || '',
-                        image: companyData[0].logo || user?.image || '',
+                        business_name: companyData.business_name || '',
+                        email: companyData.email || user?.email || '',
+                        phone: companyData.phone_number || '',
+                        address: companyData.address.split(',')[0] || '',
+                        city: companyData.address.split(',')[1] || '',
+                        state: companyData.address.split(',')[2] || '',
+                        zip_code: companyData.address.split(',')[3] || '',
+                        image: companyData.logo || user?.image || '',
                     });
                 } else {
                     setFormData({

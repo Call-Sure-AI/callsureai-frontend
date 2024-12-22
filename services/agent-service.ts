@@ -1,11 +1,12 @@
 import { AgentFormData } from "@/types";
 
-export const createAgent = async (formData: AgentFormData) => {
+export const createAgent = async (formData: AgentFormData, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
                 ...formData,
@@ -26,10 +27,13 @@ export const createAgent = async (formData: AgentFormData) => {
     }
 };
 
-export const getAllAgents = async () => {
+export const getAllAgents = async (token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -44,10 +48,13 @@ export const getAllAgents = async () => {
     }
 };
 
-export const getAgentsByUserId = async (userId: string) => {
+export const getAgentsByUserId = async (userId: string, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/user?user_id=${userId}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -57,15 +64,18 @@ export const getAgentsByUserId = async (userId: string) => {
 
         return await response.json();
     } catch (error) {
-        console.error('Error in getAllAgents:', error);
+        console.error('Error in getAgentsByUserId:', error);
         throw error;
     }
 };
 
-export const getAgentById = async (id: string) => {
+export const getAgentById = async (id: string, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/${id}`, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -80,7 +90,7 @@ export const getAgentById = async (id: string) => {
     }
 };
 
-export const updateAgent = async (id: string, formData: AgentFormData) => {
+export const updateAgent = async (id: string, formData: AgentFormData, token: string) => {
     try {
         console.log('Updating agent');
         console.log(formData);
@@ -88,6 +98,7 @@ export const updateAgent = async (id: string, formData: AgentFormData) => {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
                 ...formData,
@@ -107,10 +118,13 @@ export const updateAgent = async (id: string, formData: AgentFormData) => {
     }
 };
 
-export const deleteAgent = async (id: string) => {
+export const deleteAgent = async (id: string, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/${id}`, {
             method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
