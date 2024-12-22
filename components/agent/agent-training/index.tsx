@@ -10,10 +10,12 @@ import { toast } from '@/hooks/use-toast';
 import { AgentFormData } from '@/types';
 import { createAgent } from '@/services/agent-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 
 const AgentTraining = () => {
     const router = useRouter();
     const { user } = useCurrentUser();
+    const { token } = useIsAuthenticated();
     const [formData, setFormData] = useState({
         roleDescription: '',
         businessContext: '',
@@ -58,6 +60,15 @@ const AgentTraining = () => {
                 return;
             }
 
+            if (!token) {
+                toast({
+                    title: "Error",
+                    description: "Please login to create an agent.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
             const agentData: AgentFormData = {
                 user_id: user.id,
                 name: setupData.name,
@@ -73,7 +84,7 @@ const AgentTraining = () => {
                 files: formData.files,
             };
 
-            await createAgent(agentData);
+            await createAgent(agentData, token);
 
             toast({
                 title: "Success",
