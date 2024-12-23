@@ -15,19 +15,28 @@ import {
 } from '@/components/ui/select';
 import { PlayCircle, User2, Wand2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import Link from 'next/link';
+
+interface FormData {
+    name: string;
+    gender: string;
+    tone: string;
+    language: string;
+}
+
+const initialFormData: FormData = {
+    name: '',
+    gender: '',
+    tone: '',
+    language: ''
+};
 
 const AgentSetup = () => {
     const router = useRouter();
-    const [formData, setFormData] = useState({
-        name: '',
-        gender: '',
-        tone: '',
-        language: '',
-    });
+    const [formData, setFormData] = useState(initialFormData);
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const [isAudioLoading, setIsAudioLoading] = useState(false);
     const [audioError, setAudioError] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
     const handleNameChange = (value: string) => {
         setFormData(prev => ({ ...prev, name: value }));
@@ -109,12 +118,39 @@ const AgentSetup = () => {
     };
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const data = JSON.parse(sessionStorage.getItem('agentSetupData') as string);
-            setFormData({ name: data.name, gender: data.gender, tone: data.tone, language: data.language });
-            loadAudio(data.gender, data.tone, data.language);
-        }
+        setIsMounted(true);
     }, []);
+
+    useEffect(() => {
+        if (isMounted) {
+            try {
+                const savedData = window.sessionStorage.getItem('agentSetupData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    setFormData({
+                        name: data.name || '',
+                        gender: data.gender || '',
+                        tone: data.tone || '',
+                        language: data.language || ''
+                    });
+                    if (data.gender && data.tone && data.language) {
+                        loadAudio(data.gender, data.tone, data.language);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+            }
+        }
+    }, [isMounted]);
+
+    useEffect(() => {
+        return () => {
+            if (audio) {
+                audio.pause();
+                audio.src = '';
+            }
+        };
+    }, [audio]);
 
     return (
         <div className="min-h-screen p-6 flex items-center justify-center">
@@ -241,13 +277,11 @@ const AgentSetup = () => {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                        <Link href="/agent/training">
-                            <Button
-                                onClick={handleNext}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
-                                Next
-                            </Button>
-                        </Link>
+                        <Button
+                            onClick={handleNext}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
+                            Next
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
