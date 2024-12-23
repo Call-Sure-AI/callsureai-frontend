@@ -114,7 +114,7 @@ const AgentSetup = () => {
             setFormData({ name: data.name, gender: data.gender, tone: data.tone, language: data.language });
             loadAudio(data.gender, data.tone, data.language);
         }
-    }, [window]);
+    }, []);
 
     return (
         <div className="min-h-screen p-6 flex items-center justify-center">
