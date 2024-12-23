@@ -113,7 +113,7 @@ const AgentSetup = () => {
             return;
         }
 
-        sessionStorage.setItem('agentSetupData', JSON.stringify(formData));
+        window.sessionStorage.setItem('agentSetupData', JSON.stringify(formData));
         router.push('/agent/training');
     };
 
@@ -151,6 +151,11 @@ const AgentSetup = () => {
             }
         };
     }, [audio]);
+
+    if (!isMounted) {
+        // TODO: Add loading state
+        return null;
+    }
 
     return (
         <div className="min-h-screen p-6 flex items-center justify-center">
