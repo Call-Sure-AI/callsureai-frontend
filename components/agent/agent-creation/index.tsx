@@ -19,12 +19,11 @@ import Link from 'next/link';
 
 const AgentSetup = () => {
     const router = useRouter();
-    const data = JSON.parse(sessionStorage.getItem('agentSetupData') as string);
     const [formData, setFormData] = useState({
-        name: data ? data.name : '',
-        gender: data ? data.gender : '',
-        tone: data ? data.tone : '',
-        language: data ? data.language : '',
+        name: '',
+        gender: '',
+        tone: '',
+        language: '',
     });
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const [isAudioLoading, setIsAudioLoading] = useState(false);
@@ -110,10 +109,12 @@ const AgentSetup = () => {
     };
 
     useEffect(() => {
-        if (data) {
+        if (typeof window !== 'undefined') {
+            const data = JSON.parse(sessionStorage.getItem('agentSetupData') as string);
+            setFormData({ name: data.name, gender: data.gender, tone: data.tone, language: data.language });
             loadAudio(data.gender, data.tone, data.language);
         }
-    }, []);
+    }, [window]);
 
     return (
         <div className="min-h-screen p-6 flex items-center justify-center">
