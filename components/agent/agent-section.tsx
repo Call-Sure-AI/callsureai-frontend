@@ -21,7 +21,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                             <div className="flex flex-row items-center justify-between">
                                 <div>
                                     <h2 className="text-lg font-semibold mb-2 text-black">{agent.name}</h2>
-                                    <p className="text-[#0A1E4E]">{agent.prompt}</p>
+                                    <p className="text-[#0A1E4E] text-ellipsis">{agent.prompt}</p>
                                 </div>
                                 <AgentEdit />
                             </div>

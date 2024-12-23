@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -19,11 +19,12 @@ import Link from 'next/link';
 
 const AgentSetup = () => {
     const router = useRouter();
+    const data = JSON.parse(sessionStorage.getItem('agentSetupData') as string);
     const [formData, setFormData] = useState({
-        name: '',
-        gender: '',
-        tone: '',
-        language: '',
+        name: data ? data.name : '',
+        gender: data ? data.gender : '',
+        tone: data ? data.tone : '',
+        language: data ? data.language : '',
     });
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const [isAudioLoading, setIsAudioLoading] = useState(false);
@@ -38,12 +39,10 @@ const AgentSetup = () => {
         return `/voices/${gender}-${tone}-${language}.mp3`;
     };
 
-    // Single function to update audio based on selection changes
     const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
         setFormData(prev => {
             const newData = { ...prev, [type]: value };
 
-            // Only attempt to load audio if all three fields are filled
             if (newData.gender && newData.tone && newData.language) {
                 loadAudio(newData.gender, newData.tone, newData.language);
             }
@@ -52,7 +51,6 @@ const AgentSetup = () => {
         });
     };
 
-    // Function to load audio
     const loadAudio = async (gender: string, tone: string, language: string) => {
         setIsAudioLoading(true);
         setAudioError(false);
@@ -110,6 +108,12 @@ const AgentSetup = () => {
         sessionStorage.setItem('agentSetupData', JSON.stringify(formData));
         router.push('/agent/training');
     };
+
+    useEffect(() => {
+        if (data) {
+            loadAudio(data.gender, data.tone, data.language);
+        }
+    }, []);
 
     return (
         <div className="min-h-screen p-6 flex items-center justify-center">
@@ -190,7 +194,7 @@ const AgentSetup = () => {
                                         <label className="text-sm font-medium text-gray-600 ml-1">
                                             Gender
                                         </label>
-                                        <Select onValueChange={(value) => handleSelectionChange('gender', value)}>
+                                        <Select defaultValue={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
                                             <SelectTrigger className="w-36">
                                                 <SelectValue placeholder="Select gender" />
                                             </SelectTrigger>
@@ -205,7 +209,7 @@ const AgentSetup = () => {
                                         <label className="text-sm font-medium text-gray-600 ml-1">
                                             Tone
                                         </label>
-                                        <Select onValueChange={(value) => handleSelectionChange('tone', value)}>
+                                        <Select defaultValue={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
                                             <SelectTrigger className="w-36">
                                                 <SelectValue placeholder="Select tone" />
                                             </SelectTrigger>
@@ -220,7 +224,7 @@ const AgentSetup = () => {
                                         <label className="text-sm font-medium text-gray-600 ml-1">
                                             Language
                                         </label>
-                                        <Select onValueChange={(value) => handleSelectionChange('language', value)}>
+                                        <Select defaultValue={formData.language} onValueChange={(value) => handleSelectionChange('language', value)}>
                                             <SelectTrigger className="w-36">
                                                 <SelectValue placeholder="Select language" />
                                             </SelectTrigger>

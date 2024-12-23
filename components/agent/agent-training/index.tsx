@@ -36,7 +36,7 @@ const AgentTraining = () => {
         if (savedData) {
             setSetupData(JSON.parse(savedData));
         } else {
-            router.push('/agent/setup');
+            router.push('/agent/creation');
         }
     }, [router]);
 
@@ -190,7 +190,10 @@ const AgentTraining = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <div className="flex justify-end pt-4">
+                    <div className="flex justify-between pt-4">
+                        <Button onClick={() => router.back()} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
+                            Back
+                        </Button>
                         <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
                             Submit
                         </Button>
