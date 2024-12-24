@@ -236,7 +236,7 @@ const AgentSetup = () => {
                                         <label className="text-sm font-medium text-gray-600 ml-1">
                                             Gender
                                         </label>
-                                        <Select defaultValue={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
+                                        <Select value={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
                                             <SelectTrigger className="w-36">
                                                 <SelectValue placeholder="Select gender" />
                                             </SelectTrigger>
@@ -251,7 +251,7 @@ const AgentSetup = () => {
                                         <label className="text-sm font-medium text-gray-600 ml-1">
                                             Tone
                                         </label>
-                                        <Select defaultValue={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
+                                        <Select value={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
                                             <SelectTrigger className="w-36">
                                                 <SelectValue placeholder="Select tone" />
                                             </SelectTrigger>
@@ -266,7 +266,7 @@ const AgentSetup = () => {
                                         <label className="text-sm font-medium text-gray-600 ml-1">
                                             Language
                                         </label>
-                                        <Select defaultValue={formData.language} onValueChange={(value) => handleSelectionChange('language', value)}>
+                                        <Select value={formData.language} onValueChange={(value) => handleSelectionChange('language', value)}>
                                             <SelectTrigger className="w-36">
                                                 <SelectValue placeholder="Select language" />
                                             </SelectTrigger>
