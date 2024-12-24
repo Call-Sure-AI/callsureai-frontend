@@ -71,7 +71,7 @@ export const getAgentsByUserId = async (userId: string, token: string) => {
 
 export const getAgentById = async (id: string, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent?id=${id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`

@@ -1,24 +1,52 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+
 import { toast } from '@/hooks/use-toast';
-import { AgentFormData } from '@/types';
-import { createAgent } from '@/services/agent-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+import { AgentFormData } from '@/types';
+import { createAgent } from '@/services/agent-service';
+import { Input } from '@/components/ui/input';
+
+interface AdvancedSettings {
+    authUrl: string;
+    clientId: string;
+    clientSecret: string;
+    apis: string[];
+}
+
+interface FormData {
+    roleDescription: string;
+    businessContext: string;
+    advanced_settings: AdvancedSettings;
+    files: string[];
+}
 
 const AgentTraining = () => {
     const router = useRouter();
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         roleDescription: '',
         businessContext: '',
+        advanced_settings: {
+            authUrl: '',
+            clientId: '',
+            clientSecret: '',
+            apis: []
+        },
         files: [] as string[],
     });
     const [setupData, setSetupData] = useState<any>(null);
@@ -29,6 +57,15 @@ const AgentTraining = () => {
 
     const handleBusinessContextChange = (value: string) => {
         setFormData(prev => ({ ...prev, businessContext: value }));
+    };
+
+    const handleAdvancedSettingsChange = (value: AdvancedSettings) => {
+        setFormData(prev => ({ ...prev, advanced_settings: value }));
+    };
+
+    const handleApiUrlChange = (value: string) => {
+        value = value.trim();
+        setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
     };
 
     useEffect(() => {
@@ -69,11 +106,40 @@ const AgentTraining = () => {
                 return;
             }
 
+            if (!formData.roleDescription || !formData.businessContext) {
+                toast({
+                    title: "Error",
+                    description: "Please fill in all the required fields.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (formData.advanced_settings && !formData.advanced_settings.apis.length) {
+                formData.advanced_settings.apis.forEach(api => {
+                    if (!api.startsWith('http')) {
+                        toast({
+                            title: "Error",
+                            description: "Please enter a valid URL.",
+                            variant: "destructive",
+                        });
+                        return;
+                    }
+                });
+                toast({
+                    title: "Error",
+                    description: "Please provide at least one API URL.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
             const agentData: AgentFormData = {
                 user_id: user.id,
                 name: setupData.name,
                 type: 'custom',
                 prompt: formData.roleDescription,
+                is_active: true,
                 additional_context: {
                     gender: setupData.gender,
                     tone: setupData.tone,
@@ -81,6 +147,7 @@ const AgentTraining = () => {
                     roleDescription: formData.roleDescription,
                     businessContext: formData.businessContext,
                 },
+                advanced_settings: formData.advanced_settings,
                 files: formData.files,
             };
 
@@ -188,6 +255,64 @@ const AgentTraining = () => {
                             </div>
                         </div>
                     </div>
+
+                    <Collapsible>
+                        <CollapsibleTrigger className="text-sm flex items-center font-medium text-gray-700 mb-2">
+                            Advanced Settings
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="w-4 h-4 ml-2 transition-transform"
+                            >
+                                <path d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="bg-gray-50 p-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-5 h-5 text-blue-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                        To enable seamless integration, Provide the following details:
+                                    </h3>
+                                </div>
+
+                                <div className="bg-gray-50 p-6 rounded-xl space-y-6" id="api-settings">
+                                    <Input
+                                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, authUrl: e.target.value })}
+                                        placeholder="Enter your authentication URL"
+                                        className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
+                                    />
+
+                                    <Input
+                                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientId: e.target.value })}
+                                        placeholder="Enter your client ID"
+                                        className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
+                                    />
+
+                                    <Input
+                                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientSecret: e.target.value })}
+                                        placeholder="Enter your client secret"
+                                        className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
+                                    />
+
+                                    <Textarea
+                                        onChange={(e) => handleApiUrlChange(e.target.value)}
+                                        placeholder="Enter list of APIs separated by comma"
+                                        className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
+                                    />
+                                </div>
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
 
                     {/* Submit Button */}
                     <div className="flex justify-between pt-4">

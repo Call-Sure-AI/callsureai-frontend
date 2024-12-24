@@ -167,7 +167,7 @@ const ProfileSection = () => {
                             {/* Avatar Section */}
                             <div className="flex flex-col w-full justify-center items-center space-y-3 md:w-1/3">
                                 <div className="ml-2 w-32 h-32 md:w-64 md:h-64 rounded-full bg-gray-100 flex items-center justify-center">
-                                    {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={64} height={64} />}
+                                    {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={32} height={32} />}
                                     {!formData?.image && <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />}
                                 </div>
                                 <span className="text-sm text-gray-600 break-all text-center">

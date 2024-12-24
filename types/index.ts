@@ -69,12 +69,19 @@ export interface AgentFormData {
     name: string;
     type: string;
     prompt: string;
+    is_active: boolean;
     additional_context: {
         gender: string;
         tone: string;
         language: string;
         roleDescription: string;
         businessContext: string;
+    };
+    advanced_settings: {
+        authUrl: string;
+        clientId: string;
+        clientSecret: string;
+        apis: string[];
     };
     files: string[];
     company_id?: string;
