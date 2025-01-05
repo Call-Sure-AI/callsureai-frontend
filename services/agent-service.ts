@@ -90,10 +90,8 @@ export const getAgentById = async (id: string, token: string) => {
     }
 };
 
-export const updateAgent = async (id: string, formData: AgentFormData, token: string) => {
+export const updateAgent = async (id: string, formData: any, token: string) => {
     try {
-        console.log('Updating agent');
-        console.log(formData);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/${id}`, {
             method: 'PUT',
             headers: {

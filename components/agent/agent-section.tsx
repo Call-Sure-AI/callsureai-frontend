@@ -71,7 +71,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between border-t border-gray-100">
-                                        <AgentEdit agentId={agent.id as string} />
+                                        <AgentEdit {...agent} />
                                         <Button
                                             className="bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 text-[#0A1E4E] transition-colors duration-200"
                                             size="sm"

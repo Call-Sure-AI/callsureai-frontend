@@ -1,34 +1,50 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { memo, useState } from "react";
 import { PlayCircle, PlusCircleIcon } from "lucide-react";
-import { Input } from "../ui/input";
-import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select";
-import { getAgentById } from "@/services/agent-service";
+
+import { AgentFormData } from "@/types";
+
+import { Textarea } from "../ui/textarea";
+import { Switch } from "../ui/switch";
+import { Input } from "../ui/input";
+
+import { updateAgent } from "@/services/agent-service";
+
+import { toast } from "@/hooks/use-toast";
 import { useIsAuthenticated } from "@/hooks/use-is-authenticated";
 interface EditAgentData {
     name: string;
     gender: string;
     tone: string;
     language: string;
+    roleDescription: string;
+    businessContext: string;
+    is_active: boolean;
 }
 
-export const AgentEdit = ({ agentId }: { agentId: string }) => {
-    const { token } = useIsAuthenticated();
+export const AgentEdit = memo(({ name, additional_context, is_active, id }: AgentFormData) => {
     const [formData, setFormData] = useState<EditAgentData>({
-        name: '',
-        gender: '',
-        tone: '',
-        language: ''
+        name: name ?? '',
+        gender: additional_context?.gender ?? '',
+        tone: additional_context?.tone ?? '',
+        language: additional_context?.language ?? '',
+        roleDescription: additional_context?.roleDescription ?? '',
+        businessContext: additional_context?.businessContext ?? '',
+        is_active: is_active ?? false
     });
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const [isAudioLoading, setIsAudioLoading] = useState(false);
     const [audioError, setAudioError] = useState(false);
+    const { token } = useIsAuthenticated();
+    const router = useRouter();
 
-    const handleNameChange = (value: string) => {
-        setFormData(prev => ({ ...prev, name: value }));
+    const handleChange = (name: string, value: any) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const getAudioPath = (gender: string, tone: string, language: string) => {
@@ -92,29 +108,60 @@ export const AgentEdit = ({ agentId }: { agentId: string }) => {
         });
     };
 
-    if (!token) {
-        return <div>Loading...</div>;
-    }
-
-    const fetchAgentData = async () => {
+    const handleSave = async () => {
         try {
-            const response = await getAgentById(agentId, token);
-            console.log(response);
-            setFormData({
-                name: response.name,
-                gender: response.additional_context.gender,
-                tone: response.additional_context.tone,
-                language: response.additional_context.language,
+            if (!id) {
+                toast({
+                    title: "Error",
+                    description: "Not a valid agent ID. Please try again.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (!token) {
+                toast({
+                    title: "Error",
+                    description: "Please login to save the agent.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            const data = {
+                name: formData.name,
+                additional_context: {
+                    gender: formData.gender,
+                    tone: formData.tone,
+                    language: formData.language,
+                    roleDescription: formData.roleDescription,
+                    businessContext: formData.businessContext,
+                },
+                is_active: formData.is_active
+            }
+
+            await updateAgent(id, data, token);
+
+            toast({
+                title: "Success",
+                description: "Agent updated successfully!",
             });
+
+            router.push('/dashboard');
         } catch (error) {
-            console.error('Error fetching agent data:', error);
+            console.error('Error saving agent:', error);
+            toast({
+                title: "Error",
+                description: "Failed to save the agent. Please try again.",
+                variant: "destructive",
+            });
         }
     };
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <button onClick={fetchAgentData} className="text-white flex justify-center items-center bg-[#0A1E4E] hover:bg-[#0A1E4E] text-sm font-medium rounded-md px-2 py-1.5 text-center">
+                <button className="text-white flex justify-center items-center bg-[#0A1E4E] hover:bg-[#0A1E4E] text-sm font-medium rounded-md px-2 py-1.5 text-center">
                     <PlusCircleIcon className="w-4 h-4 mr-2" />
                     Edit
                 </button>
@@ -124,19 +171,48 @@ export const AgentEdit = ({ agentId }: { agentId: string }) => {
                     <DialogTitle>Edit Agent</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                    <div className="bg-gray-50 p-6 rounded-xl space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Agent Name
-                            </label>
-                            <Input
-                                value={formData.name}
-                                onChange={(e) => handleNameChange(e.target.value)}
-                                placeholder="Enter your agent's name"
-                                className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
-                            />
-                        </div>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Agent Name
+                        </label>
+                        <Input
+                            value={formData.name}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                            placeholder="Enter your agent's name"
+                            className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
+                        />
                     </div>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                            1. Give me a brief about the job Role of your Agent*
+                        </label>
+                        <Textarea
+                            value={formData.roleDescription}
+                            onChange={(e) => handleChange('roleDescription', e.target.value)}
+                            placeholder="Describe the agent's role and responsibilities..."
+                            className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                            2. Give a brief about your Business for which this agent is being created*
+                        </label>
+                        <Textarea
+                            value={formData.businessContext}
+                            onChange={(e) => handleChange('businessContext', e.target.value)}
+                            placeholder="Tell us about your business context..."
+                            className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
+                        />
+                    </div>
+
+                    <div className="space-y-2 flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <label className="block text-sm font-medium text-gray-700">
+                            Status
+                        </label>
+                        <Switch className="" checked={formData.is_active} onCheckedChange={(value) => handleChange('is_active', value)} />
+                    </div>
+
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-5 h-5 text-blue-600">
@@ -150,7 +226,7 @@ export const AgentEdit = ({ agentId }: { agentId: string }) => {
                         </div>
 
                         <div className="bg-gray-50 p-6 rounded-xl space-y-6">
-                            <div className="flex justify-center items-center gap-4">
+                            <div className="flex justify-between items-center gap-4">
                                 <button
                                     onClick={handlePlayAudio}
                                     className={`w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center transition-colors 
@@ -216,7 +292,7 @@ export const AgentEdit = ({ agentId }: { agentId: string }) => {
                         </div>
                     </div>
                     <div className="flex justify-end pt-4">
-                        <button className="bg-[#0A1E4E] text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
+                        <button onClick={handleSave} className="bg-[#0A1E4E] text-white px-8 py-2 h-auto text-lg font-medium rounded-xl">
                             Save
                         </button>
                     </div>
@@ -225,4 +301,6 @@ export const AgentEdit = ({ agentId }: { agentId: string }) => {
 
         </Dialog>
     )
-};
+});
+
+AgentEdit.displayName = "AgentEdit";
