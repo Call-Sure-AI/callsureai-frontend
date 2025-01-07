@@ -4,9 +4,11 @@ import { AgentFormData } from "@/types";
 import { AgentEdit } from "./agent-edit";
 import { Activity, Bot, Settings } from "lucide-react";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
 export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
     const { user } = useCurrentUser();
+    const router = useRouter();
 
     if (user && !user.id) {
         return (
@@ -73,6 +75,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                     <div className="flex items-center justify-between border-t border-gray-100">
                                         <AgentEdit {...agent} />
                                         <Button
+                                            onClick={() => router.push("/dashboard/chat")}
                                             className="bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 text-[#0A1E4E] transition-colors duration-200"
                                             size="sm"
                                         >
