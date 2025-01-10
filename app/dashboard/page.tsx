@@ -45,7 +45,7 @@ const DashboardLayout = () => {
         if (user && user.id) {
             fetchAgents();
         }
-    }, [user]);
+    }, [user, token]);
 
     const statsCards = [
         { label: 'Account Balance', value: '$1,234' },

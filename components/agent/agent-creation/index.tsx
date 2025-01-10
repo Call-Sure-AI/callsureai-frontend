@@ -141,7 +141,7 @@ const AgentSetup = () => {
                 console.error('Error loading saved data:', error);
             }
         }
-    }, [isMounted]);
+    }, [isMounted, loadAudio]);
 
     useEffect(() => {
         return () => {

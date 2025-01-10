@@ -117,7 +117,7 @@ const Chat = () => {
                 recognition.stop();
             }
         };
-    }, []);
+    }, [recognition]);
 
     const toggleListening = useCallback((): void => {
         if (!recognition) {
