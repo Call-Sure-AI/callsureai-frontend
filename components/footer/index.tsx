@@ -28,7 +28,7 @@ const Footer = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+
         if (!email) {
             setMessage({ text: 'Please enter your email address', type: 'error' });
             return;
@@ -111,13 +111,13 @@ const Footer = () => {
                             aria-label="Email address"
                         />
                         <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                            <AnimatedButton 
+                            <AnimatedButton
                                 text="Subscribe"
                                 icon={<Send className="w-4 h-4 md:block hidden" />}
                             />
                         </div>
                     </form>
-                    
+
                     {message.text && (
                         <div className={`mt-4 text-sm ${message.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
                             {message.text}
@@ -135,9 +135,9 @@ const Footer = () => {
                     <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-0">
                         {/* Left - Terms */}
                         <div className="flex flex-col md:flex-row gap-4 md:gap-5 text-center md:text-left md:order-1">
-                            <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Terms of Service</a>
-                            <a href="/privacy" className="cursor-pointer hover:text-white transition-colors">Privacy Policy</a>
-                            <a href="/terms" className="cursor-pointer hover:text-white transition-colors">Contact Us</a>
+                            <a href="https://tos.callsure.ai/" className="cursor-pointer hover:text-white transition-colors">Terms of Service</a>
+                            <a href="https://privacy.callsure.ai/" className="cursor-pointer hover:text-white transition-colors">Privacy Policy</a>
+                            <a href="/contact" className="cursor-pointer hover:text-white transition-colors">Contact Us</a>
                         </div>
 
                         {/* Center - Copyright */}
