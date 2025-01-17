@@ -14,10 +14,10 @@ const Navbar = () => {
     const { user } = useCurrentUser();
 
     const navItems = [
-        { label: "Features", href: "#" },
-        { label: "Pricing", href: "#" },
-        { label: "Resources", href: "#" },
-        { label: "Integrations", href: "#" },
+        { label: "Features", href: "/features" },
+        { label: "Pricing", href: "/pricing" },
+        { label: "Resources", href: "/resources" },
+        { label: "Integrations", href: "/integrations" },
     ];
 
     const navAnimation = {
@@ -91,15 +91,15 @@ const Navbar = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 + 0.2 }}
                             >
-                                <Button
-                                    variant="ghost"
+                                <Link
+                                    href={item.href}
                                     className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
                                     // @ts-ignore
                                     whilehover={{ scale: 1.05 }}
                                     whiletap={{ scale: 0.95 }}
                                 >
                                     {item.label}
-                                </Button>
+                                </Link>
                             </motion.div>
                         ))}
                     </div>
@@ -181,12 +181,12 @@ const Navbar = () => {
                                         key={item.label}
                                         variants={itemAnimation}
                                     >
-                                        <Button
-                                            variant="ghost"
+                                        <Link
+                                            href={item.href}
                                             className="w-full justify-start text-slate-600 hover:text-[#0A1E4E] hover:bg-slate-100/80"
                                         >
                                             {item.label}
-                                        </Button>
+                                        </Link>
                                     </motion.div>
                                 ))}
                                 {user && user?.email ? (
