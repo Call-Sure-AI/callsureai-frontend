@@ -54,6 +54,12 @@ const Navbar = () => {
         exit: { x: -20, opacity: 0 }
     };
 
+    const reverseItemAnimation = {
+        hidden: { x: 20, opacity: 0 },
+        visible: { x: 0, opacity: 1 },
+        exit: { x: 20, opacity: 0 }
+    };
+
     return (
         <motion.nav
             initial="hidden"
@@ -66,6 +72,7 @@ const Navbar = () => {
                 <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group my-3">
                         <motion.div
+                            variants={itemAnimation}
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400 }}
                             className="w-10 h-10 sm:w-12 sm:h-12 relative"
@@ -78,9 +85,12 @@ const Navbar = () => {
                                 priority
                             />
                         </motion.div>
-                        <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
+                        <motion.span
+                            variants={itemAnimation}
+                            transition={{ type: "spring", stiffness: 400 }}
+                            className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
                             Callsure
-                        </span>
+                        </motion.span>
                     </Link>
 
                     <div className="hidden md:flex items-center gap-6">
@@ -109,8 +119,7 @@ const Navbar = () => {
                             <UserProfileIcon />
                         ) : (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
+                                variants={reverseItemAnimation}
                                 transition={{ delay: 0.6 }}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
