@@ -22,7 +22,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-16 md:pb-8">
             {agents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-80 bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-300 hover:border-[#0A1E4E]/30 transition-all duration-300">
                     <div className="relative">
