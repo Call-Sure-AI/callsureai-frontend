@@ -151,13 +151,19 @@ const ProfileSection = () => {
     }, [user]);
 
     if (loading) {
-        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+        return (
+            <div className="flex w-full justify-center items-center min-h-screen">
+                <div className="w-full h-full flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+                </div>
+            </div>
+        );
     }
 
     return (
         <ProtectedRoute>
 
-            <div className="ml-16 p-2 md:p-8">
+            <div className="w-full p-2 md:p-8">
                 <Card className="bg-white shadow-sm w-full">
                     <CardHeader className="border-b">
                         <CardTitle className="text-xl font-medium">Edit Profile</CardTitle>

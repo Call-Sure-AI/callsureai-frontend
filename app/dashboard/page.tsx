@@ -56,9 +56,9 @@ const DashboardLayout = () => {
 
     return (
         <ProtectedRoute>
-            <div className="flex h-screen bg-white text-black">
+            <div className="flex w-full h-screen bg-white text-black">
                 {/* Main Content */}
-                <div className="ml-16 flex-1 p-6 md:p-8 bg-white">
+                <div className="flex-1 p-6 md:p-8 bg-white">
                     {/* Welcome Section */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
