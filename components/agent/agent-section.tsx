@@ -53,7 +53,6 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                 <div className="flex flex-col h-full space-y-6">
                                     <div className="flex items-start space-x-4">
                                         <div className="relative flex-shrink-0">
-                                            <div className="absolute -inset-1 bg-gradient-to-r from-[#0A1E4E] to-[#0A1E4E]/60 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
                                                 <Bot className="w-7 h-7 text-white" />
                                             </div>

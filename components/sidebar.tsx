@@ -116,14 +116,16 @@ const Sidebar = () => {
                                     }`}
                             >
                                 {item.icon}
-                                <motion.span
-                                    variants={contentVariants}
-                                    initial="visible"
-                                    animate={isCollapsed ? "hidden" : "visible"}
-                                    className="ml-2"
-                                >
-                                    {item.label}
-                                </motion.span>
+                                {!isCollapsed && (
+                                    <motion.span
+                                        variants={contentVariants}
+                                        initial="visible"
+                                        animate={isCollapsed ? "hidden" : "visible"}
+                                        className="ml-2"
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                )}
                             </Button>
                         </Link>
                     </motion.div>
@@ -153,14 +155,16 @@ const Sidebar = () => {
                                         }`}
                                 >
                                     {item.icon}
-                                    <motion.span
-                                        variants={contentVariants}
-                                        initial="visible"
-                                        animate={isCollapsed ? "hidden" : "visible"}
-                                        className="ml-2"
-                                    >
-                                        {item.label}
-                                    </motion.span>
+                                    {!isCollapsed && (
+                                        <motion.span
+                                            variants={contentVariants}
+                                            initial="visible"
+                                            animate={isCollapsed ? "hidden" : "visible"}
+                                            className="ml-2"
+                                        >
+                                            {item.label}
+                                        </motion.span>
+                                    )}
                                 </Button>
                             </Link>
                         </motion.div>
