@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { PlayCircle, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -41,6 +41,9 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
     const [isAudioLoading, setIsAudioLoading] = useState(false);
     const [audioError, setAudioError] = useState(false);
     const { token } = useIsAuthenticated();
+
+    const buttonRef = useRef<HTMLButtonElement>(null);
+
     const router = useRouter();
 
     const handleChange = (name: string, value: any) => {
@@ -147,7 +150,8 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
                 description: "Agent updated successfully!",
             });
 
-            router.push('/dashboard');
+            buttonRef.current?.click();
+
         } catch (error) {
             console.error('Error saving agent:', error);
             toast({
@@ -161,7 +165,7 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <button className="text-white flex justify-center items-center bg-[#0A1E4E] hover:bg-[#0A1E4E] text-sm font-medium rounded-md px-2 py-1.5 text-center">
+                <button ref={buttonRef} className="text-white flex justify-center items-center bg-[#0A1E4E] hover:bg-[#0A1E4E] text-sm font-medium rounded-md px-2 py-1.5 text-center">
                     <PlusCircleIcon className="w-4 h-4 mr-2" />
                     Edit
                 </button>
