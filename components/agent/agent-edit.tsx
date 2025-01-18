@@ -2,7 +2,6 @@
 
 import { memo, useRef, useState } from "react";
 import { PlayCircle, PlusCircleIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select";
@@ -43,8 +42,6 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
     const { token } = useIsAuthenticated();
 
     const buttonRef = useRef<HTMLButtonElement>(null);
-
-    const router = useRouter();
 
     const handleChange = (name: string, value: any) => {
         setFormData(prev => ({ ...prev, [name]: value }));
