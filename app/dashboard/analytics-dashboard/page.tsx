@@ -57,7 +57,7 @@ const AnalyticsDashboard = () => {
 
     return (
         <motion.div
-            className="ml-16 p-8 bg-white"
+            className="w-full p-8 bg-white"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
