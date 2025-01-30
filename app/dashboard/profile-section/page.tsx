@@ -169,20 +169,14 @@ const ProfileSection = () => {
                         <CardTitle className="text-xl font-medium">Edit Profile</CardTitle>
                     </CardHeader>
                     <CardContent className="p-8">
-                        <div className="flex flex-col justify-between md:flex-row gap-6">
-                            {/* Avatar Section */}
-                            <div className="flex flex-col w-full justify-center items-center space-y-3 md:w-1/3">
-                                <div className="ml-2 w-32 h-32 md:w-64 md:h-64 rounded-full bg-gray-100 flex items-center justify-center">
-                                    {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={32} height={32} />}
-                                    {!formData?.image && <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />}
-                                </div>
-                                <span className="text-sm text-gray-600 break-all text-center">
-                                    {formData?.email || ''}
-                                </span>
-                            </div>
-
-                            {/* Form Section */}
+                        <div className="flex flex-col items-center justify-center md:flex-row gap-6">
                             <div className="flex-1 max-w-5xl">
+                                <div className="flex w-full mb-2 justify-center items-center space-y-3">
+                                    <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center">
+                                        {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={32} height={32} />}
+                                        {!formData?.image && <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />}
+                                    </div>
+                                </div>
                                 <form className="space-y-8">
                                     {/* Name Fields */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -16,10 +16,12 @@ import { AgentFormData } from '@/types';
 import { getAllAgents } from '@/services/agent-service';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { toast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 const DashboardLayout = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
+    const router = useRouter();
     const [agents, setAgents] = useState<AgentFormData[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -37,8 +39,13 @@ const DashboardLayout = () => {
                 const response = await getAllAgents(token);
                 setAgents(response);
                 setLoading(false);
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error fetching agents:', error);
+                if (error.message === "Invalid token") {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    router.push('/');
+                }
                 setLoading(false);
             }
         };
