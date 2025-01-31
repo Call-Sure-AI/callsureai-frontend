@@ -50,6 +50,34 @@ const AgentTraining = () => {
         files: [] as string[],
     });
     const [setupData, setSetupData] = useState<any>(null);
+    const [files, setFiles] = useState<File[]>([]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const newFiles = Array.from(e.target.files);
+            setFiles(prevFiles => [...prevFiles, ...newFiles]);
+            setFormData(prev => ({
+                ...prev,
+                files: [...prev.files, ...newFiles.map(file => file.name)]
+            }));
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (e.dataTransfer.files) {
+            const newFiles = Array.from(e.dataTransfer.files);
+            setFiles(prevFiles => [...prevFiles, ...newFiles]);
+            setFormData(prev => ({
+                ...prev,
+                files: [...prev.files, ...newFiles.map(file => file.name)]
+            }));
+        }
+    };
 
     const handleRoleDescriptionChange = (value: string) => {
         setFormData(prev => ({ ...prev, roleDescription: value }));
@@ -115,25 +143,6 @@ const AgentTraining = () => {
                 return;
             }
 
-            if (formData.advanced_settings && !formData.advanced_settings.apis.length) {
-                formData.advanced_settings.apis.forEach(api => {
-                    if (!api.startsWith('http')) {
-                        toast({
-                            title: "Error",
-                            description: "Please enter a valid URL.",
-                            variant: "destructive",
-                        });
-                        return;
-                    }
-                });
-                toast({
-                    title: "Error",
-                    description: "Please provide at least one API URL.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
             const agentData: AgentFormData = {
                 user_id: user.id,
                 name: setupData.name,
@@ -161,7 +170,6 @@ const AgentTraining = () => {
             sessionStorage.removeItem('agentSetupData');
 
             router.push('/dashboard');
-
         } catch (error: any) {
             toast({
                 title: "Error",
@@ -219,31 +227,39 @@ const AgentTraining = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-4">
-                            <Button
-                                variant="outline"
-                                className="flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                            >
-                                <Upload className="w-4 h-4" />
-                                Upload File 1
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                            >
-                                <Upload className="w-4 h-4" />
-                                Upload File 2
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                            >
-                                <Upload className="w-4 h-4" />
-                                Upload File 3
-                            </Button>
+                            {files.length > 0 && (
+                                <div className="mt-4 w-full">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">Uploaded files:</p>
+                                    <ul className="space-y-1">
+                                        {files.map((file, index) => (
+                                            <Button
+                                                key={`${file.name}-${index}`}
+                                                variant="outline"
+                                                className="flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
+                                            >
+                                                <Upload className="w-4 h-4" />
+                                                {file.name}
+                                            </Button>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
                         {/* Upload Area */}
-                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50">
+                        <div
+                            className="border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50 cursor-pointer"
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById('fileInput')?.click()}
+                        >
+                            <input
+                                id="fileInput"
+                                type="file"
+                                multiple
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
                             <div className="flex flex-col items-center justify-center text-center">
                                 <Upload className="w-12 h-12 text-gray-400 mb-4" />
                                 <h3 className="text-lg font-medium text-gray-700 mb-2">
