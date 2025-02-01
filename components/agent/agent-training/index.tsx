@@ -56,10 +56,6 @@ const AgentTraining = () => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
             setFiles(prevFiles => [...prevFiles, ...newFiles]);
-            setFormData(prev => ({
-                ...prev,
-                files: [...prev.files, ...newFiles.map(file => file.name)]
-            }));
         }
     };
 
@@ -72,10 +68,6 @@ const AgentTraining = () => {
         if (e.dataTransfer.files) {
             const newFiles = Array.from(e.dataTransfer.files);
             setFiles(prevFiles => [...prevFiles, ...newFiles]);
-            setFormData(prev => ({
-                ...prev,
-                files: [...prev.files, ...newFiles.map(file => file.name)]
-            }));
         }
     };
 
@@ -95,6 +87,52 @@ const AgentTraining = () => {
         value = value.trim();
         setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
     };
+
+    const uploadFiles = async (files: File[]) => {
+        try {
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/files/upload-multiple`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to upload files');
+            }
+
+            const newFiles = result.files.map((file: any) => ({
+                name: file.originalname || file.key,
+                url: file.location
+            }));
+
+            setFormData(prev => ({
+                ...prev,
+                files: [...prev.files, ...newFiles]
+            }));
+
+            toast({
+                title: "Success",
+                description: "Files uploaded successfully!",
+            });
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to upload files",
+                variant: "destructive",
+            });
+        }
+    };
+
 
     useEffect(() => {
         const savedData = sessionStorage.getItem('agentSetupData');
@@ -141,6 +179,10 @@ const AgentTraining = () => {
                     variant: "destructive",
                 });
                 return;
+            }
+
+            if (files && files.length > 0) {
+                await uploadFiles(files);
             }
 
             const agentData: AgentFormData = {
