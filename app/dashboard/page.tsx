@@ -124,7 +124,7 @@ const DashboardLayout = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-2xl font-bold mb-4 text-[#0A1E4E]"
                     >
-                        Agents
+                        Your Agents
                     </motion.h1>
 
                     {loading ? (
