@@ -17,13 +17,16 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     MenuIcon,
-    XIcon
+    XIcon,
+    ChevronUpIcon,
+    ChevronDownIcon
 } from "lucide-react";
 import Link from 'next/link';
 
 const Navigation = () => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isAccountsOpen, setIsAccountsOpen] = useState(false);
 
     const menuItems = [
         { icon: <HomeIcon className="w-4 h-4" />, label: 'Home', link: "/dashboard" },
@@ -34,11 +37,14 @@ const Navigation = () => {
     ];
 
     const accountItems = [
-        { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager', link: '/dashboard/access-manager' },
-        { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History', link: '/dashboard/account-history' },
         { icon: <LinkIcon className="w-4 h-4" />, label: 'Integration', link: '/dashboard/integration' },
         { icon: <LifeBuoyIcon className="w-4 h-4" />, label: 'Help', link: '/dashboard/help' },
     ];
+
+    const accounts = [
+        { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager', link: '/dashboard/access-manager' },
+        { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History', link: '/dashboard/account-history' },
+    ]
 
     const sidebarVariants = {
         expanded: {
@@ -127,11 +133,47 @@ const Navigation = () => {
                         variants={contentVariants}
                         initial="visible"
                         animate={isCollapsed ? "hidden" : "visible"}
-                        className="text-sm text-gray-400 mb-2"
+                        className="space-y-2"
                     >
-                        Accounts
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
+                            onClick={() => setIsAccountsOpen(!isAccountsOpen)}
+                        >
+                            <span>Accounts</span>
+                            {isAccountsOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                        </Button>
                     </motion.div>
                 )}
+
+                <AnimatePresence>
+                    {(!isCollapsed && isAccountsOpen) && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-2 pl-2"
+                        >
+                            {accounts.map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <Link href={item.link}>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
+                                        >
+                                            {item.icon}
+                                            <span className="ml-2">{item.label}</span>
+                                        </Button>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 <div className="space-y-2">
                     {accountItems.map((item, index) => (
                         <motion.div
@@ -165,7 +207,6 @@ const Navigation = () => {
         </motion.div>
     );
 
-    // Mobile Menu
     const MobileMenu = () => (
         <>
             {/* Bottom Navigation Bar */}
@@ -218,7 +259,38 @@ const Navigation = () => {
                             </div>
 
                             <div className="space-y-4">
-                                {[...menuItems, ...accountItems].map((item, index) => (
+                                {menuItems.map((item, index) => (
+                                    <Link
+                                        key={index}
+                                        href={item.link}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
+                                        >
+                                            {item.icon}
+                                            <span className="ml-2">{item.label}</span>
+                                        </Button>
+                                    </Link>
+                                ))}
+                                {accounts.map((item, index) => (
+                                    <Link
+                                        key={index}
+                                        href={item.link}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
+                                        >
+                                            {item.icon}
+                                            <span className="ml-2">{item.label}</span>
+                                        </Button>
+                                    </Link>
+                                ))}
+
+                                {accountItems.map((item, index) => (
                                     <Link
                                         key={index}
                                         href={item.link}
