@@ -1,4 +1,4 @@
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/dashboard/sidebar";
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
     return (

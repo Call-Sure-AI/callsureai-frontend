@@ -13,20 +13,22 @@ import {
     ClockIcon,
     LinkIcon,
     LifeBuoyIcon,
-    BellDotIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     MenuIcon,
     XIcon,
     ChevronUpIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    BookUser
 } from "lucide-react";
 import Link from 'next/link';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const Navigation = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAccountsOpen, setIsAccountsOpen] = useState(false);
+    const { user } = useCurrentUser();
 
     const menuItems = [
         { icon: <HomeIcon className="w-4 h-4" />, label: 'Home', link: "/dashboard" },
@@ -82,8 +84,18 @@ const Navigation = () => {
                     <ChevronLeftIcon className="w-4 h-4" />
                 )}
             </Button>
+            {
+                !isCollapsed &&
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8 flex w-full justify-between items-center"
+                >
+                    <h1 className="text-sm md:text-lg font-bold mb-4 text-[#0A1E4E] text-ellipsis">Good Afternoon, {user?.name}</h1>
+                </motion.div>
+            }
 
-            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+            {/* <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                 {!isCollapsed && (
                     <motion.h1
                         variants={contentVariants}
@@ -94,8 +106,7 @@ const Navigation = () => {
                         Dashboard
                     </motion.h1>
                 )}
-                <BellDotIcon className="w-4 h-4 text-[#0A1E4E] cursor-pointer" />
-            </div>
+            </div> */}
 
             <div className="space-y-2">
                 {menuItems.map((item, index) => (
@@ -133,14 +144,16 @@ const Navigation = () => {
                         variants={contentVariants}
                         initial="visible"
                         animate={isCollapsed ? "hidden" : "visible"}
-                        className="space-y-2"
                     >
                         <Button
                             variant="ghost"
                             className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
                             onClick={() => setIsAccountsOpen(!isAccountsOpen)}
                         >
-                            <span>Accounts</span>
+                            <div className='flex justify-start items-center'>
+                                <BookUser className='w-4 h-4' />
+                                <span className='ml-4'>Accounts</span>
+                            </div>
                             {isAccountsOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
                         </Button>
                     </motion.div>
