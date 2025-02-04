@@ -2,7 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Search } from "lucide-react"
 import { ChevronRight } from 'lucide-react';
 
 const buttonVariants = cva(
@@ -75,11 +75,12 @@ export interface ButtonProps
   VariantProps<typeof buttonVariants> {
   asChild?: boolean
   showArrow?: boolean
+  showSearchIcon?: boolean
   children?: React.ReactNode
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, showArrow = false, children, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, showArrow = false, showSearchIcon = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
 
     if (variant === 'animated') {
@@ -92,9 +93,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <span className="flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
             {children} {showArrow && <ArrowRight className="h-4 w-4" />}
           </span>
-          <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
-            <ArrowRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
-          </span>
+          {
+            showArrow &&
+            <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
+              <ArrowRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+            </span>
+          }
+          {
+            showSearchIcon &&
+            <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
+              <Search className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+            </span>
+          }
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div
               className="absolute h-[300%] w-[1px] bg-gradient-to-b from-transparent to-transparent -skew-x-12 opacity-10"
