@@ -162,7 +162,7 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <button ref={buttonRef} className="text-white flex justify-center items-center bg-[#0A1E4E] hover:bg-[#0A1E4E] text-sm font-medium rounded-md px-2 py-1.5 text-center">
+                <button ref={buttonRef} className="text-[#0A1E4E] flex justify-center items-center bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 text-sm font-medium rounded-md px-2 py-1.5 text-center">
                     <PlusCircleIcon className="w-4 h-4 mr-2" />
                     Edit
                 </button>

@@ -75,7 +75,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                         <AgentEdit {...agent} />
                                         <Button
                                             onClick={() => router.push("/dashboard/chat")}
-                                            className="bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 text-[#0A1E4E] transition-colors duration-200"
+                                            className="bg-[#0A1E4E] hover:bg-[#0A1E4E] text-white transition-colors duration-200"
                                             size="sm"
                                         >
                                             Test Agent
