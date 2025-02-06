@@ -43,7 +43,7 @@ const FAQ: React.FC = () => {
         },
         {
             question: 'How does Callsure.ai work? Does it offer real-time call monitoring?',
-            answer: 'Callsure.ai uses advanced AI to provide natural, real-time responses tailored to your business and integrates seamlessly with your CRM. Supervisors can monitor live calls and provide immediate feedback when needed.',
+            answer: 'Yes, we at callsure.ai uses advanced AI to provide natural, real-time responses tailored to your business and integrates seamlessly with your CRM. Supervisors can monitor live calls and provide immediate feedback when needed.',
             category: 'About Us'
         },
         {
