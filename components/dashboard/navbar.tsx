@@ -33,9 +33,9 @@ const Navbar = () => {
             animate="visible"
             variants={navAnimation}
             transition={{ duration: 0.5 }}
-            className="w-full py-1 sm:py-1 px-4 sm:px-6 bg-white/80 backdrop-blur-md border-b-2 border-gray-100"
+            className="w-full py-1 bg-white/80 backdrop-blur-md border-b-2 border-gray-100"
         >
-            <div className="max-w-7xl mx-auto">
+            <div className="mx-12">
                 <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group my-3">
                         <motion.div
@@ -55,7 +55,7 @@ const Navbar = () => {
                         <motion.span
                             variants={itemAnimation}
                             transition={{ type: "spring", stiffness: 400 }}
-                            className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
+                            className="text-2xl hidden md:block sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
                             Callsure
                         </motion.span>
                     </Link>
@@ -68,7 +68,7 @@ const Navbar = () => {
                         </div>
                         <input type="search" id="default-search" className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Mockups, Logos..." required />
                         <Button
-                            className="absolute end-2.5 bottom-2.5 font-semibold w-full sm:w-auto text-lg"
+                            className="absolute end-2.5 bottom-2.5 font-semibold hidden md:block w-full sm:w-auto text-lg"
                             variant="animated"
                             size="sm"
                             showSearchIcon
@@ -81,8 +81,8 @@ const Navbar = () => {
                     <div className="flex items-center gap-4">
                         {user && user?.email ? (
                             <>
+                                <BellDotIcon className="w-4 h-4 md:w-6 md:h-6 text-[#0A1E4E] cursor-pointer" />
                                 <UserProfileIcon />
-                                <BellDotIcon className="ml-0 w-4 h-4 md:ml-4 md:w-6 md:h-6 text-[#0A1E4E] cursor-pointer" />
                             </>
                         ) : (
                             <motion.div

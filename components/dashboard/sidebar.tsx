@@ -64,14 +64,23 @@ const Navigation = () => {
         hidden: { opacity: 0, x: -20 }
     };
 
-    // Desktop Sidebar
     const DesktopSidebar = () => (
         <motion.div
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-8 border-r h-screen hidden md:block"
+            className="relative z-20 bg-white p-4 space-y-2 border-r h-screen hidden md:block"
         >
+            {
+                !isCollapsed &&
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8 space-y-2 pl-2 flex w-full justify-between items-center border-b-[1px] border-gray-200"
+                >
+                    <h1 className="text-xs text-wrap font-medium mb-4 text-[#0A1E4E] text-ellipsis md:text-sm ">Good Afternoon, <span className="font-bold">{user?.name}</span></h1>
+                </motion.div>
+            }
             <Button
                 variant="ghost"
                 size="icon"
@@ -84,29 +93,6 @@ const Navigation = () => {
                     <ChevronLeftIcon className="w-4 h-4" />
                 )}
             </Button>
-            {
-                !isCollapsed &&
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8 flex w-full justify-between items-center"
-                >
-                    <h1 className="text-sm md:text-lg font-bold mb-4 text-[#0A1E4E] text-ellipsis">Good Afternoon, {user?.name}</h1>
-                </motion.div>
-            }
-
-            {/* <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-                {!isCollapsed && (
-                    <motion.h1
-                        variants={contentVariants}
-                        initial="visible"
-                        animate={isCollapsed ? "hidden" : "visible"}
-                        className="text-xl text-[#0A1E4E] font-bold"
-                    >
-                        Dashboard
-                    </motion.h1>
-                )}
-            </div> */}
 
             <div className="space-y-2">
                 {menuItems.map((item, index) => (
@@ -222,7 +208,6 @@ const Navigation = () => {
 
     const MobileMenu = () => (
         <>
-            {/* Bottom Navigation Bar */}
             <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t md:hidden">
                 <div className="flex justify-between items-center px-4 py-2">
                     {menuItems.slice(0, 4).map((item, index) => (
@@ -249,7 +234,6 @@ const Navigation = () => {
                 </div>
             </div>
 
-            {/* Full Screen Mobile Menu */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div
