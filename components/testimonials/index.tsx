@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useAnimationControls } from "framer-motion";
-import Image from "next/image";
+// import Image from "next/image";
 import { memo, useEffect, useState, useCallback } from "react";
 import { Quote } from "lucide-react";
 
@@ -64,7 +64,7 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
         <Quote className="text-blue-100 absolute top-4 right-4 w-8 h-8" />
 
         <div className="flex items-center gap-4 mb-6 relative">
-            <div className="relative w-16 h-16 rounded-full ring-4 ring-blue-50">
+            {/* <div className="relative w-16 h-16 rounded-full ring-4 ring-blue-50">
                 <Image
                     src={testimonial.avatar}
                     alt={testimonial.name}
@@ -72,7 +72,7 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
                     className="rounded-full object-cover"
                     priority
                 />
-            </div>
+            </div> */}
             <div>
                 <h3 className="text-lg font-semibold text-slate-800">{testimonial.name}</h3>
                 <p className="text-sm text-[#3362A6] font-medium">{testimonial.title}</p>
@@ -186,7 +186,7 @@ const TestimonialSection = () => {
         setIsTransitioning(true);
 
         const nextPage = (currentPage + 1) % totalPages;
-        
+
         await controls.start({
             transform: `translateX(-${nextPage * (100 / totalPages)}%)`,
             transition: { duration: 0.8, ease: "easeInOut" }
@@ -250,10 +250,10 @@ const TestimonialSection = () => {
                             pageIndex * itemsPerPage,
                             (pageIndex + 1) * itemsPerPage
                         );
-                        
+
                         return (
-                            <div 
-                                key={pageIndex} 
+                            <div
+                                key={pageIndex}
                                 className="w-full"
                                 style={{ flex: `0 0 ${100 / totalPages}%` }}
                             >
@@ -277,9 +277,8 @@ const TestimonialSection = () => {
                             key={index}
                             onClick={() => handleDotClick(index)}
                             disabled={isTransitioning}
-                            className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                                currentPage === index ? "bg-[#3362A6]" : "bg-blue-200"
-                            }`}
+                            className={`w-3 h-3 rounded-full transition-colors duration-300 ${currentPage === index ? "bg-[#3362A6]" : "bg-blue-200"
+                                }`}
                             aria-label={`Go to slide ${index + 1}`}
                         />
                     ))}
