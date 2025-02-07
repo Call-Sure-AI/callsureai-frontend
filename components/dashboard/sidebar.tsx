@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { use, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import {
@@ -64,6 +64,18 @@ const Navigation = () => {
         hidden: { opacity: 0, x: -20 }
     };
 
+    const getTimeBasedGreeting = useCallback(() => {
+        const hour = new Date().getHours();
+
+        if (hour >= 5 && hour < 12) {
+            return 'Good Morning';
+        } else if (hour >= 12 && hour < 17) {
+            return 'Good Afternoon';
+        } else {
+            return 'Good Evening';
+        }
+    }, []);
+
     const DesktopSidebar = () => (
         <motion.div
             initial="expanded"
@@ -78,7 +90,7 @@ const Navigation = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8 space-y-2 pl-2 flex w-full justify-between items-center border-b-[1px] border-gray-200"
                 >
-                    <h1 className="text-xs text-wrap font-medium mb-4 text-[#0A1E4E] text-ellipsis md:text-sm ">Good Afternoon, <span className="font-bold">{user?.name}</span></h1>
+                    <h1 className="text-xs text-wrap font-medium mb-4 text-[#0A1E4E] text-ellipsis md:text-sm ">{getTimeBasedGreeting()}, <span className="font-bold">{user?.name}</span></h1>
                 </motion.div>
             }
             <Button
