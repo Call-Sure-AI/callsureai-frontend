@@ -6,17 +6,13 @@ import { CircleUser } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 
 export const UserProfileIcon = () => {
-    const router = useRouter();
     const { user } = useCurrentUser();
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.push('/');
-    }
+    const { logout, isLoggingOut } = useAuth({
+        redirectPath: '/'
+    });
 
     return (
         <DropdownMenu>
@@ -53,8 +49,12 @@ export const UserProfileIcon = () => {
                     <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                    Logout
+                <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer"
+                    disabled={isLoggingOut}
+                >
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

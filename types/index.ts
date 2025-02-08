@@ -100,4 +100,5 @@ export interface ProfileFormData {
     state: string;
     zip_code: string;
     image: string;
+    logo?: string;
 }

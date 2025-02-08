@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { UserIcon } from "lucide-react";
-import { useRouter } from 'next/navigation';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,11 +14,15 @@ import { createOrUpdateCompany } from '@/services/company-service';
 
 import { ProfileFormData } from '@/types';
 import { ProtectedRoute } from '@/components/protected-route';
+import ProfileImageUpload from '@/components/settings/image-upload';
+import { useAuth } from '@/hooks/use-auth';
 
 const ProfileSection = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
-    const router = useRouter();
+    const { logout } = useAuth({
+        redirectPath: '/',
+    });
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<ProfileFormData>({
         first_name: '',
@@ -34,7 +35,12 @@ const ProfileSection = () => {
         state: '',
         zip_code: '',
         image: '',
+        logo: '',
     });
+
+    if (!token) {
+        logout();
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -84,11 +90,11 @@ const ProfileSection = () => {
             setLoading(true);
 
             await createOrUpdateCompany({ ...formData, userId: user?.id || '' }, token);
+
             toast({
                 title: "Success",
                 description: "Company profile updated successfully!",
             });
-            router.push('/dashboard');
         } catch (error: any) {
             toast({
                 title: "Error",
@@ -110,8 +116,11 @@ const ProfileSection = () => {
                     },
                 });
 
+
+
                 if (response.ok) {
                     const companyData = await response.json();
+
                     setFormData({
                         first_name: user?.name?.split(' ')[0] || '',
                         last_name: user?.name?.split(' ')[1] || '',
@@ -173,8 +182,11 @@ const ProfileSection = () => {
                             <div className="flex-1 max-w-5xl">
                                 <div className="flex w-full mb-2 justify-center items-center space-y-3">
                                     <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center">
-                                        {formData.image && <Image src={formData.image} alt="user-image" className='w-full h-full rounded-full' width={32} height={32} />}
-                                        {!formData?.image && <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />}
+                                        <ProfileImageUpload
+                                            currentImage={formData.logo ?? formData.image}
+                                            onImageUpdate={(imageUrl) => setFormData(prev => ({ ...prev, logo: imageUrl }))}
+                                            token={token as string}
+                                        />
                                     </div>
                                 </div>
                                 <form className="space-y-8">

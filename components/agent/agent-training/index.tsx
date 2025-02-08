@@ -300,6 +300,7 @@ const AgentTraining = () => {
                                 type="file"
                                 multiple
                                 className="hidden"
+                                accept='application/pdf'
                                 onChange={handleFileChange}
                             />
                             <div className="flex flex-col items-center justify-center text-center">

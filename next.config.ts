@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    domains: [`${process.env.AWS_OBJECT_URL}`],
     remotePatterns: [
       {
         protocol: 'https',
