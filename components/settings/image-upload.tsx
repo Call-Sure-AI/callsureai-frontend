@@ -59,14 +59,6 @@ const ProfileImageUpload = ({
                 throw new Error(data.error || 'Failed to upload image');
             }
 
-            const userStr = localStorage.getItem('user');
-
-            if (userStr) {
-                const user = JSON.parse(userStr);
-                user.image = data.url;
-                localStorage.setItem('user', JSON.stringify(user));
-            }
-
             onImageUpdate(data.url);
             toast({
                 title: "Success",

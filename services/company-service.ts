@@ -15,6 +15,7 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
                 phone_number: formData.phone,
                 address: address,
                 user_id: formData.userId,
+                logo: formData.logo,
             }),
         });
 

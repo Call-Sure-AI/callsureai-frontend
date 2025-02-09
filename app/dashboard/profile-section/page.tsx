@@ -116,8 +116,6 @@ const ProfileSection = () => {
                     },
                 });
 
-
-
                 if (response.ok) {
                     const companyData = await response.json();
 

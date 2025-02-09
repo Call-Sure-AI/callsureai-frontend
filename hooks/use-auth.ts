@@ -37,9 +37,11 @@ export const useAuth = (options: UseAuthOptions = {}) => {
     }, []);
 
     const logout = useCallback(async () => {
-        setState(prev => ({ ...prev, isLoggingOut: true, error: null }));
+        if (state.isLoggingOut) return;
+
 
         try {
+            setState({ isLoggingOut: true, error: null });
             clearAuthData();
 
             await handleGoogleLogout();
@@ -68,7 +70,10 @@ export const useAuth = (options: UseAuthOptions = {}) => {
 
             options.onLogoutError?.(error as Error);
         } finally {
-            setState(prev => ({ ...prev, isLoggingOut: false }));
+            setState({
+                isLoggingOut: false,
+                error: null
+            });
         }
     }, [router, clearAuthData, handleGoogleLogout, options]);
 
