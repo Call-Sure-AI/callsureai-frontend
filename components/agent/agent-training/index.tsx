@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -52,6 +52,10 @@ const AgentTraining = () => {
     const [setupData, setSetupData] = useState<any>(null);
     const [files, setFiles] = useState<File[]>([]);
 
+    const handleDeleteFile = (indexToDelete: number) => {
+        setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToDelete));
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
@@ -99,7 +103,6 @@ const AgentTraining = () => {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
             });
@@ -110,10 +113,7 @@ const AgentTraining = () => {
                 throw new Error(result.error || 'Failed to upload files');
             }
 
-            const newFiles = result.files.map((file: any) => ({
-                name: file.originalname || file.key,
-                url: file.location
-            }));
+            const newFiles = result.files.map((file: any) => file.url) as string[];
 
             setFormData(prev => ({
                 ...prev,
@@ -125,11 +125,7 @@ const AgentTraining = () => {
                 description: "Files uploaded successfully!",
             });
         } catch (error) {
-            toast({
-                title: "Error",
-                description: error instanceof Error ? error.message : "Failed to upload files",
-                variant: "destructive",
-            });
+            throw error;
         }
     };
 
@@ -185,6 +181,15 @@ const AgentTraining = () => {
                 await uploadFiles(files);
             }
 
+            if (!formData.files || formData.files.length === 0) {
+                toast({
+                    title: "Error",
+                    description: "Please upload at least one file.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
             const agentData: AgentFormData = {
                 user_id: user.id,
                 name: setupData.name,
@@ -221,7 +226,7 @@ const AgentTraining = () => {
         }
     };
     return (
-        <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="w-full p-6 flex items-center justify-center">
             <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
                 <CardHeader className="border-b border-gray-100 pb-6">
                     <div className="flex items-center justify-between">
@@ -274,14 +279,22 @@ const AgentTraining = () => {
                                     <p className="text-sm font-medium text-gray-700 mb-2">Uploaded files:</p>
                                     <ul className="space-y-1">
                                         {files.map((file, index) => (
-                                            <Button
-                                                key={`${file.name}-${index}`}
-                                                variant="outline"
-                                                className="flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                                            >
-                                                <Upload className="w-4 h-4" />
-                                                {file.name}
-                                            </Button>
+                                            <div key={`${file.name}-${index}`} className="flex items-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    className="flex-1 flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
+                                                >
+                                                    <Upload className="w-4 h-4" />
+                                                    {file.name}
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => handleDeleteFile(index)}
+                                                    className="p-2 hover:bg-red-100 hover:text-red-600"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         ))}
                                     </ul>
                                 </div>

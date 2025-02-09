@@ -1,12 +1,16 @@
+import ActivityFeed from "@/components/dashboard/activity-bar";
+import Navbar from "@/components/dashboard/navbar";
 import Sidebar from "@/components/dashboard/sidebar";
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex h-screen text-black">
-            <Sidebar />
-            <div className="ml-16 flex-1 p-8">
+        <>
+            <Navbar />
+            <div className="min-h-screen relative flex">
+                <Sidebar />
                 {children}
+                <ActivityFeed />
             </div>
-        </div>
+        </>
     );
 }

@@ -158,7 +158,7 @@ const AgentSetup = () => {
     }
 
     return (
-        <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="w-full p-6 flex items-center justify-center">
             <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
                 <CardHeader className="border-b border-gray-100 pb-6">
                     <div className="flex items-center gap-3">
