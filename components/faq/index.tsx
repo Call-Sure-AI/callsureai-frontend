@@ -73,7 +73,7 @@ const FAQ: React.FC = () => {
         },
         {
             question: 'Can I customize the AI voice assistant?',
-            answer: "Fully! You can customize the assistant’s voice, tone, language, and gender, and even upload your customer support scripts to ensure alignment with your brand’s personality.",
+            answer: "Definitely! You can customize the assistant’s voice, tone, language, and gender, and even upload your customer support scripts to ensure alignment with your brand’s personality.",
             category: 'Our Service'
         },
         {
@@ -97,10 +97,15 @@ const FAQ: React.FC = () => {
             category: 'Our Plan'
         },
         {
+            question: "What if there is a technical issue? Will we get a refund?",
+            answer: "If you encounter a technical issue, we will do our best to resolve it as quickly as possible. Please contact our support team for assistance.",
+            category: 'Our Plan'
+        },
+        {
             question: 'How long does it take to set up Callsure.ai?',
             answer: 'Setting up Callsure.ai is quick and easy. Most businesses can configure and integrate their AI voice assistant within a few hours.',
             category: 'Our Plan'
-        }
+        },
     ];
 
     const filteredQuestions = questions

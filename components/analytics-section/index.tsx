@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
                 >
                     <ParallaxText speed={-0.5}>
                         <motion.div
-                            className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 text-sm text-blue-600 mb-8"
+                            className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 text-sm text-blue-600"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{
@@ -131,7 +131,7 @@ export default function AnalyticsPage() {
                     </ParallaxText>
 
                     <ScrollReveal>
-                        <h1 className="text-4xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text font-boldmax-w-5xl mx-auto">
+                        <h1 className="text-4xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text max-w-5xl mx-auto">
                             From <GradientText>Lead Tracking</GradientText> To <GradientText>Analytics</GradientText>, Everything Your Team <GradientText>Needs</GradientText> To <GradientText>Succeed</GradientText>.
                         </h1>
                     </ScrollReveal>
