@@ -6,6 +6,14 @@ import { Activity, Bot, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
+const Dot = ({ background = 'bg-green-500' }) => (
+    <span className="flex h-3 w-3">
+        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${background}`}></span>
+        <span className={`relative inline-flex rounded-full h-3 w-3 ${background}`}></span>
+    </span>
+)
+
+
 export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
     const { user } = useCurrentUser();
     const router = useRouter();
@@ -35,7 +43,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     {agents.map((agent) => (
                         <Card
                             key={agent.id}
@@ -44,10 +52,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                             <CardContent className="p-6 relative h-full">
                                 {agent.is_active && (
                                     <div className="absolute top-3 right-3 z-10">
-                                        <span className="flex h-3 w-3">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                                        </span>
+                                        <Dot />
                                     </div>
                                 )}
                                 <div className="flex flex-col h-full space-y-6">
@@ -58,28 +63,32 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                             </div>
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h2 className="text-lg font-semibold text-gray-900 group-hover:text-[#0A1E4E] transition-colors duration-200 truncate">
-                                                {agent.name}
-                                            </h2>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Activity className={`w-4 h-4 transition-colors duration-200 ${agent.is_active ? 'text-green-500' : 'text-gray-400'
-                                                    }`} />
-                                                <span className={`text-xs font-medium transition-colors duration-200 ${agent.is_active ? 'text-green-500' : 'text-gray-400'
-                                                    }`}>
-                                                    {agent.is_active ? 'Online' : 'Offline'}
-                                                </span>
+                                            <div className="flex flex-col justify-start items-start gap-2 mt-1 text-sm text-[#0A1E4E]/70">
+                                                <h2 className="text-lg font-semibold text-gray-900 group-hover:text-[#0A1E4E] transition-colors duration-200 truncate">
+                                                    {agent.name}
+                                                </h2>
+                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent.additional_context.tone.substring(0, 1).toUpperCase() + agent.additional_context.tone.substring(1)}</span>
+                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent.additional_context.gender.substring(0, 1).toUpperCase() + agent.additional_context.gender.substring(1)}</span>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center justify-between border-t border-gray-100">
-                                        <AgentEdit {...agent} />
-                                        <Button
-                                            onClick={() => router.push("/dashboard/chat")}
-                                            className="bg-[#0A1E4E] hover:bg-[#0A1E4E] text-white transition-colors duration-200"
-                                            size="sm"
-                                        >
-                                            Test Agent
-                                        </Button>
+                                        <div className="flex justify-center my-auto items-center gap-2">
+                                            <Activity className={`w-4 h-4 transition-colors duration-200 ${agent.is_active ? 'text-green-500' : 'text-gray-400'
+                                                }`} />
+                                            <span className={`text-xs font-medium transition-colors duration-200 ${agent.is_active ? 'text-green-500' : 'text-gray-400'
+                                                }`}>
+                                                {agent.is_active ? 'Online' : 'Offline'}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col items-center justify-between border-t border-gray-100">
+                                            <Button
+                                                onClick={() => router.push("/dashboard/chat")}
+                                                className="bg-[#0A1E4E] hover:bg-[#0A1E4E] mb-4 text-white transition-colors duration-200"
+                                                size="sm"
+                                            >
+                                                Test Agent
+                                            </Button>
+                                            <AgentEdit {...agent} />
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>

@@ -3,12 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { PlusCircleIcon } from "lucide-react";
+import { PlusCircleIcon, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AgentSection } from '@/components/agent/agent-section';
 import { ProtectedRoute } from '@/components/protected-route';
+import AgentPerformanceChart from '@/components/charts/agent-performance-chat';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { AgentFormData } from '@/types';
@@ -54,19 +55,19 @@ const DashboardLayout = () => {
     }, [user, token]);
 
     const statsCards = [
-        { label: 'Account Balance', value: '$1,234' },
-        { label: 'Total Call Cost', value: '$567' },
-        { label: 'Completed Calls', value: '89' },
-        { label: 'Total Call Duration', value: '45h' },
+        { label: 'Total Calls', value: '5,672', stat: "40% increase", trend: "up" },
+        { label: 'Completed Calls', value: '4,987', stat: "400 active calls", trend: "up" },
+        { label: 'Resolution Rate', value: '89%', stat: "+2.5% increase", trend: "up" },
+        { label: 'Total Bookings', value: '4,510', stat: "32.0% increase", trend: "up" },
+        { label: 'Credit Balance', value: '$1,234', stat: "Can be increased by $500", trend: "neutral" },
     ];
 
     return (
         <ProtectedRoute>
-            <div className="flex w-full h-screen bg-white text-black">
-                {/* Main Content */}
-                <div className="flex-1 p-6 md:p-8 bg-white">
-                    {/* Stats Cards */}
-                    <div className="grid grid-cold-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="min-h-screen w-full bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Stats Cards Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
                         {statsCards.map((stat, index) => (
                             <motion.div
                                 key={index}
@@ -74,53 +75,77 @@ const DashboardLayout = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                             >
-                                <Card className="bg-white transition-colors">
-                                    <CardContent className="p-4">
-                                        <div className="text-sm font-bold text-[#0A1E4E]">{stat.label}</div>
-                                        <div className="text-xl font-bold mt-1 text-black">{stat.value}</div>
+                                <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+                                    <CardContent className="p-6">
+                                        <div className="flex flex-col space-y-2">
+                                            <div className="text-sm font-medium text-[#0A1E4E]/80">{stat.label}</div>
+                                            <div className="text-2xl font-bold text-[#0A1E4E]">{stat.value}</div>
+                                            <div className={`text-sm ${stat.trend === 'up' ? 'text-green-600' :
+                                                stat.trend === 'down' ? 'text-red-600' :
+                                                    'text-gray-600'
+                                                }`}>
+                                                {stat.stat}
+                                            </div>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </motion.div>
                         ))}
                     </div>
 
-                    {/* Agent Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-8"
-                    >
-                        <Card className="bg-white">
-                            <CardContent className="p-6">
-                                <div className="flex flex-col md:flex-row items-center justify-between">
-                                    <div>
-                                        <h2 className="text-lg font-semibold mb-2 text-black">Set up a new agent - Start</h2>
-                                        <p className="text-[#0A1E4E]">Manage your agents here</p>
+                    {/* Main Content Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Left Column - Performance Chart */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="w-full"
+                        >
+                            <AgentPerformanceChart />
+                        </motion.div>
+
+                        {/* Right Column - Agent Management */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="w-full space-y-6"
+                        >
+                            {/* Add Agent Card */}
+                            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+                                <CardContent className="p-6">
+                                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
+                                        <div className="space-y-2">
+                                            <h2 className="text-xl font-semibold text-[#0A1E4E]">Set up a new agent</h2>
+                                            <p className="text-[#0A1E4E]/70">Create and manage your AI agents</p>
+                                        </div>
+                                        <Link href="/agent/creation">
+                                            <Button className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white shadow-sm">
+                                                <PlusCircleIcon className="w-4 h-4 mr-2" />
+                                                Add Agent
+                                            </Button>
+                                        </Link>
                                     </div>
-                                    <Link href="/agent/creation">
-                                        <Button className="bg-[#0A1E4E] mt-4 text-white">
-                                            <PlusCircleIcon className="w-4 h-4 mr-2" />
-                                            Add Agent
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
+                                </CardContent>
+                            </Card>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-2xl font-bold mb-4 text-[#0A1E4E]"
-                    >
-                        Your Agents
-                    </motion.h1>
+                            {/* Agents List Section */}
+                            <div className="space-y-4">
+                                <h1 className="text-2xl font-bold text-[#0A1E4E]">
+                                    Your Agents
+                                </h1>
 
-                    {loading ? (
-                        <div>Loading...</div>
-                    ) : (
-                        <AgentSection agents={agents} />
-                    )}
+                                {loading ? (
+                                    <div className="flex items-center justify-center h-48 bg-white rounded-lg">
+                                        <Loader2 className="w-8 h-8 animate-spin text-[#0A1E4E]" />
+                                    </div>
+                                ) : (
+                                    <AgentSection agents={agents} />
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
         </ProtectedRoute>

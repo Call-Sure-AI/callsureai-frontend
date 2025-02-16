@@ -79,7 +79,7 @@ const ActivityFeed = () => {
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-8 border-l h-screen hidden md:block"
+            className="relative right-0 z-20 bg-white p-4 space-y-8 border-l h-screen hidden md:block"
         >
             <Button
                 variant="ghost"
