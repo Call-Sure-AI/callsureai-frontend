@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import {
@@ -19,28 +19,46 @@ import {
     XIcon,
     ChevronUpIcon,
     ChevronDownIcon,
-    BookUser
+    BookUser,
+    Settings
 } from "lucide-react";
 import Link from 'next/link';
+
 import { useCurrentUser } from '@/hooks/use-current-user';
 
+const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) {
+        return 'Good Morning';
+    } else if (hour >= 12 && hour < 17) {
+        return 'Good Afternoon';
+    } else {
+        return 'Good Evening';
+    }
+};
+
 const Navigation = () => {
+    const { user } = useCurrentUser();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAccountsOpen, setIsAccountsOpen] = useState(false);
-    const { user } = useCurrentUser();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const menuItems = [
         { icon: <HomeIcon className="w-4 h-4" />, label: 'Home', link: "/dashboard" },
-        { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', link: '/dashboard/profile-section' },
         { icon: <BarChart3Icon className="w-4 h-4" />, label: 'Analytics', link: '/dashboard/analytics-dashboard' },
         { icon: <PhoneCallIcon className="w-4 h-4" />, label: 'Call History', link: '/dashboard/call-history-dashboard' },
     ];
 
     const accountItems = [
         { icon: <LinkIcon className="w-4 h-4" />, label: 'Integration', link: '/dashboard/integration' },
-        { icon: <CreditCardIcon className="w-4 h-4" />, label: 'Payments', link: '/dashboard/payments-section' },
         { icon: <LifeBuoyIcon className="w-4 h-4" />, label: 'Help', link: '/dashboard/help' },
+    ];
+
+    const settings = [
+        { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', link: '/dashboard/profile-section' },
+        { icon: <CreditCardIcon className="w-4 h-4" />, label: 'Payments', link: '/dashboard/payments-section' },
     ];
 
     const accounts = [
@@ -50,7 +68,7 @@ const Navigation = () => {
 
     const sidebarVariants = {
         expanded: {
-            width: "16rem",
+            width: "20rem",
             transition: { duration: 0.3 }
         },
         collapsed: {
@@ -64,17 +82,6 @@ const Navigation = () => {
         hidden: { opacity: 0, x: -20 }
     };
 
-    const getTimeBasedGreeting = useCallback(() => {
-        const hour = new Date().getHours();
-
-        if (hour >= 5 && hour < 12) {
-            return 'Good Morning';
-        } else if (hour >= 12 && hour < 17) {
-            return 'Good Afternoon';
-        } else {
-            return 'Good Evening';
-        }
-    }, []);
 
     const DesktopSidebar = () => (
         <motion.div
@@ -166,6 +173,54 @@ const Navigation = () => {
                             className="space-y-2 pl-2"
                         >
                             {accounts.map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <Link href={item.link}>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
+                                        >
+                                            {item.icon}
+                                            <span className="ml-2">{item.label}</span>
+                                        </Button>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                {!isCollapsed && (
+                    <motion.div
+                        variants={contentVariants}
+                        initial="visible"
+                        animate={isCollapsed ? "hidden" : "visible"}
+                    >
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
+                            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                        >
+                            <div className='flex justify-start items-center'>
+                                <Settings className='w-4 h-4' />
+                                <span className='ml-4'>Settings</span>
+                            </div>
+                            {isSettingsOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                        </Button>
+                    </motion.div>
+                )}
+
+                <AnimatePresence>
+                    {(!isCollapsed && isSettingsOpen) && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-2 pl-2"
+                        >
+                            {settings.map((item, index) => (
                                 <motion.div
                                     key={index}
                                     whileHover={{ scale: 1.02 }}

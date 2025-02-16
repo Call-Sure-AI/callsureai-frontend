@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 interface Message {
     sender: 'user' | 'server';
@@ -61,93 +61,40 @@ const Chat = () => {
             msgId: 2,
         }
     ]);
-
-    const [isListening, setIsListening] = useState<boolean>(false);
     const [transcript, setTranscript] = useState<string>('');
-    const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
+    const [isListening, setIsListening] = useState<boolean>(false);
+    const [recognition, setRecognition] = useState<SpeechRecognitionType>();
     const [error, setError] = useState<string>('');
 
-    // Initialize speech recognition with fallbacks
-    useEffect(() => {
-        const initializeSpeechRecognition = (): void => {
-            // Define different speech recognition implementations
-            window.SpeechRecognition = window.SpeechRecognition ||
-                window.webkitSpeechRecognition ||
-                window.mozSpeechRecognition ||
-                window.msSpeechRecognition;
-
-            if (window.SpeechRecognition) {
-                const recognition = new window.SpeechRecognition();
-
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = 'en-US';
-
-                recognition.onstart = () => {
-                    setIsListening(true);
-                    setError('');
-                };
-
-                recognition.onend = () => {
-                    setIsListening(false);
-                };
-
-                recognition.onresult = (event: SpeechRecognitionEvent) => {
-                    const current = event.resultIndex;
-                    const transcript = event.results[current][0].transcript;
-                    setTranscript(transcript);
-                };
-
-                recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-                    console.error('Speech recognition error:', event.error);
-                    setError('Speech recognition failed. Please try again.');
-                    setIsListening(false);
-                };
-
-                setRecognition(recognition);
-            } else {
-                setError('Speech recognition is not supported in this browser. Please try Chrome, Edge, or Safari.');
-            }
-        };
-
-        initializeSpeechRecognition();
-
-        return () => {
-            if (recognition) {
-                recognition.stop();
-            }
-        };
-    }, [recognition]);
-
-    const toggleListening = useCallback((): void => {
-        if (!recognition) {
-            setError('Speech recognition is not supported in this browser.');
-            return;
-        }
-
+    const toggleListening = useCallback(() => {
         if (isListening) {
-            recognition.stop();
-            if (transcript.trim()) {
-                setMessages(prev => [...prev, {
-                    sender: 'user',
-                    content: transcript.trim(),
-                    msgId: prev.length + 1,
-                }]);
-                setTranscript('');
-            }
+            recognition?.stop();
+            setIsListening(false);
         } else {
-            setTranscript('');
-            recognition.start();
+            recognition?.start();
+            setIsListening(true);
         }
-    }, [recognition, isListening, transcript]);
+    }, [isListening, recognition]);
 
-    const endCall = (): void => {
-        if (recognition) {
-            recognition.stop();
-        }
-        setTranscript('');
+    const endCall = useCallback(() => {
+        recognition?.stop();
         setIsListening(false);
-    };
+        setError('');
+        setTranscript('');
+        setRecognition(undefined);
+        setMessages([
+            {
+                sender: 'user',
+                content: 'Hello there! How can I assist you today?',
+                msgId: 1,
+            },
+            {
+                sender: 'server',
+                content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
+                msgId: 2,
+            }
+        ]);
+    }, [recognition]);
 
     return (
         <div className="flex justify-center items-center w-full h-screen bg-slate-100">
