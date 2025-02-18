@@ -21,6 +21,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // animated: "rounded-full group relative bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] hover:from-[#0A2260]/90 hover:to-[#0A4EF3]/90 transition-all duration-300 overflow-hidden text-white",
         animated: "rounded-full group relative bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] hover:from-[#162a47]/90 hover:via-[#3362A6]/90 hover:to-[#162a47]/90 transition-all duration-300 overflow-hidden text-white",
+        primary: "bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white shadow-sm"
       },
       size: {
         default: "h-10 px-4 py-2",

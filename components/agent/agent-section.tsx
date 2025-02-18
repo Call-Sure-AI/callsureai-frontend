@@ -82,7 +82,8 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                         <div className="flex flex-col items-center justify-between border-t border-gray-100">
                                             <Button
                                                 onClick={() => router.push("/dashboard/chat")}
-                                                className="bg-[#0A1E4E] hover:bg-[#0A1E4E] mb-4 text-white transition-colors duration-200"
+                                                className="mb-4 transition-colors duration-200"
+                                                variant="primary"
                                                 size="sm"
                                             >
                                                 Test Agent

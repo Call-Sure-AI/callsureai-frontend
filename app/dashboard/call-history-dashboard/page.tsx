@@ -79,7 +79,7 @@ const CallHistoryDashboard = () => {
                             </Button>
 
                             <Button
-                                className="bg-[#0A1E4E] text-white hover:bg-[#0A1E4E]/90"
+                                variant="primary"
                             >
                                 Apply
                             </Button>

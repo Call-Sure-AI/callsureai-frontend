@@ -114,7 +114,7 @@ const PaymentSettings = () => {
                             ))}
                         </SelectContent>
                     </Select>
-                    <Button className="bg-blue-600 hover:bg-blue-700">Buy</Button>
+                    <Button variant="primary">Buy</Button>
                 </div>
             </div>
 

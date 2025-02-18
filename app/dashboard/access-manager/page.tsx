@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, ChevronDown, Users, Mail, Shield, Search } from 'lucide-react';
 import { AccessLevel, AccessLevelName, AccessManagerProps, SelectedAccessMap, User } from '@/types';
+import { Button } from '@/components/ui/button';
 
 const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
     initialUsers = [],
@@ -109,7 +110,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                 animate="visible"
             >
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-white">
+                <div className="bg-gradient-to-r from-[#0A1E4E] via-[#0A1E4E]/80 to-[#0A1E4E] p-8 text-white">
                     <motion.h1
                         className="text-3xl font-bold mb-2"
                         variants={itemVariants}
@@ -135,21 +136,20 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                             <input
                                 type="email"
                                 placeholder="Enter email address"
-                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0A1E4E] focus:border-transparent outline-none transition-all duration-200"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 shadow-md transition-colors duration-200"
+                        <Button
+                            className="px-6 py-3 rounded-xl flex items-center gap-2 shadow-md transition-colors duration-200"
+                            variant="primary"
                             onClick={handleAddUser}
                             disabled={!email}
                         >
                             <Plus size={20} />
                             Add User
-                        </motion.button>
+                        </Button>
                     </motion.div>
 
                     {/* Search Filter */}
@@ -161,7 +161,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                         <input
                             type="text"
                             placeholder="Search users..."
-                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0A1E4E] focus:border-transparent outline-none transition-all duration-200"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -182,7 +182,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="bg-blue-100 p-2 rounded-lg">
-                                        <Users className="text-blue-600" size={24} />
+                                        <Users className="text-[#0A1E4E]" size={24} />
                                     </div>
                                     <span className="text-xs md:text-lg text-gray-700 font-medium">{user.email}</span>
 
@@ -191,7 +191,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                                             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-300 transition-colors duration-200"
                                             onClick={() => toggleDropdown(user.id)}
                                         >
-                                            <Shield size={16} className="text-blue-600" />
+                                            <Shield size={16} className="text-[#0A1E4E]" />
                                             <span className='hidden md:block'>{selectedAccess[user.id] || 'Admin Access'}</span>
                                             <ChevronDown
                                                 size={16}
@@ -215,7 +215,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                                                             onClick={() => handleAccessSelect(user.id, name)}
                                                             whileHover={{ x: 4 }}
                                                         >
-                                                            <Icon size={16} className="text-blue-600" />
+                                                            <Icon size={16} className="text-[#0A1E4E]" />
                                                             {name}
                                                         </motion.button>
                                                     ))}
@@ -242,22 +242,20 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                         className="flex gap-4 mt-8 pt-8 border-t border-gray-200"
                         variants={itemVariants}
                     >
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                        <Button
+                            variant="outline"
                             className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors duration-200"
                             onClick={onCancel}
                         >
                             Cancel
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-md"
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="px-6 py-4 rounded-xl transition-colors duration-200 shadow-md"
                             onClick={() => onInvite?.(users)}
                         >
                             Invite Selected Users
-                        </motion.button>
+                        </Button>
                     </motion.div>
                 </div>
             </motion.div>

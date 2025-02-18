@@ -121,7 +121,7 @@ const DashboardLayout = () => {
                                             <p className="text-[#0A1E4E]/70">Create and manage your AI agents</p>
                                         </div>
                                         <Link href="/agent/creation">
-                                            <Button className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white shadow-sm">
+                                            <Button variant="primary">
                                                 <PlusCircleIcon className="w-4 h-4 mr-2" />
                                                 Add Agent
                                             </Button>
