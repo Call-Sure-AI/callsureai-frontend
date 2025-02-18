@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mic, MicOff, PhoneOff } from "lucide-react";
+import { Mic, MicOff, PhoneOff, ArrowLeft } from "lucide-react";
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 interface Message {
     sender: 'user' | 'server';
@@ -49,6 +50,7 @@ declare global {
 }
 
 const Chat = () => {
+    const router = useRouter();
     const [messages, setMessages] = useState<Message[]>([
         {
             sender: 'user',
@@ -96,17 +98,32 @@ const Chat = () => {
         ]);
     }, [recognition]);
 
+    const handleBack = () => {
+        router.push('/dashboard');
+    };
+
     return (
         <div className="flex justify-center items-center w-full h-screen bg-slate-100">
             <Card className="max-w-3xl ml-16 w-full h-[600px] flex flex-col shadow-xl">
                 {/* Header */}
                 <div className="px-6 py-4 border-b bg-white">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-xl font-semibold text-slate-900">AI Assistant</h2>
-                            <p className="text-sm text-slate-500">
-                                {isListening ? 'Listening...' : 'Voice Chat'}
-                            </p>
+                        <div className="flex items-center space-x-4">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleBack}
+                                className="hover:bg-slate-100"
+                                aria-label="Back to dashboard"
+                            >
+                                <ArrowLeft className="h-5 w-5 text-slate-600" />
+                            </Button>
+                            <div>
+                                <h2 className="text-xl font-semibold text-slate-900">AI Assistant</h2>
+                                <p className="text-sm text-slate-500">
+                                    {isListening ? 'Listening...' : 'Voice Chat'}
+                                </p>
+                            </div>
                         </div>
                         {error && (
                             <div className="text-sm text-red-500">
