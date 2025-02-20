@@ -141,53 +141,41 @@ const AgentTraining = () => {
 
     const handleSubmit = async () => {
         try {
-            if (!user) {
-                toast({
-                    title: "Error",
-                    description: "You must be logged in to create an agent.",
-                    variant: "destructive",
-                });
-                return;
-            }
+            const validationChecks = [
+                { condition: !user, message: "You must be logged in to create an agent." },
+                { condition: !setupData, message: "Missing setup data. Please complete the setup first." },
+                { condition: !token, message: "Please login to create an agent." },
+                { condition: !formData.roleDescription || !formData.businessContext, message: "Please fill in all the required fields." }
+            ];
 
-            if (!setupData) {
-                toast({
-                    title: "Error",
-                    description: "Missing setup data. Please complete the setup first.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            if (!token) {
-                toast({
-                    title: "Error",
-                    description: "Please login to create an agent.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            if (!formData.roleDescription || !formData.businessContext) {
-                toast({
-                    title: "Error",
-                    description: "Please fill in all the required fields.",
-                    variant: "destructive",
-                });
-                return;
+            for (const check of validationChecks) {
+                if (check.condition) {
+                    toast({
+                        title: "Error",
+                        description: check.message,
+                        variant: "destructive"
+                    });
+                    return;
+                }
             }
 
             if (files && files.length > 0) {
                 await uploadFiles(files);
-            }
-
-            if (!formData.files || formData.files.length === 0) {
+            } else {
                 toast({
                     title: "Error",
                     description: "Please upload at least one file.",
                     variant: "destructive",
                 });
                 return;
+            }
+
+            if (!user?.id) {
+                throw new Error("User ID is required");
+            }
+
+            if (!token) {
+                throw new Error("Please login to create an agent.");
             }
 
             const agentData: AgentFormData = {

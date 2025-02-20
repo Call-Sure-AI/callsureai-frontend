@@ -30,7 +30,15 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
     }
 
     return (
-        <div className="space-y-8 pb-16 md:pb-8">
+        <div className="space-y-8 pb-16 md:pb-8 h-[calc(80vh-200px)] overflow-y-auto pr-4 
+            [&::-webkit-scrollbar]:w-2
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/10
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            hover:[&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/20
+            transition-colors
+            duration-200
+            ease-in-out">
             {agents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-80 bg-gradient-to-b from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-300 hover:border-[#0A1E4E]/30 transition-all duration-300">
                     <div className="relative">

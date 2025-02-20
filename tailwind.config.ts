@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 import type { PluginAPI } from "tailwindcss/types/config";
 import animatePlugin from "tailwindcss-animate";
 const {
-    default: flattenColorPalette,
+  default: flattenColorPalette,
 } = require("tailwindcss/lib/util/flattenColorPalette");
 
 const config: Config = {
@@ -22,35 +22,35 @@ const config: Config = {
       '2xl': '1536px',
 
       // Extra Small Devices (Older/Compact Phones)
-      'xxs': {'max': '320px'},     // iPhone 4, iPhone 5/SE (1st gen)
-      'xs': {'min': '321px', 'max': '375px'},  // iPhone SE
+      'xxs': { 'max': '320px' },     // iPhone 4, iPhone 5/SE (1st gen)
+      'xs': { 'min': '321px', 'max': '375px' },  // iPhone SE
 
       // Small Devices (Smaller Smartphones)
-      'sm-mobile': {'min': '376px', 'max': '390px'},  // iPhone 12/13 Mini
+      'sm-mobile': { 'min': '376px', 'max': '390px' },  // iPhone 12/13 Mini
 
       // Medium Devices (Average Smartphones)
-      'mobile': {'min': '391px', 'max': '414px'},     // iPhone XR, 11, etc.
+      'mobile': { 'min': '391px', 'max': '414px' },     // iPhone XR, 11, etc.
 
       // Large Devices (Larger Smartphones)
-      'lg-mobile': {'min': '415px', 'max': '428px'},  // iPhone Pro Max
+      'lg-mobile': { 'min': '415px', 'max': '428px' },  // iPhone Pro Max
 
       // Extra Large Devices (Phablets)
-      'xl-mobile': {'min': '429px', 'max': '480px'},  // Larger Android devices
+      'xl-mobile': { 'min': '429px', 'max': '480px' },  // Larger Android devices
 
       // Small Tablets & Landscape Phones
-      'sm-tablet': {'min': '481px', 'max': '640px'},  // Small tablets
+      'sm-tablet': { 'min': '481px', 'max': '640px' },  // Small tablets
 
       // Medium Tablets
-      'tablet': {'min': '641px', 'max': '768px'},     // iPads
+      'tablet': { 'min': '641px', 'max': '768px' },     // iPads
 
       // Large Tablets
-      'lg-tablet': {'min': '769px', 'max': '1024px'}, // iPad Pro
+      'lg-tablet': { 'min': '769px', 'max': '1024px' }, // iPad Pro
 
       // Special Cases
-      'landscape': {'raw': '(orientation: landscape)'},
-      'tall': {'raw': '(min-height: 800px)'},
-      'fold': {'min': '280px', 'max': '320px'},       // Galaxy Fold closed
-      'unfold': {'min': '717px', 'max': '721px'},     // Galaxy Fold open
+      'landscape': { 'raw': '(orientation: landscape)' },
+      'tall': { 'raw': '(min-height: 800px)' },
+      'fold': { 'min': '280px', 'max': '320px' },       // Galaxy Fold closed
+      'unfold': { 'min': '717px', 'max': '721px' },     // Galaxy Fold open
     },
     extend: {
       fontFamily: {
@@ -139,7 +139,7 @@ const config: Config = {
       const newVars = Object.fromEntries(
         Object.entries(allColors).map(([key, val]) => [`--${key}`, String(val)])
       );
-    
+
       addBase({
         ":root": newVars as Record<string, string>
       });
