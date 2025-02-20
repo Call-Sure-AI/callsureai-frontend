@@ -15,15 +15,12 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { AgentFormData } from '@/types';
 import { getAllAgents } from '@/services/agent-service';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
-import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 
 const DashboardLayout = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
     const { logout } = useAuth({ redirectPath: '/auth' });
-    const router = useRouter();
     const [agents, setAgents] = useState<AgentFormData[]>([]);
     const [loading, setLoading] = useState(true);
 

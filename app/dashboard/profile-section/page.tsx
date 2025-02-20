@@ -15,14 +15,10 @@ import { createOrUpdateCompany } from '@/services/company-service';
 import { ProfileFormData } from '@/types';
 import { ProtectedRoute } from '@/components/protected-route';
 import ProfileImageUpload from '@/components/settings/image-upload';
-import { useAuth } from '@/hooks/use-auth';
 
 const ProfileSection = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
-    const { logout } = useAuth({
-        redirectPath: '/auth'
-    });
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<ProfileFormData>({
         first_name: '',

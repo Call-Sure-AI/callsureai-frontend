@@ -3,7 +3,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
-import { useAuth } from '@/hooks/use-auth';
 
 interface ProtectedRouteProps {
     children: ReactNode;
