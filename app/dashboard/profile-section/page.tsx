@@ -21,7 +21,7 @@ const ProfileSection = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
     const { logout } = useAuth({
-        redirectPath: '/',
+        redirectPath: '/auth'
     });
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<ProfileFormData>({
@@ -37,10 +37,6 @@ const ProfileSection = () => {
         image: '',
         logo: '',
     });
-
-    if (!token) {
-        logout();
-    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -109,6 +105,10 @@ const ProfileSection = () => {
     useEffect(() => {
         const fetchCompanyData = async () => {
             try {
+                if (!token || !user) {
+                    setLoading(false);
+                    return;
+                }
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company`, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -118,7 +118,6 @@ const ProfileSection = () => {
 
                 if (response.ok) {
                     const companyData = await response.json();
-
                     setFormData({
                         first_name: user?.name?.split(' ')[0] || '',
                         last_name: user?.name?.split(' ')[1] || '',
@@ -131,19 +130,6 @@ const ProfileSection = () => {
                         zip_code: companyData.address.split(',')[3] || '',
                         image: companyData.logo || user?.image || '',
                     });
-                } else {
-                    setFormData({
-                        first_name: user?.name?.split(' ')[0] || '',
-                        last_name: user?.name?.split(' ')[1] || '',
-                        business_name: '',
-                        email: user?.email || '',
-                        phone: '',
-                        address: '',
-                        city: '',
-                        state: '',
-                        zip_code: '',
-                        image: user?.image || '',
-                    });
                 }
             } catch (error) {
                 console.error('Error fetching company data:', error);
@@ -152,10 +138,10 @@ const ProfileSection = () => {
             }
         };
 
-        if (user) {
+        if (user && token) {
             fetchCompanyData();
         }
-    }, [user]);
+    }, [user, token]);
 
     if (loading) {
         return (

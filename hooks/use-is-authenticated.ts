@@ -1,6 +1,28 @@
+import { useState, useEffect } from 'react';
+
 export const useIsAuthenticated = () => {
-    if (typeof window === 'undefined') return { isAuthenticated: false, token: '' };
-    const token = localStorage.getItem('token');
-    const isAuthenticated = !!token;
-    return { isAuthenticated, token };
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [token, setToken] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = () => {
+            if (typeof window === 'undefined') {
+                setIsAuthenticated(false);
+                setToken('');
+                setIsLoading(false);
+                return;
+            }
+            const storedToken = localStorage.getItem('token');
+            setIsAuthenticated(!!storedToken);
+            setToken(storedToken || '');
+            setIsLoading(false);
+        };
+
+        checkAuth();
+        window.addEventListener('storage', checkAuth);
+        return () => window.removeEventListener('storage', checkAuth);
+    }, []);
+
+    return { isAuthenticated, token, isLoading };
 };

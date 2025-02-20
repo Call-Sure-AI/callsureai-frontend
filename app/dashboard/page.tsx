@@ -17,10 +17,12 @@ import { getAllAgents } from '@/services/agent-service';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 const DashboardLayout = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
+    const { logout } = useAuth({ redirectPath: '/auth' });
     const router = useRouter();
     const [agents, setAgents] = useState<AgentFormData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -28,31 +30,27 @@ const DashboardLayout = () => {
     useEffect(() => {
         const fetchAgents = async () => {
             try {
-                if (!token) {
-                    toast({
-                        title: "Error",
-                        description: "Please login to view your agents.",
-                        variant: "destructive",
-                    });
+                if (!token || !user) {
                     return;
                 }
                 const response = await getAllAgents(token);
                 setAgents(response);
-                setLoading(false);
             } catch (error: any) {
                 console.error('Error fetching agents:', error);
                 if (error.message === "Invalid token") {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    router.push('/');
+                    logout();
                 }
+            } finally {
                 setLoading(false);
             }
         };
-        if (user && user.id) {
+
+        if (token && user) {
             fetchAgents();
+        } else {
+            setLoading(false);
         }
-    }, [user, token]);
+    }, [token, user, logout]);
 
     const statsCards = [
         { label: 'Total Calls', value: '5,672', stat: "40% increase", trend: "up" },

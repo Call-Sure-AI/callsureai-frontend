@@ -17,9 +17,12 @@ export const useCurrentUser = () => {
                 const userData = localStorage.getItem('user');
                 if (userData) {
                     setUser(JSON.parse(userData));
+                } else {
+                    setUser(null);
                 }
             } catch (error) {
                 console.error('Error loading user:', error);
+                setUser(null);
             } finally {
                 setLoading(false);
             }
@@ -27,8 +30,15 @@ export const useCurrentUser = () => {
 
         loadUser();
 
-        window.addEventListener('storage', loadUser);
-        return () => window.removeEventListener('storage', loadUser);
+        // Listen for storage changes
+        const handleStorageChange = () => {
+            loadUser();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
     }, []);
 
     return { user, loading, setUser };

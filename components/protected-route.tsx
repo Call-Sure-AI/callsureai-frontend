@@ -3,6 +3,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ProtectedRouteProps {
     children: ReactNode;
@@ -15,15 +16,18 @@ export const ProtectedRoute = ({
     fallback,
     redirectTo = '/auth',
 }: ProtectedRouteProps) => {
-    const { isAuthenticated } = useIsAuthenticated();
+    const { isAuthenticated, isLoading } = useIsAuthenticated();
     const router = useRouter();
 
     useEffect(() => {
-        if (!isAuthenticated && redirectTo) {
+        if (!isLoading && !isAuthenticated) {
             router.push(redirectTo);
         }
-    }, [isAuthenticated, redirectTo, router]);
+    }, [isAuthenticated, isLoading, redirectTo, router]);
 
+    if (isLoading) {
+        return null;
+    }
 
     if (!isAuthenticated) {
         if (fallback) {

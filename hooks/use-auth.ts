@@ -39,10 +39,12 @@ export const useAuth = (options: UseAuthOptions = {}) => {
     const logout = useCallback(async () => {
         if (state.isLoggingOut) return;
 
-
         try {
             setState({ isLoggingOut: true, error: null });
+
             clearAuthData();
+
+            window.dispatchEvent(new Event('storage'));
 
             await handleGoogleLogout();
 
@@ -54,7 +56,7 @@ export const useAuth = (options: UseAuthOptions = {}) => {
             options.onLogoutSuccess?.();
 
             if (options.redirectPath) {
-                router.push(options.redirectPath);
+                window.location.href = options.redirectPath;
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
@@ -75,7 +77,7 @@ export const useAuth = (options: UseAuthOptions = {}) => {
                 error: null
             });
         }
-    }, [router, clearAuthData, handleGoogleLogout, options]);
+    }, [clearAuthData, handleGoogleLogout, options]);
 
     return {
         logout,
