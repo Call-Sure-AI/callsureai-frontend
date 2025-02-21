@@ -35,7 +35,7 @@ export const SocialLogin = ({ isSignup = false }) => {
     };
 
     return (
-        <div className="text-center text-gray-500 mt-6">
+        <div className="flex flex-col items-center justify-center text-center text-gray-500 mt-6">
             <p className="mb-4 text-sm lg:text-base">
                 or {isSignup ? 'Sign Up' : 'login'} with Google
             </p>
