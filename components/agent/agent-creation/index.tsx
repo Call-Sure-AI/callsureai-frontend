@@ -13,7 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { PlayCircle, User2, Wand2 } from 'lucide-react';
+import { Play, User2, Wand2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface FormData {
@@ -37,6 +37,7 @@ const AgentSetup = () => {
     const [isAudioLoading, setIsAudioLoading] = useState(false);
     const [audioError, setAudioError] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const handleNameChange = (value: string) => {
         setFormData(prev => ({ ...prev, name: value }));
@@ -75,6 +76,10 @@ const AgentSetup = () => {
                 setTimeout(() => reject(new Error('Audio load timeout')), 5000);
             });
 
+            newAudio.addEventListener('play', () => setIsPlaying(true));
+            newAudio.addEventListener('pause', () => setIsPlaying(false));
+            newAudio.addEventListener('ended', () => setIsPlaying(false));
+
             setAudio(newAudio);
             setAudioError(false);
         } catch (e: any) {
@@ -92,15 +97,18 @@ const AgentSetup = () => {
     const handlePlayAudio = () => {
         if (!audio) return;
 
-        audio.currentTime = 0;
-        audio.play().catch(error => {
-            console.error('Error playing audio:', error);
-            toast({
-                title: "Playback Error",
-                description: "Could not play the voice sample. Please try again.",
-                variant: "destructive",
+        if (audio.paused) {
+            audio.play().catch(error => {
+                console.error('Error playing audio:', error);
+                toast({
+                    title: "Playback Error",
+                    description: "Could not play the voice sample. Please try again.",
+                    variant: "destructive",
+                });
             });
-        });
+        } else {
+            audio.pause();
+        }
     };
 
     const handleNext = () => {
@@ -218,16 +226,28 @@ const AgentSetup = () => {
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={handlePlayAudio}
-                                    className={`w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center transition-colors 
+                                    className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
                                         ${isAudioLoading ? 'cursor-wait' : ''} 
                                         ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`
                                     }
                                     disabled={!audio || isAudioLoading}
                                 >
                                     {isAudioLoading ? (
-                                        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                                        <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                                     ) : (
-                                        <PlayCircle className={`w-8 h-8 ${audioError ? 'text-red-600' : 'text-blue-600'}`} />
+                                        isPlaying ? (
+                                            <svg
+                                                className={`w-6 h-6 text-white`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <rect x="6" y="4" width="4" height="16" rx="1" />
+                                                <rect x="14" y="4" width="4" height="16" rx="1" />
+                                            </svg>
+                                        ) : (
+                                            <Play className={`w-6 h-6 text-white`} />
+                                        )
                                     )}
                                 </button>
 

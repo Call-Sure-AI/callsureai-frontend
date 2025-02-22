@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { PlusCircleIcon, Loader2 } from "lucide-react";
+import { PlusCircleIcon, Loader2, TrendingUpIcon, TrendingDownIcon, MinusIcon, AlertTriangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,7 +54,7 @@ const DashboardLayout = () => {
         { label: 'Completed Calls', value: '4,987', stat: "400 active calls", trend: "up" },
         { label: 'Resolution Rate', value: '89%', stat: "+2.5% increase", trend: "up" },
         { label: 'Total Bookings', value: '4,510', stat: "32.0% increase", trend: "up" },
-        { label: 'Credit Balance', value: '$1,234', stat: "Can be increased by $500", trend: "neutral" },
+        { label: 'Credit Balance', value: '$1,234', stat: "Can be recharged", trend: "warn" },
     ];
 
     return (
@@ -75,11 +75,15 @@ const DashboardLayout = () => {
                                         <div className="flex flex-col space-y-2">
                                             <div className="text-sm font-medium text-[#0A1E4E]/80">{stat.label}</div>
                                             <div className="text-2xl font-bold text-[#0A1E4E]">{stat.value}</div>
-                                            <div className={`text-sm ${stat.trend === 'up' ? 'text-green-600' :
-                                                stat.trend === 'down' ? 'text-red-600' :
+                                            <div className={`text-sm flex items-center gap-1 ${stat.trend === 'up' ? 'text-green-600' :
+                                                stat.trend === 'down' || stat.trend === 'warn' ? 'text-red-600' :
                                                     'text-gray-600'
                                                 }`}>
                                                 {stat.stat}
+                                                {stat.trend === 'up' && <TrendingUpIcon className="w-4 h-4" />}
+                                                {stat.trend === 'down' && <TrendingDownIcon className="w-4 h-4" />}
+                                                {stat.trend === 'warn' && <AlertTriangle className="w-4 h-4" />}
+                                                {!stat.trend && <MinusIcon className="w-4 h-4" />}
                                             </div>
                                         </div>
                                     </CardContent>
