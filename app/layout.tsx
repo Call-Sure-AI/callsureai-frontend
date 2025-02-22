@@ -4,6 +4,7 @@ import "./globals.css";
 import Script from "next/script";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
+import { AppProviders } from '@/providers/app-providers';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -43,12 +44,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <GoogleOAuthProvider
-          clientId={googleClientId}
-        >
-          {children}
-          <Toaster />
-        </GoogleOAuthProvider>
+        <AppProviders>
+          <GoogleOAuthProvider
+            clientId={googleClientId}
+          >
+            {children}
+            <Toaster />
+          </GoogleOAuthProvider>
+        </AppProviders>
       </body>
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}

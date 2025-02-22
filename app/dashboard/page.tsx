@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PlusCircleIcon, Loader2, TrendingUpIcon, TrendingDownIcon, MinusIcon, AlertTriangle } from "lucide-react";
@@ -11,43 +10,10 @@ import { AgentSection } from '@/components/agent/agent-section';
 import { ProtectedRoute } from '@/components/protected-route';
 import AgentPerformanceChart from '@/components/charts/agent-performance-chat';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { AgentFormData } from '@/types';
-import { getAllAgents } from '@/services/agent-service';
-import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
-import { useAuth } from '@/hooks/use-auth';
+import { useAgents } from '@/contexts/agent-context';
 
 const DashboardLayout = () => {
-    const { user } = useCurrentUser();
-    const { token } = useIsAuthenticated();
-    const { logout } = useAuth({ redirectPath: '/auth' });
-    const [agents, setAgents] = useState<AgentFormData[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchAgents = async () => {
-            try {
-                if (!token || !user) {
-                    return;
-                }
-                const response = await getAllAgents(token);
-                setAgents(response);
-            } catch (error: any) {
-                console.error('Error fetching agents:', error);
-                if (error.message === "Invalid token") {
-                    logout();
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (token && user) {
-            fetchAgents();
-        } else {
-            setLoading(false);
-        }
-    }, [token, user, logout]);
+    const { agents, loading } = useAgents();
 
     const statsCards = [
         { label: 'Total Calls', value: '5,672', stat: "40% increase", trend: "up" },
@@ -117,7 +83,7 @@ const DashboardLayout = () => {
                                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
                                         <div className="space-y-2">
                                             <h2 className="text-xl font-semibold text-[#0A1E4E]">Set up a new agent</h2>
-                                            <p className="text-[#0A1E4E]/70">Create and manage your AI agents</p>
+                                            <p className="text-[#0A1E4E]/70 text-xs">Create and manage your AI agents</p>
                                         </div>
                                         <Link href="/agent/creation">
                                             <Button variant="primary">

@@ -13,45 +13,12 @@ import {
     XIcon,
     ActivityIcon
 } from "lucide-react";
+import { useActivities } from '@/contexts/activity-context';
 
 const ActivityFeed = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-    const activities = [
-        {
-            id: 1,
-            type: 'commit',
-            title: 'Updated dashboard layout with new responsive design and improved accessibility features',
-            timestamp: '2 hours ago',
-            user: 'Sarah Chen',
-            icon: <GitCommitIcon className="w-4 h-4" />,
-        },
-        {
-            id: 2,
-            type: 'comment',
-            title: 'Left a comment on pull request #123 regarding the navigation implementation',
-            timestamp: '3 hours ago',
-            user: 'Mike Johnson',
-            icon: <MessageCircleIcon className="w-4 h-4" />,
-        },
-        {
-            id: 3,
-            type: 'status',
-            title: 'Deployed version 2.0.1 to production environment',
-            timestamp: '5 hours ago',
-            user: 'Deploy Bot',
-            icon: <CircleIcon className="w-4 h-4" />,
-        },
-        {
-            id: 4,
-            type: 'star',
-            title: 'Starred the project and added it to featured repositories',
-            timestamp: 'Yesterday',
-            user: 'Alex Williams',
-            icon: <StarIcon className="w-4 h-4" />,
-        },
-    ];
+    const { activities, loading } = useActivities();
 
     const sidebarVariants = {
         expanded: {
@@ -104,6 +71,9 @@ const ActivityFeed = () => {
                     <ActivityIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
                 </motion.div>
             )}
+            {
+                isCollapsed && <ActivityIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
+            }
 
             <ActivityList isCollapsed={isCollapsed} />
         </motion.div>
@@ -149,42 +119,80 @@ const ActivityFeed = () => {
         </>
     );
 
+    const getActivityIcon = (entityType: string) => {
+        switch (entityType.toLowerCase()) {
+            case 'agent':
+                return <GitCommitIcon className="w-4 h-4" />;
+            case 'chat':
+                return <MessageCircleIcon className="w-4 h-4" />;
+            case 'status':
+                return <CircleIcon className="w-4 h-4" />;
+            default:
+                return <StarIcon className="w-4 h-4" />;
+        }
+    };
+
+    const formatTimestamp = (timestamp: string | Date) => {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+        if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        return 'Just now';
+    };
+
     const ActivityList = ({ isCollapsed }: { isCollapsed: boolean }) => (
         <div className="space-y-2">
-            {activities.map((activity, index) => (
-                <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                >
-                    <Button
-                        variant="ghost"
-                        className={`w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
-                            }`}
+            {loading ? (
+                <div className="text-center text-gray-500">Loading activities...</div>
+            ) : activities.length === 0 && !isCollapsed ? (
+                <div className="text-center text-gray-500">No activities yet</div>
+            ) : (
+                activities.map((activity) => (
+                    <motion.div
+                        key={activity.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                     >
-                        <div className="bg-gray-100 p-1 rounded-full flex-shrink-0">
-                            {activity.icon}
-                        </div>
-                        {!isCollapsed && (
-                            <motion.div
-                                variants={contentVariants}
-                                initial="visible"
-                                animate={isCollapsed ? "hidden" : "visible"}
-                                className="ml-3 text-left min-w-0 flex-1"
-                            >
-                                <p className="text-sm font-medium truncate">
-                                    {activity.title}
-                                </p>
-                                <div className="flex items-center text-xs text-gray-500 space-x-1 min-w-0">
-                                    <span className="truncate">{activity.user}</span>
-                                    <span className="flex-shrink-0">•</span>
-                                    <span className="truncate flex-shrink-0">{activity.timestamp}</span>
-                                </div>
-                            </motion.div>
-                        )}
-                    </Button>
-                </motion.div>
-            ))}
+                        <Button
+                            variant="ghost"
+                            className={`w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
+                                }`}
+                        >
+                            <div className="bg-gray-100 rounded-full flex-shrink-0">
+                                {getActivityIcon(activity.entity_type)}
+                            </div>
+                            {!isCollapsed && (
+                                <motion.div
+                                    variants={contentVariants}
+                                    initial="visible"
+                                    animate={isCollapsed ? "hidden" : "visible"}
+                                    className="ml-1 text-left min-w-0 flex-1"
+                                >
+                                    <p className="text-sm font-medium truncate">
+                                        {activity.action}
+                                    </p>
+                                    <div className="flex items-center text-xs text-gray-500 space-x-1 min-w-0">
+                                        <span className="truncate text-[10px]">
+                                            {activity.entity_type || 'System'}
+                                        </span>
+                                        <span className="flex-shrink-0">•</span>
+                                        <span className="truncate flex-shrink-0">
+                                            {formatTimestamp(activity.created_at!)}
+                                        </span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </Button>
+                    </motion.div>
+                ))
+            )}
         </div>
     );
 

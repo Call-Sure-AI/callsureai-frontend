@@ -102,3 +102,13 @@ export interface ProfileFormData {
     image: string;
     logo?: string;
 }
+
+export interface Activity {
+    id: string;
+    user_id: string;
+    action: string;
+    entity_type: string;
+    entity_id: string;
+    metadata?: Record<string, any>;
+    created_at?: Date;
+}
