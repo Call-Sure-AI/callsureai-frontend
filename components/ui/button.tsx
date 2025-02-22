@@ -38,16 +38,26 @@ const buttonVariants = cva(
   }
 )
 
-interface AnimatedButtonProps {
-  text: string; // The text to display
-  icon?: React.ReactNode; // Optional icon
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+  showArrow?: boolean
+  showSearchIcon?: boolean
+  children?: React.ReactNode
 }
 
-const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon }) => {
+interface AnimatedButtonProps extends Omit<ButtonProps, 'size' | 'className'> {
+  text: string;
+  icon?: React.ReactNode;
+}
+
+const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon, ...props }) => {
   return (
     <Button
       size="lg"
       className="rounded-full group relative bg-white/80 text-blue-700 transition-all duration-300 overflow-hidden px-10 py-6 text-md hover:bg-white hover:shadow-[0_0_10px_5px_rgba(255,255,255,0.2)] font-bold"
+      {...props}
     >
       {/* Default content */}
       <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
@@ -70,15 +80,6 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon }) => {
     </Button>
   );
 };
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  showArrow?: boolean
-  showSearchIcon?: boolean
-  children?: React.ReactNode
-}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, showArrow = false, showSearchIcon = false, children, ...props }, ref) => {
