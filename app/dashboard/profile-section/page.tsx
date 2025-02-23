@@ -16,9 +16,12 @@ import { ProfileFormData } from '@/types';
 import { ProtectedRoute } from '@/components/protected-route';
 import ProfileImageUpload from '@/components/settings/image-upload';
 
+import { useActivities } from '@/contexts/activity-context';
+
 const ProfileSection = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
+    const { refreshActivities } = useActivities();
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<ProfileFormData>({
         first_name: '',
@@ -82,6 +85,7 @@ const ProfileSection = () => {
             setLoading(true);
 
             await createOrUpdateCompany({ ...formData, userId: user?.id || '' }, token);
+            await refreshActivities();
 
             toast({
                 title: "Success",

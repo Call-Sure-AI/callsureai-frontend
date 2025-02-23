@@ -19,6 +19,8 @@ import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { AgentFormData } from '@/types';
 import { createAgent } from '@/services/agent-service';
 import { Input } from '@/components/ui/input';
+import { useActivities } from '@/contexts/activity-context';
+import { useAgents } from '@/contexts/agent-context';
 
 interface AdvancedSettings {
     authUrl: string;
@@ -38,6 +40,8 @@ const AgentTraining = () => {
     const router = useRouter();
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
+    const { refreshActivities } = useActivities();
+    const { refreshAgents } = useAgents();
     const [formData, setFormData] = useState<FormData>({
         roleDescription: '',
         businessContext: '',
@@ -161,13 +165,6 @@ const AgentTraining = () => {
 
             if (files && files.length > 0) {
                 await uploadFiles(files);
-            } else {
-                toast({
-                    title: "Error",
-                    description: "Please upload at least one file.",
-                    variant: "destructive",
-                });
-                return;
             }
 
             if (!user?.id) {
@@ -192,10 +189,12 @@ const AgentTraining = () => {
                     businessContext: formData.businessContext,
                 },
                 advanced_settings: formData.advanced_settings,
-                files: formData.files,
+                files: formData.files || [],
             };
 
+
             await createAgent(agentData, token);
+            await Promise.all([refreshAgents(), refreshActivities()]);
 
             toast({
                 title: "Success",

@@ -17,6 +17,8 @@ import { updateAgent } from "@/services/agent-service";
 import { toast } from "@/hooks/use-toast";
 import { useIsAuthenticated } from "@/hooks/use-is-authenticated";
 import { Button } from "../ui/button";
+import { useAgents } from "@/contexts/agent-context";
+import { useActivities } from "@/contexts/activity-context";
 interface EditAgentData {
     name: string;
     gender: string;
@@ -41,6 +43,8 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
     const [isAudioLoading, setIsAudioLoading] = useState(false);
     const [audioError, setAudioError] = useState(false);
     const { token } = useIsAuthenticated();
+    const { refreshAgents } = useAgents();
+    const { refreshActivities } = useActivities();
 
     const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -142,6 +146,8 @@ export const AgentEdit = memo(({ name, additional_context, is_active, id }: Agen
             }
 
             await updateAgent(id, data, token);
+
+            await Promise.all([refreshAgents(), refreshActivities()]);
 
             toast({
                 title: "Success",
