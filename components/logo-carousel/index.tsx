@@ -8,19 +8,20 @@ const fadeIn = {
     visible: { opacity: 1, y: 0 },
 };
 
+const logos = [
+    "/images/logo1.png",
+    "/images/logo2.png",
+    "/images/logo3.png",
+    "/images/logo4.png",
+    "/images/logo5.png",
+    "/images/logo6.png",
+    "/images/logo7.png",
+    "/images/logo8.png",
+    "/images/logo9.png",
+    "/images/logo10.png",
+];
+
 const LogoCarousel = () => {
-    const logos = [
-        "/images/logo1.png",
-        "/images/logo2.png",
-        "/images/logo3.png",
-        "/images/logo4.png",
-        "/images/logo5.png",
-        "/images/logo6.png",
-        "/images/logo7.png",
-        "/images/logo8.png",
-        "/images/logo9.png",
-        "/images/logo10.png",
-    ];
 
     return (
         <motion.div

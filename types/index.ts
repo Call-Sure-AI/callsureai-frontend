@@ -112,3 +112,15 @@ export interface Activity {
     metadata?: Record<string, any>;
     created_at?: Date;
 }
+
+export interface TestimonialType {
+    name: string;
+    title: string;
+    testimonial: string;
+    avatar: string;
+}
+
+export interface TestimonialCardProps {
+    testimonial: TestimonialType;
+    index: number;
+}

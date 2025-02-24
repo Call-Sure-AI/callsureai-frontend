@@ -4,6 +4,8 @@ import { motion, useAnimationControls } from "framer-motion";
 // import Image from "next/image";
 import { memo, useEffect, useState, useCallback } from "react";
 import { Quote } from "lucide-react";
+import { TestimonialCardProps } from "@/types";
+import { testimonials } from "@/constants";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -38,17 +40,7 @@ const GradientText = memo(({ children }: GradientTextProps) => (
 
 GradientText.displayName = "GradientText";
 
-interface TestimonialType {
-    name: string;
-    title: string;
-    testimonial: string;
-    avatar: string;
-}
 
-interface TestimonialCardProps {
-    testimonial: TestimonialType;
-    index: number;
-}
 
 const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
     <motion.div
@@ -64,15 +56,6 @@ const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
         <Quote className="text-blue-100 absolute top-4 right-4 w-8 h-8" />
 
         <div className="flex items-center gap-4 mb-6 relative">
-            {/* <div className="relative w-16 h-16 rounded-full ring-4 ring-blue-50">
-                <Image
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    fill
-                    className="rounded-full object-cover"
-                    priority
-                />
-            </div> */}
             <div>
                 <h3 className="text-lg font-semibold text-slate-800">{testimonial.name}</h3>
                 <p className="text-sm text-[#3362A6] font-medium">{testimonial.title}</p>
@@ -92,81 +75,6 @@ const TestimonialSection = () => {
     const [isMobile, setIsMobile] = useState(false);
     const controls = useAnimationControls();
     const [isTransitioning, setIsTransitioning] = useState(false);
-
-    const testimonials: TestimonialType[] = [
-        {
-            name: "John Doe",
-            title: "CEO, Example Inc.",
-            testimonial: "The AI Calling Agents have completely transformed our customer support experience. Our clients love the seamless interactions!",
-            avatar: "/images/Face.jpeg",
-        },
-        {
-            name: "Jane Smith",
-            title: "Founder, Startup Co.",
-            testimonial: "Thanks to AI Calling Agents, we've seen a 300% increase in customer satisfaction scores. The natural conversations are remarkable.",
-            avatar: "/images/Face1.jpeg",
-        },
-        {
-            name: "Mike Johnson",
-            title: "Product Manager, TechCorp",
-            testimonial: "Implementing AI Calling Agents was the best decision we made this year. Our support team is now more efficient than ever.",
-            avatar: "/images/Face2.jpeg",
-        },
-        {
-            name: "Sarah Williams",
-            title: "CTO, Innovation Labs",
-            testimonial: "The natural language processing capabilities are outstanding. Our customers consistently praise the service quality.",
-            avatar: "/images/Face.jpeg",
-        },
-        {
-            name: "Alex Chen",
-            title: "Support Director, GlobalTech",
-            testimonial: "We've reduced response times by 80% while maintaining perfect customer satisfaction scores. Simply amazing!",
-            avatar: "/images/Face1.jpeg",
-        },
-        {
-            name: "Emily Brown",
-            title: "Operations Manager, FastGrowth",
-            testimonial: "The scalability of the AI Calling Agents has allowed us to expand to new markets without adding overhead.",
-            avatar: "/images/Face2.jpeg",
-        },
-        {
-            name: "David Wilson",
-            title: "Customer Success Lead",
-            testimonial: "Our support team now focuses on strategic initiatives while AI handles routine inquiries perfectly.",
-            avatar: "/images/Face.jpeg",
-        },
-        {
-            name: "Lisa Anderson",
-            title: "VP of Sales, Market Leaders",
-            testimonial: "The ROI has been incredible. We've significantly reduced costs while improving our service quality.",
-            avatar: "/images/Face1.jpeg",
-        },
-        {
-            name: "Robert Martinez",
-            title: "CEO, Future Systems",
-            testimonial: "AI Calling Agents have given us a competitive edge in our industry. The results speak for themselves!",
-            avatar: "/images/Face2.jpeg",
-        },
-        {
-            name: "Maria Garcia",
-            title: "Support Manager, TechFlow",
-            testimonial: "The AI system learns and adapts quickly. Each interaction gets better than the last.",
-            avatar: "/images/Face.jpeg",
-        },
-        {
-            name: "Tom Wilson",
-            title: "Operations Director",
-            testimonial: "Customer wait times have been reduced by 90%. The efficiency gains are remarkable.",
-            avatar: "/images/Face1.jpeg",
-        },
-        {
-            name: "Sophie Taylor",
-            title: "Customer Experience Head",
-            testimonial: "Our customers frequently compliment the natural conversation flow. It's truly revolutionary.",
-            avatar: "/images/Face2.jpeg",
-        }
-    ];
 
     const updateMedia = useCallback(() => {
         setIsMobile(window.innerWidth < 768);
