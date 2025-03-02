@@ -20,7 +20,7 @@ interface GradientTextProps {
 const GradientText = memo(({ children }: GradientTextProps) => (
     <span
         className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
-        style={{ lineHeight: 1.5 }}
+        style={{ lineHeight: 1.2 }}
     >
         {children}
     </span>
@@ -113,11 +113,11 @@ export default function AnalyticsPage() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="text-center space-y-6"
+                    className="text-center pb-0 mb-0"
                 >
                     <ParallaxText speed={-0.5}>
                         <motion.div
-                            className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 text-sm text-blue-600"
+                            className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 mb-0 text-sm text-blue-600 mb-0"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{
@@ -131,15 +131,14 @@ export default function AnalyticsPage() {
                     </ParallaxText>
 
                     <ScrollReveal>
-                        <h1 className="text-4xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text max-w-5xl mx-auto">
-                            From <GradientText>Lead Tracking</GradientText> To <GradientText>Analytics</GradientText>, Everything Your Team <GradientText>Needs</GradientText> To <GradientText>Succeed</GradientText>.
+                        <h1 className="text-4xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text max-w-5xl mx-auto" style={{ lineHeight: 1.2 }}>
+                        Your <GradientText>All</GradientText>-in-<GradientText>1 Customer Success</GradientText> Platform  — Track, <GradientText>Engage,</GradientText> Analyze & <GradientText>Grow</GradientText>
                         </h1>
                     </ScrollReveal>
 
                     <ScrollReveal>
-                        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                            Our platform simplifies your customer management process. <br />Discover how we can help you
-                            stay organized, <br />save time, and grow your business
+                        <p className="text-lg text-slate-600 max-w-2xl mx-auto mt-4">
+                        Capture, analyze, and optimize every customer interaction—all in one powerful platform that boosts your growth, and reclaims your time.
                         </p>
                     </ScrollReveal>
                 </motion.div>
@@ -149,7 +148,7 @@ export default function AnalyticsPage() {
                         {
                             icon: Users,
                             title: "Easy track user analytics",
-                            description: "Easily see what users do and how interested they are with simple analytics.",
+                            description: "Easily see what users do and how interested they are with simple analytics.",
                             component: <UserAnalytics userData={sampleUser} />,
                             metric: null
                         },
