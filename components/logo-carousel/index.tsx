@@ -33,9 +33,17 @@ const LogoCarousel = () => {
             className="mt-12"
         >
             <h3 className="text-2xl font-bold text-center text-slate-800 mb-6 w-[80%] mx-auto">
-                Trusted by{" "}
+                    Supports {" "}
                 <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">
-                    100+ Global Brands
+                    2K+
+                </span>{" "}
+                Integrations across{" "}
+                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">
+                    Industries
+                </span> {" "}
+                and {" "}
+                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">
+                    Businesses
                 </span>
             </h3>
             <div className="overflow-hidden relative pb-8">
