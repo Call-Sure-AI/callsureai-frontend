@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Upload, X, User2, Play, PlusCircleIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -127,12 +127,12 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         }
     };
 
-    const getAudioPath = (gender: string, tone: string, language: string) => {
-        if (!gender || !tone || !language) return null;
-        return `/voices/${gender}-${tone}-${language}.mp3`;
-    };
+    const loadAudio = useCallback(async (gender: string, tone: string, language: string) => {
+        const getAudioPath = (gender: string, tone: string, language: string) => {
+            if (!gender || !tone || !language) return null;
+            return `/voices/${gender}-${tone}-${language}.mp3`;
+        };
 
-    const loadAudio = async (gender: string, tone: string, language: string) => {
         setIsAudioLoading(true);
         setAudioError(false);
 
@@ -164,7 +164,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         } finally {
             setIsAudioLoading(false);
         }
-    };
+    }, [setIsPlaying, setAudio, setAudioError, setIsAudioLoading]);
 
     const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
         setFormData(prev => {
@@ -308,7 +308,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                 audio.src = '';
             }
         };
-    }, []);
+    }, [formData.gender, formData.tone, formData.language, loadAudio, audio]); // Added missing dependency
 
     if (!isMounted) {
         return null;

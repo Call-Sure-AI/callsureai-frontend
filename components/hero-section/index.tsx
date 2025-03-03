@@ -144,7 +144,7 @@ const HeroSection = () => {
                                 size="animated"
                                 showArrow
                             >
-                                Get Started
+                                Try It Now
                             </Button>
                         </motion.div>
 
@@ -153,7 +153,7 @@ const HeroSection = () => {
                                 variant="outline"
                                 className="border-slate-400 bg-white text-blue-800 px-8 py-2 h-14 rounded-full w-full sm:w-auto text-lg font-bold"
                             >
-                                Book Demo Now
+                                Book A Demo
                             </Button>
                         </motion.div>
                     </motion.div>

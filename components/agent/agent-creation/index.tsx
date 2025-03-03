@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Upload, X, Wand2, User2, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -114,10 +114,10 @@ const AgentCreationForm = () => {
     setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
   };
 
-  const getAudioPath = (gender: string, tone: string, language: string) => {
+  const getAudioPath = useCallback((gender: string, tone: string, language: string) => {
     if (!gender || !tone || !language) return null;
     return `/voices/${gender}-${tone}-${language}.mp3`;
-  };
+  }, []);
 
   const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
     setFormData(prev => {
@@ -131,39 +131,39 @@ const AgentCreationForm = () => {
     });
   };
 
-  const loadAudio = async (gender: string, tone: string, language: string) => {
-    setIsAudioLoading(true);
-    setAudioError(false);
-
-    const audioPath = getAudioPath(gender, tone, language);
-    if (!audioPath) return;
-
-    const newAudio = new Audio(audioPath);
-
-    try {
-      await new Promise((resolve, reject) => {
-        newAudio.addEventListener('canplaythrough', resolve, { once: true });
-        newAudio.addEventListener('error', reject, { once: true });
-        setTimeout(() => reject(new Error('Audio load timeout')), 5000);
-      });
-
-      newAudio.addEventListener('play', () => setIsPlaying(true));
-      newAudio.addEventListener('pause', () => setIsPlaying(false));
-      newAudio.addEventListener('ended', () => setIsPlaying(false));
-
-      setAudio(newAudio);
+    const loadAudio = useCallback(async (gender: string, tone: string, language: string) => {
+      setIsAudioLoading(true);
       setAudioError(false);
-    } catch (e: any) {
-      setAudioError(true);
-      toast({
-        title: "Audio Load Error",
-        description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAudioLoading(false);
-    }
-  };
+
+      const audioPath = getAudioPath(gender, tone, language);
+      if (!audioPath) return;
+
+      const newAudio = new Audio(audioPath);
+
+      try {
+          await new Promise((resolve, reject) => {
+              newAudio.addEventListener('canplaythrough', resolve, { once: true });
+              newAudio.addEventListener('error', reject, { once: true });
+              setTimeout(() => reject(new Error('Audio load timeout')), 5000);
+          });
+
+          newAudio.addEventListener('play', () => setIsPlaying(true));
+          newAudio.addEventListener('pause', () => setIsPlaying(false));
+          newAudio.addEventListener('ended', () => setIsPlaying(false));
+
+          setAudio(newAudio);
+          setAudioError(false);
+      } catch (e: any) {
+          setAudioError(true);
+          toast({
+              title: "Audio Load Error",
+              description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
+              variant: "destructive",
+          });
+      } finally {
+          setIsAudioLoading(false);
+      }
+  }, [getAudioPath, setIsPlaying, setAudio, setAudioError, setIsAudioLoading]);
 
   const handlePlayAudio = () => {
     if (!audio) return;
@@ -303,16 +303,20 @@ const AgentCreationForm = () => {
     } catch (error) {
       console.error('Error loading saved data:', error);
     }
-  }, []);
+  }, [loadAudio]);
 
   useEffect(() => {
-    return () => {
-      if (audio) {
-        audio.pause();
-        audio.src = '';
+      if (formData.gender && formData.tone && formData.language) {
+          loadAudio(formData.gender, formData.tone, formData.language);
       }
-    };
-  }, [audio]);
+      
+      return () => {
+          if (audio) {
+              audio.pause();
+              audio.src = '';
+          }
+      };
+  }, [formData.gender, formData.tone, formData.language, loadAudio, audio]);
 
   if (!isMounted) {
     return null;

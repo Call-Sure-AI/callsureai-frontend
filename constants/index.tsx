@@ -47,7 +47,7 @@ export const integrations = [
         ),
     },
     {
-        name: 'Twilio',
+        name: 'Trello',
         description: 'Integrate with Twilio',
         icon: (
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
