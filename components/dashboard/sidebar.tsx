@@ -64,7 +64,21 @@ const Navigation = () => {
     const accounts = [
         { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager', link: '/dashboard/access-manager' },
         { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History', link: '/dashboard/account-history' },
-    ]
+    ];
+
+    const toggleDropdown = (dropdown: string) => {
+        if (dropdown === 'accounts') {
+            setIsAccountsOpen(!isAccountsOpen);
+            if (!isAccountsOpen && isSettingsOpen) {
+                setIsSettingsOpen(false);
+            }
+        } else if (dropdown === 'settings') {
+            setIsSettingsOpen(!isSettingsOpen);
+            if (!isSettingsOpen && isAccountsOpen) {
+                setIsAccountsOpen(false);
+            }
+        }
+    };
 
     const sidebarVariants = {
         expanded: {
@@ -82,13 +96,32 @@ const Navigation = () => {
         hidden: { opacity: 0, x: -20 }
     };
 
+    // Improved dropdown animation variants
+    const dropdownVariants = {
+        hidden: {
+            height: 0,
+            opacity: 0,
+            transition: {
+                height: { duration: 0.2 },
+                opacity: { duration: 0.1 }
+            }
+        },
+        visible: {
+            height: "auto",
+            opacity: 1,
+            transition: {
+                height: { duration: 0.2 },
+                opacity: { duration: 0.2, delay: 0.1 }
+            }
+        }
+    };
 
     const DesktopSidebar = () => (
         <motion.div
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-2 border-r h-screen hidden md:block"
+            className="relative z-20 bg-white p-4 space-y-2 border-r h-screen hidden md:block overflow-hidden"
         >
             {
                 !isCollapsed &&
@@ -153,7 +186,7 @@ const Navigation = () => {
                         <Button
                             variant="ghost"
                             className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
-                            onClick={() => setIsAccountsOpen(!isAccountsOpen)}
+                            onClick={() => toggleDropdown('accounts')}
                         >
                             <div className='flex justify-start items-center'>
                                 <BookUser className='w-4 h-4' />
@@ -164,13 +197,15 @@ const Navigation = () => {
                     </motion.div>
                 )}
 
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                     {(!isCollapsed && isAccountsOpen) && (
                         <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="space-y-2 pl-2"
+                            key="accounts-dropdown"
+                            variants={dropdownVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            className="space-y-2 pl-2 overflow-hidden"
                         >
                             {accounts.map((item, index) => (
                                 <motion.div
@@ -192,6 +227,7 @@ const Navigation = () => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+
                 {!isCollapsed && (
                     <motion.div
                         variants={contentVariants}
@@ -201,7 +237,7 @@ const Navigation = () => {
                         <Button
                             variant="ghost"
                             className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
-                            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                            onClick={() => toggleDropdown('settings')}
                         >
                             <div className='flex justify-start items-center'>
                                 <Settings className='w-4 h-4' />
@@ -212,13 +248,15 @@ const Navigation = () => {
                     </motion.div>
                 )}
 
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                     {(!isCollapsed && isSettingsOpen) && (
                         <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="space-y-2 pl-2"
+                            key="settings-dropdown"
+                            variants={dropdownVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            className="space-y-2 pl-2 overflow-hidden"
                         >
                             {settings.map((item, index) => (
                                 <motion.div
@@ -240,7 +278,8 @@ const Navigation = () => {
                         </motion.div>
                     )}
                 </AnimatePresence>
-                <div className="space-y-2">
+
+                <div className="space-y-2 mt-2">
                     {accountItems.map((item, index) => (
                         <motion.div
                             key={index}
