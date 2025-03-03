@@ -212,7 +212,7 @@ export default function AnalyticsPage() {
       description:
         "Live agent handoff ensures customers get personal attention when AI assistance isn't enough.",
       content: (
-        <div className="h-full w-full bg-[#4F46E5] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <Users color="white" size={80} />
             <div className="text-center">
@@ -222,7 +222,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-3 gap-4 w-full mt-4">
               {[
                 { value: "24/7", label: "Availability" },
-                { value: "30s", label: "Avg. Response Time" },
+                { value: "300ms", label: "Avg. Response Time" },
                 { value: "98%", label: "Resolution Rate" }
               ].map((item, i) => (
                 <div key={i} className="bg-white/10 p-4 rounded-lg text-center">
@@ -240,7 +240,7 @@ export default function AnalyticsPage() {
       description:
         "Seamless transition to human support agents whenever additional assistance is required.",
       content: (
-        <div className="h-full w-full bg-[#0891B2] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <Clock color="white" size={80} />
             <div className="text-center">
@@ -278,7 +278,7 @@ export default function AnalyticsPage() {
       description:
         "Round-the-clock availability with natural voice complete with breathing sounds and pitch variations for a more authentic experience.",
       content: (
-        <div className="h-full w-full bg-[#7C3AED] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <LineChart color="white" size={80} />
             <div className="text-center">
@@ -319,21 +319,31 @@ export default function AnalyticsPage() {
       description:
         "Communication in both Hindi and English, allowing customers to interact in their preferred language.",
       content: (
-        <div className="h-full w-full bg-[#F59E0B] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
-            <div className="text-5xl">🗣️</div>
+            <div className="text-5xl">⚛🗣</div>
             <div className="text-center">
               <h4 className="text-2xl font-bold mb-2">Language Flexibility</h4>
-              <p className="max-w-md text-white/80">Seamlessly switch between Hindi and English for natural conversations</p>
+              <p className="max-w-md text-white/80">Seamlessly switch between multiple languages according to customer&apos;s input  for natural conversations</p>
             </div>
             <div className="grid grid-cols-2 gap-8 w-full mt-4">
+            <div className="bg-white/10 p-4 rounded-lg text-center">
+                <div className="font-bold text-xl mb-2">English</div>
+                <div className="text-sm text-white/70">Hello, how may I assist you today?</div>
+              </div>
               <div className="bg-white/10 p-4 rounded-lg text-center">
                 <div className="font-bold text-xl mb-2">हिन्दी</div>
                 <div className="text-sm text-white/70">नमस्ते, मैं आपकी कैसे सहायता कर सकता हूँ?</div>
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-8 w-full mt-4">
+            <div className="bg-white/10 p-4 rounded-lg text-center">
+                <div className="font-bold text-xl mb-2">Spanish</div>
+                <div className="text-sm text-white/70">Hola, ¿cómo puedo ayudarte hoy?</div>
+              </div>
               <div className="bg-white/10 p-4 rounded-lg text-center">
-                <div className="font-bold text-xl mb-2">English</div>
-                <div className="text-sm text-white/70">Hello, how may I assist you today?</div>
+                <div className="font-bold text-xl mb-2">French</div>
+                <div className="text-sm text-white/70">Bonjour, comment puis-je vous aider aujourd&apos;hui?</div>
               </div>
             </div>
           </div>
@@ -345,7 +355,7 @@ export default function AnalyticsPage() {
       description:
         "AI that improves in real-time, becoming more effective with each conversation.",
       content: (
-        <div className="h-full w-full bg-[#06B6D4] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <Brain color="white" size={80} />
             <div className="text-center">
@@ -389,7 +399,7 @@ export default function AnalyticsPage() {
       description:
         "Dynamic interactions that adapt to customer needs with AI agents that switch based on context.",
       content: (
-        <div className="h-full w-full bg-[#10B981] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <div className="text-5xl">👤</div>
             <div className="text-center">
@@ -419,7 +429,7 @@ export default function AnalyticsPage() {
       description:
         "End-to-end protection for all customer data and interactions.",
       content: (
-        <div className="h-full w-full bg-[#475569] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <Shield color="white" size={80} />
             <div className="text-center">
@@ -452,7 +462,7 @@ export default function AnalyticsPage() {
       description:
         "Approximately 40% cost reduction compared to traditional customer care agencies while maintaining quality.",
       content: (
-        <div className="h-full w-full bg-[#0E7490] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <BarChart4 color="white" size={80} />
             <div className="text-center">
@@ -487,7 +497,7 @@ export default function AnalyticsPage() {
       description:
         "Easy connection with existing business systems without complicated setup.",
       content: (
-        <div className="h-full w-full bg-[#9333EA] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <div className="text-5xl">🔄</div>
             <div className="text-center">
@@ -511,9 +521,9 @@ export default function AnalyticsPage() {
       description:
         "Advanced AI architecture that provides precise query resolution specific to your business needs.",
       content: (
-        <div className="h-full w-full bg-[#8B5CF6] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
-            <div className="text-5xl">🧠</div>
+            <div className="text-5xl">֎🇦🇮</div>
             <div className="text-center">
               <h4 className="text-2xl font-bold mb-2">Collaborative AI Network</h4>
               <p className="max-w-md text-white/80">Specialized AI agents working together to solve complex customer queries</p>
@@ -531,7 +541,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="absolute top-0 right-0 translate-x-full -translate-y-1/2">
                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                      <span className="text-xl">💬</span>
+                      <span className="text-xl">🗪</span>
                     </div>
                   </div>
                   <div className="absolute bottom-0 left-0 -translate-x-full translate-y-1/2">
@@ -541,7 +551,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="absolute bottom-0 right-0 translate-x-full translate-y-1/2">
                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
-                      <span className="text-xl">🧩</span>
+                      <span className="text-xl">☁️</span>
                     </div>
                   </div>
                 </div>
@@ -556,7 +566,7 @@ export default function AnalyticsPage() {
       description:
         "Connection to your business database for highly personalized customer responses.",
       content: (
-        <div className="h-full w-full bg-[#334155] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <Database color="white" size={80} />
             <div className="text-center">
@@ -598,7 +608,7 @@ export default function AnalyticsPage() {
       description:
         "Sophisticated AI models that can address complicated customer inquiries.",
       content: (
-        <div className="h-full w-full bg-[#EA580C] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <div className="text-5xl">🔄</div>
             <div className="text-center">
@@ -626,7 +636,7 @@ export default function AnalyticsPage() {
       description:
         "Support for customer document uploads to handle complex service requests.",
       content: (
-        <div className="h-full w-full bg-[#0F766E] flex items-center justify-center text-white p-8">
+        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
           <div className="flex flex-col items-center gap-6">
             <FileUp color="white" size={80} />
             <div className="text-center">
@@ -664,7 +674,7 @@ export default function AnalyticsPage() {
       description:
         "Live dashboards and transcript access for quality assurance and improvement.",
         content: (
-            <div className="h-full w-full bg-[#1E40AF] flex items-center justify-center text-white p-8">
+            <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
               <div className="flex flex-col items-center gap-6">
                 <PieChart color="white" size={80} />
                 <div className="text-center">
@@ -711,7 +721,7 @@ export default function AnalyticsPage() {
           description:
             "Monthly updates and ongoing AI training customized specifically for your business operations.",
           content: (
-            <div className="h-full w-full bg-[#4F46E5] flex items-center justify-center text-white p-8">
+            <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white p-8">
               <div className="flex flex-col items-center gap-6">
                 <Brain color="white" size={80} />
                 <div className="text-center">
