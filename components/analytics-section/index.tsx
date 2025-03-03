@@ -650,7 +650,7 @@ export default function AnalyticsPage() {
                     <span className="text-lg">📄</span>
                   </div>
                   <div>
-                    <div className="text-sm font-semibold">invoice-march.pdf</div>
+                    <div className="text-sm font-semibold">knowledge-base.pdf</div>
                     <div className="text-xs opacity-70">3.2 MB</div>
                   </div>
                 </div>
