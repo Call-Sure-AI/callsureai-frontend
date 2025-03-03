@@ -1,5 +1,6 @@
 "use client";
 
+import React, { memo } from 'react';
 import { motion } from "framer-motion";
 import Image from "next/image";
 
@@ -21,6 +22,23 @@ const logos = [
     "/images/logo10.png",
 ];
 
+
+interface GradientTextProps {
+    children: React.ReactNode;
+  }
+  
+  const GradientText = memo(({ children }: GradientTextProps) => (
+    <span
+      className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
+      style={{ lineHeight: 1.2 }}
+    >
+      {children}
+    </span>
+  ));
+  
+  GradientText.displayName = "GradientText";
+  
+
 const LogoCarousel = () => {
 
     return (
@@ -32,19 +50,8 @@ const LogoCarousel = () => {
             variants={fadeIn}
             className="mt-12"
         >
-            <h3 className="text-2xl font-bold text-center text-slate-800 mb-6 w-[80%] mx-auto">
-                    Supports {" "}
-                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">
-                    2K+
-                </span>{" "}
-                Integrations across{" "}
-                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">
-                    Industries
-                </span> {" "}
-                and {" "}
-                <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">
-                    Businesses
-                </span>
+            <h3 className="text-2xl font-bold text-center text-slate-800 mb-8 w-[80%] mx-auto">
+                    Supports <GradientText>2K+ Integrations</GradientText> across <GradientText>Industries</GradientText> & <GradientText>Businesses</GradientText>
             </h3>
             <div className="overflow-hidden relative pb-8">
                 <motion.div
