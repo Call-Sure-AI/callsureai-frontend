@@ -315,54 +315,55 @@ interface HandlePlayProps {
     sampleUrl: string;
 }
 
-const handlePlay = (voice: HandlePlayProps) => {
+// Replace the handlePlay function with this corrected version
+const handlePlay = (voice: Voice) => {
     // If clicking the same voice that's already playing
     if (playingVoice && playingVoice.id === voice.id && audioRef.current) {
-        if (audioRef.current.paused) {
-            // Resume playback
-            audioRef.current.play();
-            animationRef.current = requestAnimationFrame(updateProgress);
-        } else {
-            // Pause playback
-            audioRef.current.pause();
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
+      if (audioRef.current.paused) {
+        // Resume playback
+        audioRef.current.play();
+        animationRef.current = requestAnimationFrame(updateProgress);
+      } else {
+        // Pause playback
+        audioRef.current.pause();
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
         }
-        return;
+      }
+      return;
     }
     
     // Stop any currently playing audio
     if (audioRef.current) {
-        audioRef.current.pause();
+      audioRef.current.pause();
     }
     if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      cancelAnimationFrame(animationRef.current);
     }
     
     // Create and play new audio
     const audio = new Audio(voice.sampleUrl);
     audio.addEventListener('loadedmetadata', () => {
-        setProgress(0);
-        audio.play();
-        audioRef.current = audio;
-        setPlayingVoice(voice);
-        animationRef.current = requestAnimationFrame(updateProgress);
+      setProgress(0);
+      audio.play();
+      audioRef.current = audio;
+      setPlayingVoice(voice);
+      animationRef.current = requestAnimationFrame(updateProgress);
     });
     
     audio.addEventListener('ended', () => {
-        setPlayingVoice(null);
-        setProgress(0);
-        if (animationRef.current) {
-            cancelAnimationFrame(animationRef.current);
-        }
+      setPlayingVoice(null);
+      setProgress(0);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     });
     
     audio.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        setPlayingVoice(null);
+      console.error('Audio error:', e);
+      setPlayingVoice(null);
     });
-};
+  };
 
   return (
     <section id="test-voices" className="py-12 bg-gray-50">
