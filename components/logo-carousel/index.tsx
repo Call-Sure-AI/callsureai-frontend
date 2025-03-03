@@ -29,7 +29,7 @@ interface GradientTextProps {
   
   const GradientText = memo(({ children }: GradientTextProps) => (
     <span
-      className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
+      className="inline-block bg-gradient-to-br from-white via-[#349afa] to-[#a7bed4] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
       style={{ lineHeight: 1.2 }}
     >
       {children}
@@ -48,9 +48,9 @@ const LogoCarousel = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.5 }}
             variants={fadeIn}
-            className="mt-12"
+            className="bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-white mt-0 pt-12 pb-4"
         >
-            <h3 className="text-2xl font-bold text-center text-slate-800 mb-8 w-[80%] mx-auto">
+            <h3 className="text-2xl font-bold text-center text-white mb-8 w-[80%] mx-auto">
                     Supports <GradientText>2K+ Integrations</GradientText> across <GradientText>Industries</GradientText> & <GradientText>Businesses</GradientText>
             </h3>
             <div className="overflow-hidden relative pb-8">
