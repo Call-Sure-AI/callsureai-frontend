@@ -91,8 +91,8 @@ const StickyScroll = ({ content }: StickyScrollProps) => {
         style={{ height: scrollHeight }} // Dynamic height calculation
       >
         <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="container mx-auto px-40">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-10 items-center">
               {/* Left side text content with card style - showing 3 cards at once */}
               <div className="relative">
                 {contentSets.map((set, setIndex) => (
@@ -124,7 +124,7 @@ const StickyScroll = ({ content }: StickyScrollProps) => {
               </div>
               
               {/* Right side visualization - shows one visualization at a time */}
-              <div className="h-[500px] rounded-2xl overflow-hidden shadow-xl relative">
+              <div className="h-[600px] rounded-2xl overflow-hidden shadow-xl relative">
                 {contentSets.map((set, setIndex) => (
                   <motion.div
                     key={setIndex}

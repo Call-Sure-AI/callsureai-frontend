@@ -7,6 +7,7 @@ import Banner from "@/components/banner";
 import FAQ from "@/components/faq";
 import TestimonialSection from "@/components/testimonials";
 import LogoCarousel from "@/components/logo-carousel";
+import TestVoicesSection from '../components/voice-section/TestVoicesSection';
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <LogoCarousel />
       <AnalyticsPage />
       <IntegrationSection />
+      <TestVoicesSection />
       <TestimonialSection />
       <FAQ />
       <Banner />
