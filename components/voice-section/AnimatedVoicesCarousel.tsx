@@ -310,11 +310,6 @@ const AnimatedVoicesCarousel = () => {
     }
   };
 
-interface HandlePlayProps {
-    id: number;
-    sampleUrl: string;
-}
-
 // Replace the handlePlay function with this corrected version
 const handlePlay = (voice: Voice) => {
     // If clicking the same voice that's already playing
