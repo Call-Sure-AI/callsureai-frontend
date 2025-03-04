@@ -183,57 +183,54 @@ interface VoiceCardProps {
 }
 
 const VoiceCard: React.FC<VoiceCardProps> = ({ voice, isPlaying, onPlay, progress }) => {
-  return (
-    <div 
-      className="flex flex-col bg-white shadow-md rounded-lg overflow-hidden p-4 mx-2 border border-gray-200"
-      style={{ 
-        minWidth: 'clamp(240px, 20vw, 300px)',
-        flexShrink: 0 
-      }}
-    >
-      <div className="flex items-center mb-2">
-        <div className="w-12 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center">
-          <span className="text-blue-600 text-xs font-bold">{voice.displayName.charAt(0)}</span>
+    return (
+      <div
+        className="flex flex-col bg-white shadow-lg rounded-xl overflow-hidden p-4 mx-2 border border-gray-100 transition-transform transform hover:scale-105"
+        style={{ minWidth: 'clamp(240px, 20vw, 300px)', flexShrink: 0 }}
+      >
+        <div className="flex items-center mb-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-slate-900 via-blue-400 to-slate-900 flex items-center justify-center shadow-md">
+            <span className="text-white text-lg font-bold">{voice.displayName.charAt(0)}</span>
+          </div>
+          <div className="ml-4">
+            <h3 className="text-gray-900 font-semibold text-base">{voice.displayName}</h3>
+            <p className="text-gray-500 text-sm">{voice.name}</p>
+          </div>
         </div>
-        <div className="ml-3">
-          <h3 className="text-gray-800 font-medium text-sm truncate">{voice.displayName}</h3>
-          <p className="text-gray-500 text-xs truncate">{voice.name}</p>
+        <div className="flex items-center justify-between mb-4">
+           <span className="text-xs text-gray-600 px-2 py-1 rounded-full bg-gray-100">{voice.accent} Accent</span>
+           <span className="text-xs text-gray-600 px-2 py-1 rounded-full bg-gray-100">{voice.language}</span>
         </div>
-      </div>
-      <div className="text-gray-600 text-xs mb-3">
-        {voice.accent} Accent - {voice.language}
-      </div>
-      <div className="flex items-center mt-2">
-        <div className="flex-shrink-0 mr-2">
+        <div className="flex items-center">
           <button
-            className={`w-10 h-10 rounded-full bg-gradient-to-b from-[#162a47] via-[#3362A6]/90 to-[#162a47] flex items-center justify-center text-white hover:bg-gradient-to-r hover:from-[#162a47] hover:via-[#3362A6]/90 hover:to-[#162a47] transition-colors
-            ${!isPlaying ? 'animate-[scale_3s_ease-in-out_infinite] hover:animate-none' : ''} 
-            hover:scale-105 active:scale-95 transition-transform`}
+            className={`w-12 h-12 rounded-full bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white transition-colors hover:opacity-90 active:scale-95 ${
+              !isPlaying ? 'animate-[scale_3s_ease-in-out_infinite]' : ''
+            }`}
             onClick={() => onPlay(voice)}
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4" />
+              <Pause className="w-5 h-5" />
             ) : (
-              <Play className="w-4 h-4 ml-0.5" />
+              <Play className="w-5 h-5" />
             )}
           </button>
-        </div>
-        <div className="flex-grow">
-          <div className="text-xs text-gray-500 mb-1">{voice.audioLength}</div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 relative overflow-hidden">
-            {isPlaying && (
-              <div
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#162a47] via-[#3362A6]/90 to-[#162a47]"
-                style={{ width: `${progress}%` }}
-              ></div>
-            )}
+          <div className="flex-grow ml-4">
+            <div className="text-xs text-gray-500 mb-1">{voice.audioLength}</div>
+            <div className="w-full bg-gray-200 rounded-full h-2 relative">
+              {isPlaying && (
+                <div
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#162a47] via-[#3362A6] to-[#162a47] rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
+  
 
 interface AnimatedRowProps {
   voices: Voice[];
@@ -406,9 +403,22 @@ const AnimatedVoicesCarousel = () => {
 
       <div className="px-4 relative max-w-full">
         <div className="pt-0 pb-0 text-center">
-          <div className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 text-sm text-blue-600 mb-6">
-            <span>Our Most Used Voices</span>
-          </div>
+        <div className="inline-flex flex-wrap items-center gap-0.75 bg-blue-50 backdrop-blur px-2 sm:px-3 py-1.5 sm:py-2 mb-6 rounded-full shadow-sm">
+  <div
+    className="animate-[scale_2s_ease-in-out_infinite]"
+    style={{
+      animationName: "scale",
+      animationDuration: "2s",
+      animationIterationCount: "infinite",
+      animationTimingFunction: "ease-in-out"
+    }}
+  >
+    <div className="h-4 w-4 sm:h-5 sm:w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mr-1.5 sm:mr-2">
+      <Mic className="h-2 w-2 sm:h-3 sm:w-3 text-white" />
+    </div>
+  </div>
+  <span className="text-blue-800 text-xs sm:text-sm font-medium whitespace-normal">Our Most Used Voices</span>
+</div>
           <h2 className="text-4xl md:text-5xl font-bold max-w-5xl mx-auto mb-4" style={{ lineHeight: 1.2 }}>
             <GradientText>Explore</GradientText> Our Premium <GradientText>Voice Collection</GradientText>
           </h2>
