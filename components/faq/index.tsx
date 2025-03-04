@@ -303,7 +303,7 @@ const FAQ: React.FC = () => {
                                         onClick={() => setActiveQuestion(
                                             activeQuestion === item.question ? null : item.question
                                         )}
-                                        className="w-full flex items-center justify-between p-6 text-left"
+                                        className="w-full flex items-center justify-between p-2 text-left"
                                         type="button"
                                     >
                                         <motion.span

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo, useState, useRef, useEffect } from 'react';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, Mic } from 'lucide-react';
 
 interface Voice {
   id: number;
@@ -185,15 +185,19 @@ interface VoiceCardProps {
 const VoiceCard: React.FC<VoiceCardProps> = ({ voice, isPlaying, onPlay, progress }) => {
   return (
     <div 
-      className="flex flex-col bg-white shadow-md rounded-lg overflow-hidden p-4 min-w-64 mx-2 border border-gray-200"
+      className="flex flex-col bg-white shadow-md rounded-lg overflow-hidden p-4 mx-2 border border-gray-200"
+      style={{ 
+        minWidth: 'clamp(240px, 20vw, 300px)',
+        flexShrink: 0 
+      }}
     >
       <div className="flex items-center mb-2">
-        <div className="w-8 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center">
+        <div className="w-12 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center">
           <span className="text-blue-600 text-xs font-bold">{voice.displayName.charAt(0)}</span>
         </div>
         <div className="ml-3">
-          <h3 className="text-gray-800 font-medium text-sm">{voice.displayName}</h3>
-          <p className="text-gray-500 text-xs">{voice.name}</p>
+          <h3 className="text-gray-800 font-medium text-sm truncate">{voice.displayName}</h3>
+          <p className="text-gray-500 text-xs truncate">{voice.name}</p>
         </div>
       </div>
       <div className="text-gray-600 text-xs mb-3">
@@ -252,9 +256,10 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ voices, direction, onPlay, pl
 
   return (
     <div 
-      className="flex overflow-hidden my-4"
+      className="flex overflow-hidden my-4 w-full"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)' }}
     >
       <div 
         ref={rowRef}
@@ -310,8 +315,8 @@ const AnimatedVoicesCarousel = () => {
     }
   };
 
-// Replace the handlePlay function with this corrected version
-const handlePlay = (voice: Voice) => {
+  // Replace the handlePlay function with this corrected version
+  const handlePlay = (voice: Voice) => {
     // If clicking the same voice that's already playing
     if (playingVoice && playingVoice.id === voice.id && audioRef.current) {
       if (audioRef.current.paused) {
@@ -361,7 +366,7 @@ const handlePlay = (voice: Voice) => {
   };
 
   return (
-    <section id="test-voices" className="py-12 bg-gray-50">
+    <section id="test-voices" className="py-12 bg-gray-50 overflow-hidden">
       <style jsx global>{`
         @keyframes scrollRightToLeft {
           0% { transform: translateX(0); }
@@ -399,7 +404,7 @@ const handlePlay = (voice: Voice) => {
         }
       `}</style>
 
-      <div className="container mx-auto px-4">
+      <div className="px-4 relative max-w-full">
         <div className="pt-0 pb-0 text-center">
           <div className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 text-sm text-blue-600 mb-6">
             <span>Our Most Used Voices</span>

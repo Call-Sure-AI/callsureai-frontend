@@ -2,7 +2,7 @@
 
 import React, { memo, useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Clock, LineChart, BarChart4, PieChart, Shield, Brain, FileUp, Database, CheckCircle } from "lucide-react";
+import { Users, Clock, LineChart, BarChart4, PieChart, Shield, Brain, FileUp, Database, CheckCircle, Award } from "lucide-react";
 
 
 interface GradientTextProps {
@@ -640,7 +640,7 @@ export default function AnalyticsPage() {
           <div className="flex flex-col items-center gap-6">
             <FileUp color="white" size={80} />
             <div className="text-center">
-              <h4 className="text-2xl font-bold mb-2">Seamless File Processing</h4>
+              <h4 className="text-2xl font-bold mb-2">Fast File Processing</h4>
               <p className="max-w-md text-white/80">AI that can analyze uploaded documents and extract relevant information</p>
             </div>
             <div className="w-full bg-white/10 rounded-lg p-4 mt-4">
@@ -769,14 +769,30 @@ export default function AnalyticsPage() {
       return (
         <div className="min-h-screen bg-gray-50">
           <div className="pt-20 pb-0 text-center">
-            <div className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 text-sm text-blue-600 mb-6">
-              <span>Built to Give Customers Amazing Experiences</span>
+            <div className="inline-flex items-center gap-0.75 bg-blue-50 backdrop-blur px-3 py-2 mb-6 rounded-full shadow-sm">
+
+            <motion.div
+                animate={{
+                    scale: [1, 1.2, 1],
+                }}
+                transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                }}
+                className="w-5 h-4 mr-2 rounded-full flex items-center justify-center text-[10px] text-white"
+            >
+                <div className="h-5 w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
+                    <Award className="h-4 w-4 text-white" />
+                </div>
+            </motion.div>
+              <span className="text-blue-800 text-sm font-medium">Built to Give Customers Amazing Experiences</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold max-w-5xl mx-auto mb-4" style={{ lineHeight: 1.2 }}>
-                Your <GradientText>All</GradientText>-in-<GradientText>1 Customer Success</GradientText> Platform  — Track, <GradientText>Engage,</GradientText> Analyze & <GradientText>Grow</GradientText>
+                Your <GradientText>All</GradientText>-in-<GradientText>1 Customer Success</GradientText> Platform  to Track, <GradientText>Engage,</GradientText> Analyze & <GradientText>Grow</GradientText>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Capture, analyze, and optimize every customer interaction—all in one powerful platform that boosts your growth and reclaims your time.
+              Capture, analyze, and optimize every customer interaction with our all in one powerful platform that boosts your growth and saves your time.
             </p>
           </div>
 
