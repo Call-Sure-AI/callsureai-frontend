@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "next/image";  // Add this import
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -69,57 +69,59 @@ const Navbar = () => {
             className="w-full py-1 sm:py-1 px-4 sm:px-6 bg-white/80 backdrop-blur-md fixed top-0 z-50"
         >
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between relative">
-                    {/* Logo section - left side */}
-                    <Link href="/" className="flex items-center gap-2 group my-3">
-                        <motion.div
-                            variants={itemAnimation}
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ type: "spring", stiffness: 400 }}
-                            className="w-10 h-10 sm:w-12 sm:h-12 relative"
-                        >
-                            <Image
-                                src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
-                                alt="Callsure AI Logo"
-                                fill
-                                className="object-contain"
-                                priority
-                            />
-                        </motion.div>
-                        <motion.span
-                            variants={itemAnimation}
-                            transition={{ type: "spring", stiffness: 400 }}
-                            className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
-                            Callsure
-                        </motion.span>
-                    </Link>
-
-                    {/* Navigation links - centered */}
-                    <div className="hidden md:flex items-center justify-center absolute left-0 right-0 mx-auto">
-                        <div className="flex items-center gap-6">
-                            {navItems.map((item, index) => (
-                                <motion.div
-                                    key={item.label}
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 + 0.2 }}
-                                >
-                                    <Link
-                                        href={item.href}
-                                        className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
-                                        // @ts-ignore
-                                        whilehover={{ scale: 1.05 }}
-                                        whiletap={{ scale: 0.95 }}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
+                {/* Three-column layout: Logo | Nav | Actions */}
+                <div className="flex items-center justify-between">
+                    {/* Left column - Logo */}
+                    <div className="flex-1">
+                        <Link href="/" className="flex items-center gap-2 group my-3">
+                            <motion.div
+                                variants={itemAnimation}
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ type: "spring", stiffness: 400 }}
+                                className="w-10 h-10 sm:w-12 sm:h-12 relative"
+                            >
+                                <Image
+                                    src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
+                                    alt="Callsure AI Logo"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </motion.div>
+                            <motion.span
+                                variants={itemAnimation}
+                                transition={{ type: "spring", stiffness: 400 }}
+                                className="text-2xl sm:text-3xl font-bold bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] bg-clip-text text-transparent">
+                                Callsure
+                            </motion.span>
+                        </Link>
                     </div>
 
-                    {/* Sign up / User profile - right side */}
-                    <div className="flex items-center gap-4">
+                    {/* Middle column - Nav Items */}
+                    <div className="hidden md:flex items-center justify-center flex-1">
+                        {navItems.map((item, index) => (
+                            <motion.div
+                                key={item.label}
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 + 0.2 }}
+                                className="mx-3"
+                            >
+                                <Link
+                                    href={item.href}
+                                    className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
+                                    // @ts-ignore
+                                    whilehover={{ scale: 1.05 }}
+                                    whiletap={{ scale: 0.95 }}
+                                >
+                                    {item.label}
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {/* Right column - User controls */}
+                    <div className="flex items-center gap-4 flex-1 justify-end">
                         {user && user?.email ? (
                             <UserProfileIcon />
                         ) : (
