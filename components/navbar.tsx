@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";  // Add this import
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -69,7 +69,8 @@ const Navbar = () => {
             className="w-full py-1 sm:py-1 px-4 sm:px-6 bg-white/80 backdrop-blur-md fixed top-0 z-50"
         >
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between relative">
+                    {/* Logo section - left side */}
                     <Link href="/" className="flex items-center gap-2 group my-3">
                         <motion.div
                             variants={itemAnimation}
@@ -93,27 +94,31 @@ const Navbar = () => {
                         </motion.span>
                     </Link>
 
-                    <div className="hidden md:flex items-center gap-6">
-                        {navItems.map((item, index) => (
-                            <motion.div
-                                key={item.label}
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 + 0.2 }}
-                            >
-                                <Link
-                                    href={item.href}
-                                    className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
-                                    // @ts-ignore
-                                    whilehover={{ scale: 1.05 }}
-                                    whiletap={{ scale: 0.95 }}
+                    {/* Navigation links - centered */}
+                    <div className="hidden md:flex items-center justify-center absolute left-0 right-0 mx-auto">
+                        <div className="flex items-center gap-6">
+                            {navItems.map((item, index) => (
+                                <motion.div
+                                    key={item.label}
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 + 0.2 }}
                                 >
-                                    {item.label}
-                                </Link>
-                            </motion.div>
-                        ))}
+                                    <Link
+                                        href={item.href}
+                                        className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
+                                        // @ts-ignore
+                                        whilehover={{ scale: 1.05 }}
+                                        whiletap={{ scale: 0.95 }}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
 
+                    {/* Sign up / User profile - right side */}
                     <div className="flex items-center gap-4">
                         {user && user?.email ? (
                             <UserProfileIcon />
