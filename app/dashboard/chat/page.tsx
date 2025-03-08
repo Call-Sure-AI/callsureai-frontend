@@ -3,8 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, MicOff, PhoneOff, ArrowLeft } from "lucide-react";
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import WebRTCClient from "@/services/webrtc-connection-service";
+import { useCompany } from "@/contexts/company-context";
 
 interface Message {
     sender: 'user' | 'server';
@@ -12,100 +14,154 @@ interface Message {
     msgId: number;
 }
 
-type SpeechRecognitionType = {
-    continuous: boolean;
-    interimResults: boolean;
-    lang: string;
-    onstart: () => void;
-    onend: () => void;
-    onresult: (event: SpeechRecognitionEvent) => void;
-    onerror: (event: SpeechRecognitionErrorEvent) => void;
-    start: () => void;
-    stop: () => void;
-}
-
-interface SpeechRecognitionEvent {
-    resultIndex: number;
-    results: {
-        [key: number]: {
-            [key: number]: {
-                transcript: string;
-            };
-        };
-    };
-}
-
-interface SpeechRecognitionErrorEvent {
-    error: string;
-    message: string;
-}
-
-declare global {
-    interface Window {
-        SpeechRecognition: new () => SpeechRecognitionType;
-        webkitSpeechRecognition: new () => SpeechRecognitionType;
-        mozSpeechRecognition: new () => SpeechRecognitionType;
-        msSpeechRecognition: new () => SpeechRecognitionType;
-    }
+interface AudioResponseData {
+    status: 'started' | 'processed' | 'completed' | 'error';
+    stream_id: string;
+    timestamp: string;
+    [key: string]: any;
 }
 
 const Chat = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { company } = useCompany();
+
+    const agentId = searchParams.get('agentId');
+
     const [messages, setMessages] = useState<Message[]>([
-        {
-            sender: 'user',
-            content: 'Hello there! How can I assist you today?',
-            msgId: 1,
-        },
         {
             sender: 'server',
             content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
-            msgId: 2,
+            msgId: 1,
         }
     ]);
-    const [transcript, setTranscript] = useState<string>('');
     const [isListening, setIsListening] = useState<boolean>(false);
-    const [recognition, setRecognition] = useState<SpeechRecognitionType>();
+    const [isConnected, setIsConnected] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+    const [nextMsgId, setNextMsgId] = useState<number>(2);
+    const [isWebRTCInitialized, setIsWebRTCInitialized] = useState<boolean>(false);
 
-    const toggleListening = useCallback(() => {
+    const webrtcRef = useRef<WebRTCClient | null>(null);
+
+    useEffect(() => {
+        console.log('Initializing WebRTC with:', { agentId });
+
+        if (!company?.id || !agentId) {
+            setError('Missing required parameters: companyApiKey or agentId');
+            return;
+        }
+
+        const webrtc = new WebRTCClient({
+            apiBaseUrl: 'wss://stage.callsure.ai',
+            companyApiKey: company.id,
+            agentId: agentId
+        });
+
+        webrtc
+            .on('onConnected', () => {
+                console.log('WebRTC connected!');
+                setIsConnected(true);
+                setError('');
+                addMessage('server', 'Connected to agent. You can start speaking now.');
+            })
+            .on('onDisconnected', () => {
+                console.log('WebRTC disconnected');
+                setIsConnected(false);
+                setIsListening(false);
+                setError('');
+                addMessage('server', 'Disconnected from agent.');
+            })
+            .on('onTextMessage', (message: string) => {
+                addMessage('server', message);
+            })
+            .on('onAudioResponse', (data: AudioResponseData) => {
+                console.log('Audio response:', data);
+                if (data.status === 'started') {
+                    webrtc.currentStreamId = data.stream_id;
+                }
+            })
+            .on('onError', (errorMessage: string) => {
+                console.error('WebRTC error:', errorMessage);
+                setError(errorMessage);
+            });
+
+        webrtcRef.current = webrtc;
+        setIsWebRTCInitialized(true);
+
+        webrtc.connect().catch(err => {
+            console.error('Failed to connect:', err);
+            setError('Failed to connect to the voice service.');
+        });
+
+        return () => {
+            if (webrtcRef.current) {
+                webrtcRef.current.disconnect();
+                webrtcRef.current = null;
+                setIsWebRTCInitialized(false);
+            }
+        };
+    }, [company?.id, agentId]);
+
+    const addMessage = useCallback((sender: 'user' | 'server', content: string) => {
+        setMessages(prevMessages => [
+            ...prevMessages,
+            { sender, content, msgId: nextMsgId }
+        ]);
+        setNextMsgId(prev => prev + 1);
+    }, [nextMsgId]);
+
+    const toggleListening = useCallback(async () => {
+        if (!webrtcRef.current) {
+            setError('WebRTC not initialized');
+            return;
+        }
+
         if (isListening) {
-            recognition?.stop();
+            webrtcRef.current.endAudioStream();
             setIsListening(false);
         } else {
-            recognition?.start();
-            setIsListening(true);
+            try {
+                const started = await webrtcRef.current.startAudioStream();
+                if (started) {
+                    setIsListening(true);
+                } else {
+                    setError('Failed to start audio stream');
+                }
+            } catch (err) {
+                console.error('Error starting audio stream:', err);
+                setError('Error starting audio stream');
+            }
         }
-    }, [isListening, recognition]);
+    }, [isListening]);
 
     const endCall = useCallback(() => {
-        recognition?.stop();
+        if (webrtcRef.current) {
+            webrtcRef.current.disconnect();
+        }
+        setIsConnected(false);
         setIsListening(false);
         setError('');
-        setTranscript('');
-        setRecognition(undefined);
+
         setMessages([
-            {
-                sender: 'user',
-                content: 'Hello there! How can I assist you today?',
-                msgId: 1,
-            },
             {
                 sender: 'server',
                 content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
-                msgId: 2,
+                msgId: 1,
             }
         ]);
-    }, [recognition]);
+        setNextMsgId(2);
+    }, []);
 
     const handleBack = () => {
+        if (webrtcRef.current) {
+            webrtcRef.current.disconnect();
+        }
         router.push('/dashboard');
     };
 
     return (
         <div className="flex justify-center items-center w-full h-screen bg-slate-100">
             <Card className="max-w-3xl ml-16 w-full h-[600px] flex flex-col shadow-xl">
-                {/* Header */}
                 <div className="px-6 py-4 border-b bg-white">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -121,8 +177,13 @@ const Chat = () => {
                             <div>
                                 <h2 className="text-xl font-semibold text-slate-900">AI Assistant</h2>
                                 <p className="text-sm text-slate-500">
-                                    {isListening ? 'Listening...' : 'Voice Chat'}
+                                    {isListening ? 'Listening...' : isConnected ? 'Connected' : isWebRTCInitialized ? 'Connecting...' : 'Initializing...'}
                                 </p>
+                                {(!company?.id || !agentId) && (
+                                    <p className="text-xs text-red-500">
+                                        Missing parameters. Please go back and try again.
+                                    </p>
+                                )}
                             </div>
                         </div>
                         {error && (
@@ -133,12 +194,11 @@ const Chat = () => {
                     </div>
                 </div>
 
-                {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto bg-slate-50 p-4">
                     <div className="space-y-3">
-                        {messages.map((message: Message, index: number) => (
+                        {messages.map((message: Message) => (
                             <div
-                                key={index}
+                                key={message.msgId}
                                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
@@ -153,36 +213,35 @@ const Chat = () => {
                             </div>
                         ))}
 
-                        {/* Live transcript */}
-                        {isListening && transcript && (
+                        {/* Status indicator when listening */}
+                        {isListening && (
                             <div className="flex justify-end">
                                 <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-blue-300 text-white shadow-sm opacity-75">
-                                    {transcript}
+                                    Listening...
                                 </div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Voice Controls */}
                 <div className="p-6 bg-white border-t">
                     <div className="flex justify-center gap-6">
                         <Button
                             onClick={toggleListening}
-                            disabled={!recognition}
+                            disabled={!isConnected}
                             className={`w-14 h-14 rounded-full shadow-lg transition-colors
-                                ${!isListening
+                                ${isListening
                                     ? 'bg-red-500 hover:bg-red-600'
                                     : 'bg-blue-500 hover:bg-blue-600'
                                 }
-                                ${!recognition ? 'opacity-50 cursor-not-allowed' : ''}
+                                ${!isConnected ? 'opacity-50 cursor-not-allowed' : ''}
                             `}
                             aria-label={isListening ? "Stop listening" : "Start listening"}
                         >
                             {isListening ? (
-                                <Mic className="h-6 w-6 text-white" />
-                            ) : (
                                 <MicOff className="h-6 w-6 text-white" />
+                            ) : (
+                                <Mic className="h-6 w-6 text-white" />
                             )}
                         </Button>
                         <Button

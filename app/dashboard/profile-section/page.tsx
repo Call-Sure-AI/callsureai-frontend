@@ -10,19 +10,19 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { toast } from '@/hooks/use-toast';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 
-import { createOrUpdateCompany } from '@/services/company-service';
-
 import { ProfileFormData } from '@/types';
 import { ProtectedRoute } from '@/components/protected-route';
 import ProfileImageUpload from '@/components/settings/image-upload';
 
 import { useActivities } from '@/contexts/activity-context';
+import { useCompany } from '@/contexts/company-context';
 
 const ProfileSection = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
     const { refreshActivities } = useActivities();
-    const [loading, setLoading] = useState(true);
+    const { company, isLoading, updateCompanyData } = useCompany();
+
     const [formData, setFormData] = useState<ProfileFormData>({
         first_name: '',
         last_name: '',
@@ -36,6 +36,25 @@ const ProfileSection = () => {
         image: '',
         logo: '',
     });
+
+    // Update form when company data loads
+    useEffect(() => {
+        if (company) {
+            setFormData({
+                first_name: user?.name?.split(' ')[0] || '',
+                last_name: user?.name?.split(' ')[1] || '',
+                business_name: company.business_name || '',
+                email: company.email || user?.email || '',
+                phone: company.phone || '',
+                address: company.address || '',
+                city: company.city || '',
+                state: company.state || '',
+                zip_code: company.zip_code || '',
+                image: user?.image || '',
+                logo: company.logo || '',
+            });
+        }
+    }, [company, user]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -82,68 +101,35 @@ const ProfileSection = () => {
         }
 
         try {
-            setLoading(true);
-
-            await createOrUpdateCompany({ ...formData, userId: user?.id || '' }, token);
-            await refreshActivities();
-
-            toast({
-                title: "Success",
-                description: "Company profile updated successfully!",
+            const success = await updateCompanyData({
+                business_name: formData.business_name,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zip_code: formData.zip_code,
+                logo: formData.logo,
+                userId: user?.id
             });
+
+            if (success) {
+                await refreshActivities();
+                toast({
+                    title: "Success",
+                    description: "Profile updated successfully.",
+                });
+            }
         } catch (error: any) {
             toast({
                 title: "Error",
                 description: error?.message || "Failed to update profile. Please try again.",
                 variant: "destructive",
             });
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        const fetchCompanyData = async () => {
-            try {
-                if (!token || !user) {
-                    setLoading(false);
-                    return;
-                }
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (response.ok) {
-                    const companyData = await response.json();
-                    setFormData({
-                        first_name: user?.name?.split(' ')[0] || '',
-                        last_name: user?.name?.split(' ')[1] || '',
-                        business_name: companyData.business_name || '',
-                        email: companyData.email || user?.email || '',
-                        phone: companyData.phone_number || '',
-                        address: companyData.address.split(',')[0] || '',
-                        city: companyData.address.split(',')[1] || '',
-                        state: companyData.address.split(',')[2] || '',
-                        zip_code: companyData.address.split(',')[3] || '',
-                        image: companyData.logo || user?.image || '',
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching company data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (user && token) {
-            fetchCompanyData();
-        }
-    }, [user, token]);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex w-full justify-center items-center min-h-screen">
                 <div className="w-full h-full flex justify-center items-center">
@@ -155,7 +141,6 @@ const ProfileSection = () => {
 
     return (
         <ProtectedRoute>
-
             <div className="w-full p-2 md:p-8">
                 <Card className="bg-white shadow-sm w-full">
                     <CardHeader className="border-b">

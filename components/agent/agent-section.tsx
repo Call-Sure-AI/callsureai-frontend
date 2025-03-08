@@ -29,6 +29,10 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
         );
     }
 
+    const handleTestAgent = (agent: AgentFormData) => {
+        router.push(`/dashboard/chat?agentId=${agent.id}`);
+    };
+
     return (
         <div className="space-y-8 pb-16 md:pb-8 h-[calc(80vh-200px)] overflow-y-auto pr-4 
             [&::-webkit-scrollbar]:w-2
@@ -75,8 +79,8 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                                 <h2 className="text-lg font-semibold text-gray-900 group-hover:text-[#0A1E4E] transition-colors duration-200 truncate">
                                                     {agent.name}
                                                 </h2>
-                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent.additional_context.tone.substring(0, 1).toUpperCase() + agent.additional_context.tone.substring(1)}</span>
-                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent.additional_context.gender.substring(0, 1).toUpperCase() + agent.additional_context.gender.substring(1)}</span>
+                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent?.additional_context?.tone.substring(0, 1).toUpperCase() + agent?.additional_context?.tone.substring(1)}</span>
+                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent?.additional_context?.gender.substring(0, 1).toUpperCase() + agent?.additional_context?.gender.substring(1)}</span>
                                             </div>
                                         </div>
                                         <div className="flex justify-center my-auto items-center gap-2">
@@ -89,7 +93,7 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                         </div>
                                         <div className="flex flex-col items-center justify-between border-t border-gray-100">
                                             <Button
-                                                onClick={() => router.push("/dashboard/chat")}
+                                                onClick={() => handleTestAgent(agent)}
                                                 className="mb-4 transition-colors duration-200"
                                                 variant="primary"
                                                 size="sm"

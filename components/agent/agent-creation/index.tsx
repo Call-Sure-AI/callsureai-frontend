@@ -25,9 +25,10 @@ import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { AgentFormData } from '@/types';
-import { createAgent } from '@/services/agent-service';
+import { createAdminAgent, createAgent } from '@/services/agent-service';
 import { useActivities } from '@/contexts/activity-context';
 import { useAgents } from '@/contexts/agent-context';
+import { useCompany } from '@/contexts/company-context';
 
 interface AdvancedSettings {
   authUrl: string;
@@ -67,6 +68,7 @@ const AgentCreationForm = () => {
   const router = useRouter();
   const { user } = useCurrentUser();
   const { token } = useIsAuthenticated();
+  const { company } = useCompany();
   const { refreshActivities } = useActivities();
   const { refreshAgents } = useAgents();
 
@@ -131,38 +133,38 @@ const AgentCreationForm = () => {
     });
   };
 
-    const loadAudio = useCallback(async (gender: string, tone: string, language: string) => {
-      setIsAudioLoading(true);
+  const loadAudio = useCallback(async (gender: string, tone: string, language: string) => {
+    setIsAudioLoading(true);
+    setAudioError(false);
+
+    const audioPath = getAudioPath(gender, tone, language);
+    if (!audioPath) return;
+
+    const newAudio = new Audio(audioPath);
+
+    try {
+      await new Promise((resolve, reject) => {
+        newAudio.addEventListener('canplaythrough', resolve, { once: true });
+        newAudio.addEventListener('error', reject, { once: true });
+        setTimeout(() => reject(new Error('Audio load timeout')), 5000);
+      });
+
+      newAudio.addEventListener('play', () => setIsPlaying(true));
+      newAudio.addEventListener('pause', () => setIsPlaying(false));
+      newAudio.addEventListener('ended', () => setIsPlaying(false));
+
+      setAudio(newAudio);
       setAudioError(false);
-
-      const audioPath = getAudioPath(gender, tone, language);
-      if (!audioPath) return;
-
-      const newAudio = new Audio(audioPath);
-
-      try {
-          await new Promise((resolve, reject) => {
-              newAudio.addEventListener('canplaythrough', resolve, { once: true });
-              newAudio.addEventListener('error', reject, { once: true });
-              setTimeout(() => reject(new Error('Audio load timeout')), 5000);
-          });
-
-          newAudio.addEventListener('play', () => setIsPlaying(true));
-          newAudio.addEventListener('pause', () => setIsPlaying(false));
-          newAudio.addEventListener('ended', () => setIsPlaying(false));
-
-          setAudio(newAudio);
-          setAudioError(false);
-      } catch (e: any) {
-          setAudioError(true);
-          toast({
-              title: "Audio Load Error",
-              description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
-              variant: "destructive",
-          });
-      } finally {
-          setIsAudioLoading(false);
-      }
+    } catch (e: any) {
+      setAudioError(true);
+      toast({
+        title: "Audio Load Error",
+        description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAudioLoading(false);
+    }
   }, [getAudioPath, setIsPlaying, setAudio, setAudioError, setIsAudioLoading]);
 
   const handlePlayAudio = () => {
@@ -210,10 +212,7 @@ const AgentCreationForm = () => {
         files: [...prev.files, ...newFiles]
       }));
 
-      toast({
-        title: "Success",
-        description: "Files uploaded successfully!",
-      });
+      return newFiles;
     } catch (error) {
       throw error;
     }
@@ -238,9 +237,10 @@ const AgentCreationForm = () => {
           return;
         }
       }
+      let fileUrls: string[] = [];
 
       if (files && files.length > 0) {
-        await uploadFiles(files);
+        fileUrls = await uploadFiles(files);
       }
 
       if (!user?.id) {
@@ -261,10 +261,17 @@ const AgentCreationForm = () => {
           businessContext: formData.businessContext,
         },
         advanced_settings: formData.advanced_settings,
-        files: formData.files || [],
+        files: fileUrls || [],
       };
 
-      await createAgent(agentData, token);
+      console.log("AGENT DATA", agentData);
+      console.log("COMPANY ID", company);
+
+      await Promise.all([
+        createAdminAgent(agentData, company?.id as string, user.id),
+        createAgent(agentData, token),
+      ]);
+
       await Promise.all([refreshAgents(), refreshActivities()]);
 
       toast({
@@ -306,16 +313,16 @@ const AgentCreationForm = () => {
   }, [loadAudio]);
 
   useEffect(() => {
-      if (formData.gender && formData.tone && formData.language) {
-          loadAudio(formData.gender, formData.tone, formData.language);
+    if (formData.gender && formData.tone && formData.language) {
+      loadAudio(formData.gender, formData.tone, formData.language);
+    }
+
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.src = '';
       }
-      
-      return () => {
-          if (audio) {
-              audio.pause();
-              audio.src = '';
-          }
-      };
+    };
   }, [formData.gender, formData.tone, formData.language, loadAudio, audio]);
 
   if (!isMounted) {

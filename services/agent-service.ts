@@ -1,5 +1,38 @@
 import { AgentFormData } from "@/types";
 
+/**
+ * Creates an agent via the admin API
+ */
+export const createAdminAgent = async (params: AgentFormData, company_id: string, user_id: string) => {
+    try {
+        console.log("PARAMS", params);
+        const formData = new FormData();
+        formData.append('name', params.name);
+        formData.append('type', params.type);
+        formData.append('company_id', company_id);
+        formData.append('prompt', params.prompt);
+        formData.append('user_id', user_id);
+
+        formData.append('file_urls', JSON.stringify(params.files));
+
+        const response = await fetch(`https://stage.callsure.ai/api/v1/admin/agents`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || result.message || 'Failed to create admin agent');
+        }
+
+        return result;
+    } catch (error: any) {
+        console.error('Error creating admin agent:', error);
+        throw new Error(error?.message || 'Failed to create admin agent');
+    }
+}
+
 export const createAgent = async (formData: AgentFormData, token: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
