@@ -56,7 +56,7 @@ const baseVoices = [
     accent: 'Indian',
     language: 'English',
     sampleUrl: '/voices/female-indian-en.mp3',
-    audioLength: '00:08'
+    audioLength: '00:09'
   },
   {
     name: 'Indian - Male',
@@ -65,11 +65,11 @@ const baseVoices = [
     accent: 'Indian',
     language: 'English',
     sampleUrl: '/voices/male-indian-en.mp3',
-    audioLength: '00:08'
+    audioLength: '00:09'
   },
   {
     name: 'Indian - Female (Hindi)',
-    displayName: 'Aanya Kapoor',
+    displayName: 'Riya Kapoor',
     gender: 'Female',
     accent: 'Indian',
     language: 'Hindi',
@@ -83,7 +83,7 @@ const baseVoices = [
     accent: 'Indian',
     language: 'Hindi',
     sampleUrl: '/voices/male-indian-hn.mp3',
-    audioLength: '00:08'
+    audioLength: '00:07'
   },
   {
     name: 'British - Female',
@@ -110,7 +110,7 @@ const baseVoices = [
     accent: 'Spanish',
     language: 'Spanish',
     sampleUrl: '/voices/female-spanish-es.mp3',
-    audioLength: '00:08'
+    audioLength: '00:09'
   },
   {
     name: 'Spanish - Male',
@@ -122,13 +122,67 @@ const baseVoices = [
     audioLength: '00:08'
   },
   {
+    name: 'Arabic - Female',
+    displayName: 'Layla Ahmed',
+    gender: 'Female',
+    accent: 'Arabic',
+    language: 'Arabic',
+    sampleUrl: '/voices/female-arabic-ar.mp3',
+    audioLength: '00:11'
+  },
+  {
+    name: 'Arabic - Male',
+    displayName: 'Youssef Ali',
+    gender: 'Male',
+    accent: 'Arabic',
+    language: 'Arabic',
+    sampleUrl: '/voices/male-arabic-ar.mp3',
+    audioLength: '00:11'
+  },
+  {
+    name: 'Chinese - Female',
+    displayName: 'Li Na',
+    gender: 'Female',
+    accent: 'Chinese',
+    language: 'Chinese',
+    sampleUrl: '/voices/female-chinese-cn.mp3',
+    audioLength: '00:10'
+  },
+  {
+    name: 'Chinese - Male',
+    displayName: 'Wang Wei',
+    gender: 'Male',
+    accent: 'Chinese',
+    language: 'Chinese',
+    sampleUrl: '/voices/male-chinese-cn.mp3',
+    audioLength: '00:08'
+  },
+  {
+    name: 'German - Female',
+    displayName: 'Mia Müller',
+    gender: 'Female',
+    accent: 'German',
+    language: 'German',
+    sampleUrl: '/voices/female-german-de.mp3',
+    audioLength: '00:12'
+  },
+  {
+    name: 'German - Male',
+    displayName: 'Lukas Schmidt',
+    gender: 'Male',
+    accent: 'German',
+    language: 'German',
+    sampleUrl: '/voices/male-german-de.mp3',
+    audioLength: '00:09'
+  },
+  {
     name: 'French - Female',
     displayName: 'Sophie Dubois',
     gender: 'Female',
     accent: 'French',
     language: 'French',
     sampleUrl: '/voices/female-french-fr.mp3',
-    audioLength: '00:08'
+    audioLength: '00:09'
   },
   {
     name: 'French - Male',
@@ -146,7 +200,7 @@ const baseVoices = [
     accent: 'Polish',
     language: 'Polish',
     sampleUrl: '/voices/female-polish-pl.mp3',
-    audioLength: '00:08'
+    audioLength: '00:14'
   },
   {
     name: 'Polish - Male',
@@ -155,7 +209,7 @@ const baseVoices = [
     accent: 'Polish',
     language: 'Polish',
     sampleUrl: '/voices/male-polish-pl.mp3',
-    audioLength: '00:08'
+    audioLength: '00:09'
   }
 ];
 
