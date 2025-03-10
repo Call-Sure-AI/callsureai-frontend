@@ -46,14 +46,14 @@ const Chat = () => {
     useEffect(() => {
         console.log('Initializing WebRTC with:', { agentId });
 
-        if (!company?.id || !agentId) {
+        if (!company?.company_api_key || !agentId) {
             setError('Missing required parameters: companyApiKey or agentId');
             return;
         }
 
         const webrtc = new WebRTCClient({
             apiBaseUrl: 'wss://stage.callsure.ai',
-            companyApiKey: company.id,
+            companyApiKey: company.company_api_key,
             agentId: agentId
         });
 
