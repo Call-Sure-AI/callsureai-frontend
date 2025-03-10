@@ -49,20 +49,19 @@ const ChatContent = () => {
             ...prevMessages,
             { sender, content, msgId: nextMsgId }
         ]);
-        setNextMsgId(prev => prev + 1);
-    }, [nextMsgId]);
+    }, []);
 
     useEffect(() => {
-        console.log('Initializing WebRTC with:', { agentId });
+        console.log('Initializing WebRTC with:', { agentId, company });
 
-        if (!company?.company_api_key || !agentId) {
+        if (!company?.api_key || !agentId) {
             setError('Missing required parameters: companyApiKey or agentId');
             return;
         }
 
         const webrtc = new WebRTCClient({
             apiBaseUrl: 'wss://stage.callsure.ai',
-            companyApiKey: company.company_api_key,
+            companyApiKey: company.api_key,
             agentId: agentId
         });
 

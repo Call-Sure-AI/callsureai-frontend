@@ -13,7 +13,7 @@ export interface CompanyData {
     phone_number: string;
     address: string;
     logo?: string;
-    company_api_key?: string;
+    api_key?: string;
     userId?: string;
 }
 
@@ -27,7 +27,7 @@ export interface ProcessedCompanyData {
     state: string;
     zip_code: string;
     logo?: string;
-    company_api_key?: string;
+    api_key?: string;
     userId?: string;
 }
 
@@ -73,7 +73,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             state: addressParts[2]?.trim() || '',
             zip_code: addressParts[3]?.trim() || '',
             logo: data.logo || userImage || '',
-            company_api_key: data.company_api_key || '',
+            api_key: data.api_key || '',
             userId: data.userId || user?.id || ''
         };
     };
