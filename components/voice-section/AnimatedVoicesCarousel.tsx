@@ -176,6 +176,24 @@ const baseVoices = [
     audioLength: '00:09'
   },
   {
+    name: 'Japanese - Female',
+    displayName: 'Yui Tanaka',
+    gender: 'Female',
+    accent: 'Japanese',
+    language: 'Japanese',
+    sampleUrl: '/voices/female-japanese-jp.mp3',
+    audioLength: '00:13'
+  },
+  {
+    name: 'Japanese - Male',
+    displayName: 'Hiroshi Yamada',
+    gender: 'Male',
+    accent: 'Japanese',
+    language: 'Japanese',
+    sampleUrl: '/voices/male-japanese-jp.mp3',
+    audioLength: '00:12'
+  },
+  {
     name: 'French - Female',
     displayName: 'Sophie Dubois',
     gender: 'Female',
@@ -193,6 +211,118 @@ const baseVoices = [
     sampleUrl: '/voices/male-french-fr.mp3',
     audioLength: '00:08'
   },
+
+
+  {
+    name: "Italian - Female",
+    displayName: "Giulia Rossi",
+    gender: "Female",
+    accent: "Italian",
+    language: "Italian",
+    sampleUrl: "/voices/female-italian-it.mp3",
+    audioLength: "00:09"
+  },
+  {
+    name: "Italian - Male",
+    displayName: "Marco Bianchi",
+    gender: "Male",
+    accent: "Italian",
+    language: "Italian",
+    sampleUrl: "/voices/male-italian-it.mp3",
+    audioLength: "00:10"
+  },
+  {
+    name: "Portuguese - Female",
+    displayName: "Maria Silva",
+    gender: "Female",
+    accent: "Portuguese",
+    language: "Portuguese",
+    sampleUrl: "/voices/female-portuguese-pt.mp3",
+    audioLength: "00:09"
+  },
+  {
+    name: "Portuguese - Male",
+    displayName: "João Santos",
+    gender: "Male",
+    accent: "Portuguese",
+    language: "Portuguese",
+    sampleUrl: "/voices/male-portuguese-pt.mp3",
+    audioLength: "00:08"
+  },
+  {
+    name: "Russian - Female",
+    displayName: "Anastasia Ivanova",
+    gender: "Female",
+    accent: "Russian",
+    language: "Russian",
+    sampleUrl: "/voices/female-russian-ru.mp3",
+    audioLength: "00:09"
+  },
+  {
+    name: "Russian - Male",
+    displayName: "Dmitry Petrov",
+    gender: "Male",
+    accent: "Russian",
+    language: "Russian",
+    sampleUrl: "/voices/male-russian-ru.mp3",
+    audioLength: "00:08"
+  },
+  {
+    name: "Korean - Female",
+    displayName: "Seo-yeon Kim",
+    gender: "Female",
+    accent: "Korean",
+    language: "Korean",
+    sampleUrl: "/voices/female-korean-ko.mp3",
+    audioLength: "00:09"
+  },
+  {
+    name: "Korean - Male",
+    displayName: "Min-jun Lee",
+    gender: "Male",
+    accent: "Korean",
+    language: "Korean",
+    sampleUrl: "/voices/male-korean-ko.mp3",
+    audioLength: "00:08"
+  },
+  {
+    name: "Dutch - Female",
+    displayName: "Emma de Vries",
+    gender: "Female",
+    accent: "Dutch",
+    language: "Dutch",
+    sampleUrl: "/voices/female-dutch-nl.mp3",
+    audioLength: "00:09"
+  },
+  {
+    name: "Dutch - Male",
+    displayName: "Daan de Jong",
+    gender: "Male",
+    accent: "Dutch",
+    language: "Dutch",
+    sampleUrl: "/voices/male-dutch-nl.mp3",
+    audioLength: "00:08"
+  },
+  {
+    name: "Turkish - Female",
+    displayName: "Zeynep Yılmaz",
+    gender: "Female",
+    accent: "Turkish",
+    language: "Turkish",
+    sampleUrl: "/voices/female-turkish-tr.mp3",
+    audioLength: "00:09"
+  },
+  {
+    name: "Turkish - Male",
+    displayName: "Emre Demir",
+    gender: "Male",
+    accent: "Turkish",
+    language: "Turkish",
+    sampleUrl: "/voices/male-turkish-tr.mp3",
+    audioLength: "00:08"
+  },
+
+
   {
     name: 'Polish - Female',
     displayName: 'Anna Kowalska',

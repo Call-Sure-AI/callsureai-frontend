@@ -1,18 +1,24 @@
 'use client';
 
 import Image from "next/image"
-import Link from "next/link";
 import { CircleUser } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 export const UserProfileIcon = () => {
     const { user } = useCurrentUser();
     const { logout, isLoggingOut } = useAuth({
         redirectPath: '/'
     });
+    const router = useRouter();
+
+    const handleNavigation = (path: any) => {
+        // Use immediate router navigation instead of Link
+        router.push(path);
+    };
 
     return (
         <DropdownMenu>
@@ -37,16 +43,21 @@ export const UserProfileIcon = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="ml-4">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <div className="px-2 mt-[-3%] text-xs text-gray-500">
                     {user?.email || 'Email'}
-                </DropdownMenuItem>
+                </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                    <Link href="/dashboard">Dashboard</Link>
+                <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleNavigation('/dashboard')}
+                >
+                    Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                    <Link href="/settings">Settings</Link>
+                <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleNavigation('/settings')}
+                >
+                    Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
