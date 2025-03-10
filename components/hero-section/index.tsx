@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Rocket } from "lucide-react";
 import VideoSection from "@/components/ui/videosection";
 
 const HeroSection = () => {
+    const [showCalendly, setShowCalendly] = useState(false);
+    
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 },
@@ -28,6 +30,14 @@ const HeroSection = () => {
             });
         }
     }, []);
+    
+    const openCalendly = () => {
+        setShowCalendly(true);
+    };
+  
+    const closeCalendly = () => {
+        setShowCalendly(false);
+    };
     
     return (
         <div
@@ -152,6 +162,7 @@ const HeroSection = () => {
                             <Button
                                 variant="outline"
                                 className="border-slate-400 bg-white text-blue-800 px-8 py-2 h-14 rounded-full w-full sm:w-auto text-lg font-bold"
+                                onClick={openCalendly}
                             >
                                 Book A Demo
                             </Button>
@@ -162,6 +173,31 @@ const HeroSection = () => {
                     <VideoSection />
                 </div>
             </motion.main>
+
+            {/* Calendly Modal */}
+            {showCalendly && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg w-full max-w-6xl h-5/6 relative">
+                        <button 
+                            onClick={closeCalendly}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <div className="h-full">
+                            <iframe
+                                src="https://calendly.com/callsureai/meet-with-callsure-ai-team"
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

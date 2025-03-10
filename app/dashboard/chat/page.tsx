@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, MicOff, PhoneOff, ArrowLeft } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import WebRTCClient from "@/services/webrtc-connection-service";
 import { useCompany } from "@/contexts/company-context";
@@ -21,7 +21,8 @@ interface AudioResponseData {
     [key: string]: any;
 }
 
-const Chat = () => {
+// Create a separate component that uses searchParams
+const ChatContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { company } = useCompany();
@@ -42,6 +43,14 @@ const Chat = () => {
     const [isWebRTCInitialized, setIsWebRTCInitialized] = useState<boolean>(false);
 
     const webrtcRef = useRef<WebRTCClient | null>(null);
+
+    const addMessage = useCallback((sender: 'user' | 'server', content: string) => {
+        setMessages(prevMessages => [
+            ...prevMessages,
+            { sender, content, msgId: nextMsgId }
+        ]);
+        setNextMsgId(prev => prev + 1);
+    }, [nextMsgId]);
 
     useEffect(() => {
         console.log('Initializing WebRTC with:', { agentId });
@@ -100,15 +109,7 @@ const Chat = () => {
                 setIsWebRTCInitialized(false);
             }
         };
-    }, [company?.id, agentId]);
-
-    const addMessage = useCallback((sender: 'user' | 'server', content: string) => {
-        setMessages(prevMessages => [
-            ...prevMessages,
-            { sender, content, msgId: nextMsgId }
-        ]);
-        setNextMsgId(prev => prev + 1);
-    }, [nextMsgId]);
+    }, [company?.id, agentId, addMessage]); // Added addMessage to the dependency array
 
     const toggleListening = useCallback(async () => {
         if (!webrtcRef.current) {
@@ -257,6 +258,21 @@ const Chat = () => {
             </Card>
         </div>
     );
-}
+};
+
+// Main component that wraps ChatContent with Suspense
+const Chat = () => {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center w-full h-screen bg-slate-100">
+                <Card className="max-w-3xl ml-16 w-full h-[600px] flex flex-col shadow-xl items-center justify-center">
+                    <p className="text-lg text-slate-600">Loading chat...</p>
+                </Card>
+            </div>
+        }>
+            <ChatContent />
+        </Suspense>
+    );
+};
 
 export default Chat;
