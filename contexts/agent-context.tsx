@@ -1,3 +1,4 @@
+// contexts/agent-context.tsx
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -24,6 +25,22 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         try {
             if (!token || !user) return;
             const data = await getAllAgents(token);
+            console.log("Fetched agents:", data);
+            
+            // Check for duplicate IDs
+            const ids = new Set();
+            const duplicates = [];
+            data.forEach(agent => {
+                if (ids.has(agent.id)) {
+                    duplicates.push(agent.id);
+                }
+                ids.add(agent.id);
+            });
+            
+            if (duplicates.length > 0) {
+                console.warn("Found duplicate agent IDs:", duplicates);
+            }
+            
             setAgents(data);
         } catch (error) {
             console.error('Failed to fetch agents:', error);

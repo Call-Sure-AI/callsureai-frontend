@@ -1,3 +1,4 @@
+// services/agent-service.ts
 import { AgentFormData } from "@/types";
 
 /**
@@ -56,29 +57,42 @@ export const createAdminAgent = async (agentData: AgentFormData, companyId: stri
 
   export const createAgent = async (agentData: AgentFormData, token: string) => {
     try {
-      console.log("PARAMS", agentData);
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(agentData)
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create agent');
-      }
-  
-      // Return the created agent (including its ID)
-      return await response.json();
+        console.log("PARAMS", agentData);
+        
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(agentData)
+        });
+    
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create agent');
+        }
+    
+        // Get the created agent
+        const createdAgent = await response.json();
+        console.log("Created agent:", createdAgent);
+        
+        // Check if this agent already exists (shouldn't happen, but checking)
+        const allAgents = await getAllAgents(token);
+        const matchingAgents = allAgents.filter(a => 
+            a.name === createdAgent.name && a.id !== createdAgent.id
+        );
+        
+        if (matchingAgents.length > 0) {
+            console.warn("Warning: Found duplicate agents with same name but different IDs:", matchingAgents);
+        }
+    
+        return createdAgent;
     } catch (error) {
-      console.error('Error creating agent:', error);
-      throw error;
+        console.error('Error creating agent:', error);
+        throw error;
     }
-  };
+};
 
 export const getAllAgents = async (token: string) => {
     try {
