@@ -45,11 +45,17 @@ const ChatContent = () => {
     const webrtcRef = useRef<WebRTCClient | null>(null);
 
     const addMessage = useCallback((sender: 'user' | 'server', content: string) => {
+        // Ensure content is a valid string
+        const safeContent = typeof content === 'string' ? content : '';
+        
         setMessages(prevMessages => [
             ...prevMessages,
-            { sender, content, msgId: nextMsgId }
+            { sender, content: safeContent, msgId: nextMsgId }
         ]);
-    }, []);
+        
+        // Increment message ID after adding a message
+        setNextMsgId(prevId => prevId + 1);
+    }, [nextMsgId]);
 
     useEffect(() => {
         console.log('Initializing WebRTC with:', { agentId, company });
@@ -61,7 +67,7 @@ const ChatContent = () => {
 
         const webrtc = new WebRTCClient({
             apiBaseUrl: 'wss://stage.callsure.ai',
-            companyApiKey: company.api_key,
+            companyApiKey: company.api_key || '', // Add fallback empty string
             agentId: agentId
         });
 
@@ -80,17 +86,22 @@ const ChatContent = () => {
                 addMessage('server', 'Disconnected from agent.');
             })
             .on('onTextMessage', (message: string) => {
-                addMessage('server', message);
+                // Only add valid messages
+                if (message && typeof message === 'string') {
+                    addMessage('server', message);
+                }
             })
             .on('onAudioResponse', (data: AudioResponseData) => {
                 console.log('Audio response:', data);
-                if (data.status === 'started') {
+                // Add defensive check for data
+                if (data && data.status === 'started' && data.stream_id) {
                     webrtc.currentStreamId = data.stream_id;
                 }
             })
             .on('onError', (errorMessage: string) => {
                 console.error('WebRTC error:', errorMessage);
-                setError(errorMessage);
+                setError(errorMessage || 'Unknown WebRTC error');
+                setIsConnected(false);
             });
 
         webrtcRef.current = webrtc;
@@ -108,7 +119,7 @@ const ChatContent = () => {
                 setIsWebRTCInitialized(false);
             }
         };
-    }, [company?.id, agentId, addMessage]); // Added addMessage to the dependency array
+    }, [company?.api_key, agentId, addMessage]); // Changed from company?.id to company?.api_key
 
     const toggleListening = useCallback(async () => {
         if (!webrtcRef.current) {
@@ -208,7 +219,8 @@ const ChatContent = () => {
                                             : 'bg-white text-slate-800'
                                         }`}
                                 >
-                                    {message.content}
+                                    {/* Ensure message.content is always a string */}
+                                    {typeof message.content === 'string' ? message.content : ''}
                                 </div>
                             </div>
                         ))}
