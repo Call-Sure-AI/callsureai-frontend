@@ -3,62 +3,80 @@ import { AgentFormData } from "@/types";
 /**
  * Creates an agent via the admin API
  */
-export const createAdminAgent = async (params: AgentFormData, company_id: string, user_id: string) => {
+export const createAdminAgent = async (agentData: AgentFormData, companyId: string, userId: string) => {
     try {
-        console.log("PARAMS", params);
-        const formData = new FormData();
-        formData.append('name', params.name);
-        formData.append('type', params.type);
-        formData.append('company_id', company_id);
-        formData.append('prompt', params.prompt);
-        formData.append('user_id', user_id);
-
-        formData.append('file_urls', JSON.stringify(params.files));
-
-        const response = await fetch(`https://stage.callsure.ai/api/v1/admin/agents`, {
-            method: 'POST',
-            body: formData,
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || result.message || 'Failed to create admin agent');
-        }
-
-        return result;
-    } catch (error: any) {
-        console.error('Error creating admin agent:', error);
-        throw new Error(error?.message || 'Failed to create admin agent');
-    }
-}
-
-export const createAgent = async (formData: AgentFormData, token: string) => {
-    try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                ...formData,
-                created_at: new Date(),
-                updated_at: new Date()
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to create agent');
-        }
-
-        return await response.json();
+      const formData = new FormData();
+      
+      // Add the agent ID if it exists
+      if (agentData.id) {
+        formData.append('id', agentData.id);
+      }
+      
+      // Add base agent data
+      formData.append('name', agentData.name);
+      formData.append('type', agentData.type);
+      formData.append('company_id', companyId);
+      formData.append('prompt', agentData.prompt);
+      formData.append('is_active', String(agentData.is_active));
+      formData.append('user_id', userId);
+      
+      // Add additional context if present
+      if (agentData.additional_context) {
+        formData.append('additional_context', JSON.stringify(agentData.additional_context));
+      }
+      
+      // Add advanced settings if present
+      if (agentData.advanced_settings) {
+        formData.append('advanced_settings', JSON.stringify(agentData.advanced_settings));
+      }
+      
+      // Add file URLs if present
+      if (agentData.files && agentData.files.length > 0) {
+        formData.append('file_urls', JSON.stringify(agentData.files));
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API_URL}/api/v1/admin/agents`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create agent in admin API');
+      }
+      
+      return await response.json();
     } catch (error) {
-        console.error('Error in createAgent:', error);
-        throw error;
+      console.error('Error creating admin agent:', error);
+      throw error;
     }
-};
+  };
+
+  export const createAgent = async (agentData: AgentFormData, token: string) => {
+    try {
+      console.log("PARAMS", agentData);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(agentData)
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create agent');
+      }
+  
+      // Return the created agent (including its ID)
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating agent:', error);
+      throw error;
+    }
+  };
 
 export const getAllAgents = async (token: string) => {
     try {

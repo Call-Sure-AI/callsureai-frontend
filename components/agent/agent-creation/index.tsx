@@ -226,7 +226,7 @@ const AgentCreationForm = () => {
         { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
         { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
       ];
-
+  
       for (const check of validationChecks) {
         if (check.condition) {
           toast({
@@ -237,16 +237,17 @@ const AgentCreationForm = () => {
           return;
         }
       }
+      
       let fileUrls: string[] = [];
-
+  
       if (files && files.length > 0) {
         fileUrls = await uploadFiles(files);
       }
-
+  
       if (!user?.id) {
         throw new Error("User ID is required");
       }
-
+  
       const agentData: AgentFormData = {
         user_id: user.id,
         name: formData.name,
@@ -263,22 +264,29 @@ const AgentCreationForm = () => {
         advanced_settings: formData.advanced_settings,
         files: fileUrls || [],
       };
-
+  
       console.log("AGENT DATA", agentData);
       console.log("COMPANY ID", company);
-
-      await Promise.all([
-        createAdminAgent(agentData, company?.id as string, user.id),
-        createAgent(agentData, token),
-      ]);
-
+  
+      // Step 1: Create agent in Express backend first
+      const expressAgentResult = await createAgent(agentData, token);
+      
+      // Step 2: Then create in Admin API using the same ID
+      if (expressAgentResult && expressAgentResult.id) {
+        // Add the ID from Express backend to the agent data
+        agentData.id = expressAgentResult.id;
+        
+        // Now create in FastAPI with the same ID
+        await createAdminAgent(agentData, company?.id as string, user.id);
+      }
+  
       await Promise.all([refreshAgents(), refreshActivities()]);
-
+  
       toast({
         title: "Success",
         description: "Agent created successfully!",
       });
-
+  
       router.push('/dashboard');
     } catch (error: any) {
       toast({
