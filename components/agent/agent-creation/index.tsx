@@ -270,12 +270,15 @@ const AgentCreationForm = () => {
   
       // Step 1: Create agent in Express backend first
       const expressAgentResult = await createAgent(agentData, token);
-      
+
+      console.log("Express agent result:", expressAgentResult);
+
       // Step 2: Then create in Admin API using the same ID
       if (expressAgentResult && expressAgentResult.id) {
         // Add the ID from Express backend to the agent data
         agentData.id = expressAgentResult.id;
-        
+        console.log("Using Express agent ID for admin API:", expressAgentResult.id);
+
         // Now create in FastAPI with the same ID
         await createAdminAgent(agentData, company?.id as string, user.id);
       }

@@ -6,10 +6,12 @@ import { AgentFormData } from "@/types";
 export const createAdminAgent = async (agentData: AgentFormData, companyId: string, userId: string) => {
     try {
       const formData = new FormData();
-      
+      console.log("Creating admin agent with ID:", agentData.id);
+
       // Add the agent ID if it exists
       if (agentData.id) {
         formData.append('id', agentData.id);
+        console.log("Added ID to form data:", agentData.id);
       }
       
       // Add base agent data
