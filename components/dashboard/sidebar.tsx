@@ -408,6 +408,22 @@ const Navigation = () => {
                                         </Button>
                                     </Link>
                                 ))}
+
+                                {settings.map((item, index) => (
+                                    <Link
+                                        key={index}
+                                        href={item.link}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
+                                        >
+                                            {item.icon}
+                                            <span className="ml-2">{item.label}</span>
+                                        </Button>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
                     </motion.div>

@@ -130,13 +130,13 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
         try {
             setIsLoading(true);
 
-            // Add defensive checks for all fields
             const address = typeof data.address === 'string' ? data.address : '';
             const city = typeof data.city === 'string' ? data.city : '';
             const state = typeof data.state === 'string' ? data.state : '';
             const zipCode = typeof data.zip_code === 'string' ? data.zip_code : '';
-            
+
             const apiData = {
+                name: user?.name || '',
                 business_name: typeof data.business_name === 'string' ? data.business_name : '',
                 email: typeof data.email === 'string' ? data.email : '',
                 phone_number: typeof data.phone === 'string' ? data.phone : '',
@@ -146,16 +146,15 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             };
 
             await createOrUpdateCompany(apiData, token);
-            
-            // Refresh company data after update
+
             await fetchCompanyData();
-            
+
             toast({
                 title: "Success",
                 description: "Company profile updated successfully.",
                 variant: "default",
             });
-            
+
             return true;
         } catch (err: any) {
             console.error('Error updating company data:', err);

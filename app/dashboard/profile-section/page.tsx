@@ -37,7 +37,6 @@ const ProfileSection = () => {
         logo: '',
     });
 
-    // Update form when company data loads
     useEffect(() => {
         if (company) {
             setFormData({
