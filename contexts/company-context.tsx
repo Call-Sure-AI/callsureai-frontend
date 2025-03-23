@@ -61,7 +61,9 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
     const [error, setError] = useState<string | null>(null);
 
     const processCompanyData = (data: CompanyData, userEmail?: string, userImage?: string): ProcessedCompanyData => {
-        const addressParts = data.address?.split(',') || [];
+        // Add defensive checks for address before splitting
+        const addressString = typeof data.address === 'string' ? data.address : '';
+        const addressParts = addressString.split(',') || [];
 
         return {
             id: data.id,
@@ -128,16 +130,32 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
         try {
             setIsLoading(true);
 
+            // Add defensive checks for all fields
+            const address = typeof data.address === 'string' ? data.address : '';
+            const city = typeof data.city === 'string' ? data.city : '';
+            const state = typeof data.state === 'string' ? data.state : '';
+            const zipCode = typeof data.zip_code === 'string' ? data.zip_code : '';
+            
             const apiData = {
-                business_name: data.business_name,
-                email: data.email,
-                phone_number: data.phone,
-                address: `${data.address}, ${data.city}, ${data.state}, ${data.zip_code}`,
-                logo: data.logo,
+                business_name: typeof data.business_name === 'string' ? data.business_name : '',
+                email: typeof data.email === 'string' ? data.email : '',
+                phone_number: typeof data.phone === 'string' ? data.phone : '',
+                address: `${address}, ${city}, ${state}, ${zipCode}`.trim(),
+                logo: typeof data.logo === 'string' ? data.logo : '',
                 userId: data.userId || user?.id
             };
 
             await createOrUpdateCompany(apiData, token);
+            
+            // Refresh company data after update
+            await fetchCompanyData();
+            
+            toast({
+                title: "Success",
+                description: "Company profile updated successfully.",
+                variant: "default",
+            });
+            
             return true;
         } catch (err: any) {
             console.error('Error updating company data:', err);

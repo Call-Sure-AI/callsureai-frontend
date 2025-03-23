@@ -1,3 +1,4 @@
+// services/agent-service.ts
 import { AgentFormData } from "@/types";
 
 /**
@@ -43,11 +44,7 @@ export const createAgent = async (formData: AgentFormData, token: string) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({
-                ...formData,
-                created_at: new Date(),
-                updated_at: new Date()
-            }),
+            body: JSON.stringify(formData)
         });
 
         if (!response.ok) {
@@ -57,7 +54,7 @@ export const createAgent = async (formData: AgentFormData, token: string) => {
 
         return await response.json();
     } catch (error) {
-        console.error('Error in createAgent:', error);
+        console.error('Error creating agent:', error);
         throw error;
     }
 };

@@ -54,11 +54,11 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         roleDescription: additional_context?.roleDescription ?? '',
         businessContext: additional_context?.businessContext ?? '',
         is_active: is_active ?? false,
-        advanced_settings: advanced_settings ?? {
-            authUrl: '',
-            clientId: '',
-            clientSecret: '',
-            apis: []
+        advanced_settings: {
+            authUrl: advanced_settings?.authUrl || '',
+            clientId: advanced_settings?.clientId || '',
+            clientSecret: advanced_settings?.clientSecret || '',
+            apis: Array.isArray(advanced_settings?.apis) ? advanced_settings.apis : []
         },
         files: files ?? []
     });
@@ -91,7 +91,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
             ...prev,
             advanced_settings: {
                 ...prev.advanced_settings,
-                apis: value.split(',')
+                apis: value ? value.split(',') : []
             }
         }));
     };
@@ -313,6 +313,13 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     if (!isMounted) {
         return null;
     }
+
+    // Safely get API values for textarea
+    const getApiTextValue = () => {
+        return Array.isArray(formData.advanced_settings.apis) 
+            ? formData.advanced_settings.apis.join(',') 
+            : '';
+    };
 
     return (
         <Dialog>
@@ -694,7 +701,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                                                     API Endpoints
                                                 </label>
                                                 <Textarea
-                                                    value={formData.advanced_settings.apis.join(',')}
+                                                    value={getApiTextValue()}
                                                     onChange={(e) => handleApiUrlChange(e.target.value)}
                                                     placeholder="Enter list of APIs separated by comma"
                                                     className="w-full border-gray-200 focus:border-blue-500 h-24"

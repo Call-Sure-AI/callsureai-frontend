@@ -1,3 +1,4 @@
+// components/agent/agent-section.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { AgentFormData } from "@/types";
@@ -13,6 +14,11 @@ const Dot = ({ background = 'bg-green-500' }) => (
     </span>
 )
 
+// Helper function to safely capitalize the first letter of a string
+const capitalizeFirstLetter = (str?: string) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
     const { user } = useCurrentUser();
@@ -79,8 +85,16 @@ export const AgentSection = ({ agents }: { agents: AgentFormData[] }) => {
                                                 <h2 className="text-lg font-semibold text-gray-900 group-hover:text-[#0A1E4E] transition-colors duration-200 truncate">
                                                     {agent.name}
                                                 </h2>
-                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent?.additional_context?.tone.substring(0, 1).toUpperCase() + agent?.additional_context?.tone.substring(1)}</span>
-                                                <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">⬤ {agent?.additional_context?.gender.substring(0, 1).toUpperCase() + agent?.additional_context?.gender.substring(1)}</span>
+                                                {agent?.additional_context?.tone && (
+                                                    <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">
+                                                        ⬤ {capitalizeFirstLetter(agent.additional_context.tone)}
+                                                    </span>
+                                                )}
+                                                {agent?.additional_context?.gender && (
+                                                    <span className="text-xs font-medium transition-colors duration-200 text-[#0A1E4E]/70">
+                                                        ⬤ {capitalizeFirstLetter(agent.additional_context.gender)}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex justify-center my-auto items-center gap-2">

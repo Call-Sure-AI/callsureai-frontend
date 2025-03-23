@@ -1,3 +1,4 @@
+// components/agent/agent-creation/index.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -237,6 +238,7 @@ const AgentCreationForm = () => {
           return;
         }
       }
+
       let fileUrls: string[] = [];
 
       if (files && files.length > 0) {
