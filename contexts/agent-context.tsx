@@ -10,6 +10,7 @@ interface AgentContextType {
     agents: AgentFormData[];
     loading: boolean;
     refreshAgents: () => Promise<void>;
+    totalAgents: number;
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined);
@@ -39,7 +40,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
     }, [user, token]);
 
     return (
-        <AgentContext.Provider value={{ agents, loading, refreshAgents: fetchAgents }}>
+        <AgentContext.Provider value={{ agents, loading, refreshAgents: fetchAgents, totalAgents: agents.length ?? 0 }}>
             {children}
         </AgentContext.Provider>
     );

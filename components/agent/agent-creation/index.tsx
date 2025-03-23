@@ -25,7 +25,7 @@ import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { AgentFormData } from '@/types';
-import { createAdminAgent, createAgent } from '@/services/agent-service';
+import { createAdminAgent } from '@/services/agent-service';
 import { useActivities } from '@/contexts/activity-context';
 import { useAgents } from '@/contexts/agent-context';
 import { useCompany } from '@/contexts/company-context';
@@ -70,7 +70,7 @@ const AgentCreationForm = () => {
   const { token } = useIsAuthenticated();
   const { company } = useCompany();
   const { refreshActivities } = useActivities();
-  const { refreshAgents } = useAgents();
+  const { refreshAgents, totalAgents } = useAgents();
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [files, setFiles] = useState<File[]>([]);
@@ -247,10 +247,14 @@ const AgentCreationForm = () => {
         throw new Error("User ID is required");
       }
 
+      if (!company || !company.id) {
+        throw new Error("Company ID is required");
+      }
+
       const agentData: AgentFormData = {
         user_id: user.id,
         name: formData.name,
-        type: 'custom',
+        type: totalAgents === 0 ? 'base' : 'custom',
         prompt: formData.roleDescription,
         is_active: true,
         additional_context: {
@@ -269,7 +273,6 @@ const AgentCreationForm = () => {
 
       await Promise.all([
         createAdminAgent(agentData, company?.id as string, user.id),
-        createAgent(agentData, token),
       ]);
 
       await Promise.all([refreshAgents(), refreshActivities()]);

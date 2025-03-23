@@ -5,13 +5,15 @@ import { AgentFormData } from "@/types";
  */
 export const createAdminAgent = async (params: AgentFormData, company_id: string, user_id: string) => {
     try {
-        console.log("PARAMS", params);
         const formData = new FormData();
         formData.append('name', params.name);
-        formData.append('type', params.type);
-        formData.append('company_id', company_id);
-        formData.append('prompt', params.prompt);
         formData.append('user_id', user_id);
+        formData.append('type', params.type);
+        formData.append('prompt', params.prompt);
+        formData.append('company_id', company_id);
+        formData.append('additional_context', JSON.stringify(params.additional_context));
+        formData.append('advanced_settings', JSON.stringify(params.advanced_settings));
+        formData.append('is_active', JSON.stringify(params.is_active));
 
         formData.append('file_urls', JSON.stringify(params.files));
 

@@ -16,7 +16,7 @@ import {
 import { useActivities } from '@/contexts/activity-context';
 
 const ActivityFeed = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const { activities, loading } = useActivities();
 
@@ -46,7 +46,7 @@ const ActivityFeed = () => {
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative right-0 z-20 bg-white p-4 space-y-8 border-l h-screen hidden md:block"
+            className="relative right-0 z-20 bg-white p-4 space-y-8 border-l h-screen hidden lg:block"
         >
             <Button
                 variant="ghost"
@@ -85,7 +85,7 @@ const ActivityFeed = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMobileOpen(true)}
-                className="fixed right-4 top-20 md:hidden bg-white shadow-md rounded-full p-2 z-30"
+                className="fixed right-4 top-20 lg:hidden bg-white shadow-md rounded-full p-2 z-30"
             >
                 <ActivityIcon className="w-5 h-5" />
             </Button>
@@ -98,7 +98,7 @@ const ActivityFeed = () => {
                         exit="hidden"
                         variants={mobileVariants}
                         transition={{ type: 'tween', duration: 0.3 }}
-                        className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-lg z-50 md:hidden"
+                        className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-lg z-50 lg:hidden"
                     >
                         <div className="p-4">
                             <div className="flex justify-between items-center mb-6">

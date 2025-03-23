@@ -121,7 +121,7 @@ const Navigation = () => {
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-2 border-r h-screen hidden md:block overflow-hidden"
+            className="relative z-20 bg-white p-4 space-y-2 border-r h-screen hidden lg:block overflow-hidden"
         >
             {
                 !isCollapsed &&
@@ -314,8 +314,8 @@ const Navigation = () => {
 
     const MobileMenu = () => (
         <>
-            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t md:hidden">
-                <div className="flex justify-between items-center px-4 py-2">
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t lg:hidden">
+                <div className="flex justify-between md:justify-evenly items-center px-4 py-2">
                     {menuItems.slice(0, 4).map((item, index) => (
                         <Link key={index} href={item.link}>
                             <Button
@@ -347,7 +347,7 @@ const Navigation = () => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'tween', duration: 0.3 }}
-                        className="fixed inset-0 bg-white z-50 md:hidden"
+                        className="fixed inset-0 bg-white z-50 lg:hidden"
                     >
                         <div className="p-4">
                             <div className="flex justify-between items-center mb-8">
