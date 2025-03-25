@@ -101,6 +101,8 @@ const ProfileSection = () => {
 
         try {
             const success = await updateCompanyData({
+                first_name: formData.first_name,
+                last_name: formData.last_name,
                 business_name: formData.business_name,
                 email: formData.email,
                 phone: formData.phone,
@@ -145,9 +147,9 @@ const ProfileSection = () => {
                     <CardHeader className="border-b">
                         <CardTitle className="text-xl font-medium">Edit Profile</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8">
-                        <div className="flex flex-col items-center justify-center md:flex-row gap-6">
-                            <div className="flex-1 max-w-5xl">
+                    <CardContent className="p-8 w-full">
+                        <div className="flex flex-col w-full items-center justify-center md:flex-row gap-6">
+                            <div className="flex-1 w-full max-w-5xl">
                                 <div className="flex w-full mb-2 justify-center items-center space-y-3">
                                     <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center">
                                         <ProfileImageUpload
@@ -157,9 +159,9 @@ const ProfileSection = () => {
                                         />
                                     </div>
                                 </div>
-                                <form className="space-y-8">
+                                <form className="w-full space-y-8">
                                     {/* Name Fields */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label className="text-sm text-gray-600">
                                                 First Name <span className="text-red-500">*</span>

@@ -12,7 +12,7 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
                 name: `${formData.first_name} ${formData.last_name}`,
                 business_name: formData.business_name,
                 email: formData.email,
-                phone_number: formData.phone,
+                phone_number: formData.phone_number,
                 address: address,
                 user_id: formData.userId,
                 logo: formData.logo,

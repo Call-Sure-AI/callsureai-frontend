@@ -8,6 +8,8 @@ import { createOrUpdateCompany } from '@/services/company-service';
 
 export interface CompanyData {
     id?: string;
+    first_name: string;
+    last_name: string;
     business_name: string;
     email: string;
     phone_number: string;
@@ -19,6 +21,8 @@ export interface CompanyData {
 
 export interface ProcessedCompanyData {
     id?: string;
+    first_name: string;
+    last_name: string;
     business_name: string;
     email: string;
     phone: string;
@@ -67,6 +71,8 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
 
         return {
             id: data.id,
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
             business_name: data.business_name || '',
             email: data.email || userEmail || '',
             phone: data.phone_number || '',
@@ -136,7 +142,8 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             const zipCode = typeof data.zip_code === 'string' ? data.zip_code : '';
 
             const apiData = {
-                name: user?.name || '',
+                first_name: typeof data.first_name === 'string' ? data.first_name : '',
+                last_name: typeof data.last_name === 'string' ? data.last_name : '',
                 business_name: typeof data.business_name === 'string' ? data.business_name : '',
                 email: typeof data.email === 'string' ? data.email : '',
                 phone_number: typeof data.phone === 'string' ? data.phone : '',
