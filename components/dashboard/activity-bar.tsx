@@ -148,7 +148,15 @@ const ActivityFeed = () => {
     };
 
     const ActivityList = ({ isCollapsed }: { isCollapsed: boolean }) => (
-        <div className="space-y-2">
+        <div className="space-y-2 h-[80vh] overflow-y-scroll 
+            [&::-webkit-scrollbar]:w-2
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/10
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            hover:[&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/20
+            transition-colors
+            duration-200
+            ease-in-out">
             {loading ? (
                 <div className="text-center text-gray-500">Loading activities...</div>
             ) : activities.length === 0 && !isCollapsed ? (

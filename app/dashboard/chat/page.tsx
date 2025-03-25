@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatContent } from "@/components/dashboard/chat-content";
+import { ChatContent } from "@/components/dashboard/chat/chat-content";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";

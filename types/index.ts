@@ -124,3 +124,18 @@ export interface TestimonialCardProps {
     testimonial: TestimonialType;
     index: number;
 }
+
+export interface Message {
+    type: string;
+    content: string;
+    metadata?: any;
+    isStreaming?: boolean;
+    msgId?: string;
+    isUser?: boolean;
+}
+
+export interface WebRTCStatus {
+    status: string;
+    isStreaming: boolean;
+    isConnected: boolean;
+}
