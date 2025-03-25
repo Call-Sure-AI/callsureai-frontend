@@ -26,22 +26,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         try {
             if (!token || !user) return;
             const data = await getAllAgents(token);
-            console.log("Fetched agents:", data);
-            
-            // Deduplicate agents by name (since your problem is showing two identical agents)
-            const uniqueAgents: AgentFormData[] = [];
-            const nameMap = new Map();
-            
-            data.forEach((agent: AgentFormData) => {
-                if (!nameMap.has(agent.name)) {
-                    nameMap.set(agent.name, agent);
-                    uniqueAgents.push(agent);
-                }
-            });
-            
-            console.log("Filtered unique agents by name:", uniqueAgents);
-            
-            setAgents(uniqueAgents);
+            setAgents(data);
         } catch (error) {
             console.error('Failed to fetch agents:', error);
         } finally {

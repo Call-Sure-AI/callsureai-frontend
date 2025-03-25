@@ -11,8 +11,8 @@ import { PermissionModal } from "@/components/dashboard/permission-modal";
 
 interface Message {
     sender: 'user' | 'server';
-    content: string;
-    msgId: number;
+    text_content: string;
+    msg_id: string;
 }
 
 interface AudioResponseData {
@@ -32,17 +32,19 @@ export const ChatContent = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             sender: 'server',
-            content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
-            msgId: 1,
+            text_content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
+            msg_id: "1",
         }
     ]);
     const [isListening, setIsListening] = useState<boolean>(false);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
-    const [nextMsgId, setNextMsgId] = useState<number>(2);
+    const [nextMsg_id, setNextMsg_id] = useState<string>('2');
     const [isWebRTCInitialized, setIsWebRTCInitialized] = useState<boolean>(false);
     const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('prompt');
     const [showPermissionModal, setShowPermissionModal] = useState<boolean>(false);
+    const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+    const [streamingMessage, setStreamingMessage] = useState<Message | null>(null);
 
     const socketRef = useRef<WebSocket | null>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -73,10 +75,10 @@ export const ChatContent = () => {
     const addMessage = useCallback((sender: 'user' | 'server', content: string) => {
         setMessages(prevMessages => [
             ...prevMessages,
-            { sender, content, msgId: nextMsgId }
+            { sender, text_content: content, msg_id: nextMsg_id }
         ]);
-        setNextMsgId(prev => prev + 1);
-    }, [nextMsgId]);
+        setNextMsg_id(prev => prev + 1);
+    }, [nextMsg_id]);
 
     const setupPingInterval = useCallback(() => {
         pingIntervalRef.current = window.setInterval(() => {
@@ -93,11 +95,49 @@ export const ChatContent = () => {
         }
     }, []);
 
+    useEffect(() => {
+        console.log("MESSAGES", messages);
+    }, [messages]);
+
     const handleSocketMessage = useCallback(async (event: MessageEvent) => {
         try {
             const message = JSON.parse(event.data);
 
             switch (message.type) {
+                case 'stream_chunk':
+                    console.log('Received stream chunk', message);
+                    if (message.msg_id !== streamingMessageId) {
+                        setStreamingMessage({
+                            sender: 'server',
+                            text_content: message.text_content || '',
+                            msg_id: message.msg_id,
+                        });
+                        setStreamingMessageId(message.msg_id);
+                    } else {
+                        setStreamingMessage(prev => {
+                            if (!prev) return null;
+                            return {
+                                ...prev,
+                                text_content: prev.text_content + (message.text_content || '')
+                            };
+                        });
+                    }
+                    break;
+                case 'stream_end':
+                    console.log('Stream ended', message);
+                    if (message.msg_id === streamingMessageId) {
+
+                        setMessages(currentMessages => [
+                            ...currentMessages,
+                            {
+                                sender: 'server',
+                                text_content: streamingMessage?.text_content || '',
+                                msg_id: streamingMessage?.msg_id || '',
+                            }
+                        ]);
+                        setStreamingMessageId(null);
+                    }
+                    break;
                 case 'config':
                     console.log('Received ICE configuration', message.ice_servers);
                     initPeerConnection(message.ice_servers);
@@ -117,6 +157,9 @@ export const ChatContent = () => {
                     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
                         socketRef.current.send(JSON.stringify({ type: 'pong' }));
                     }
+                    break;
+                case 'pong':
+                    console.log('Received pong');
                     break;
 
                 case 'text':
@@ -541,11 +584,11 @@ export const ChatContent = () => {
         setMessages([
             {
                 sender: 'server',
-                content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
-                msgId: 1,
+                text_content: 'Hello! I am an AI assistant here to help you with any questions or concerns you may have. How can I assist you today?',
+                msg_id: "1",
             }
         ]);
-        setNextMsgId(2);
+        setNextMsg_id("2");
 
         connectionAttemptedRef.current = false;
     }, [disconnect]);
@@ -664,7 +707,7 @@ export const ChatContent = () => {
                         <div className="space-y-3">
                             {messages.map((message: Message) => (
                                 <div
-                                    key={message.msgId}
+                                    key={message.msg_id}
                                     className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div
@@ -674,7 +717,7 @@ export const ChatContent = () => {
                                                 : 'bg-white text-slate-800'
                                             }`}
                                     >
-                                        {message.content}
+                                        {message.text_content}
                                     </div>
                                 </div>
                             ))}
