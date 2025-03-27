@@ -36,6 +36,34 @@ export const ChatContent = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const handleStreamChunk = (message: any) => {
+        setMessages(prevMessages => {
+            const msgIndex = prevMessages.findIndex(
+                msg => msg.type === 'assistant' && msg.msgId === message.msg_id
+            );
+
+            const newContent = message.text_content || '';
+
+            if (msgIndex >= 0) {
+                const updatedMessages = [...prevMessages];
+                updatedMessages[msgIndex] = {
+                    ...updatedMessages[msgIndex],
+                    content: updatedMessages[msgIndex].content + newContent
+                };
+                return updatedMessages;
+            } else {
+                return [...prevMessages, {
+                    type: 'assistant',
+                    content: newContent,
+                    msgId: message.msg_id,
+                    isStreaming: true
+                }];
+            }
+        });
+
+        scrollToBottom();
+    };
+
     const handleWebSocketMessage = async (event: MessageEvent) => {
         try {
             const data = JSON.parse(event.data);
@@ -51,31 +79,10 @@ export const ChatContent = () => {
                     //     };
                     // });
 
-                    setMessages((prevMessages) => {
-                        const msgIndex = prevMessages.findIndex(
-                            msg => msg.type === 'assistant' && msg.msgId === data.msg_id
-                        );
+                    if (data.text_content) {
+                        handleStreamChunk(data);
+                    }
 
-                        const newContent = data.text_content || '';
-
-                        if (msgIndex >= 0) {
-                            const updatedMessages = [...prevMessages];
-                            updatedMessages[msgIndex] = {
-                                ...updatedMessages[msgIndex],
-                                content: updatedMessages[msgIndex].content + newContent
-                            };
-                            return updatedMessages;
-                        } else {
-                            return [...prevMessages, {
-                                type: 'assistant',
-                                content: newContent,
-                                msgId: data.msg_id,
-                                isStreaming: true
-                            }];
-                        }
-                    });
-
-                    scrollToBottom();
                     break;
 
                 case 'stream_end':
