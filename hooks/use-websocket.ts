@@ -5,17 +5,47 @@ interface UseWebSocketProps {
     agentId: string | null;
     company: any;
     handleMessage: (event: MessageEvent) => void;
+    audioEnabled?: boolean;
 }
 
-export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketProps) => {
+export const useWebSocket = ({ agentId, company, handleMessage, audioEnabled = true }: UseWebSocketProps) => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
     const [reconnectCount, setReconnectCount] = useState<number>(0);
     const [connecting, setConnecting] = useState<boolean>(false);
+    const [streamingResponses, setStreamingResponses] = useState<Record<string, string>>({});
+
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const maxReconnectAttempts = 5;
-    const delay = 1000;
     const clientIdRef = useRef<string>(`client_${Date.now()}`);
+    const maxAttemptsReachedRef = useRef(false);
+
+    const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const startHeartbeat = (ws: WebSocket) => {
+        if (heartbeatIntervalRef.current) {
+            clearInterval(heartbeatIntervalRef.current);
+        }
+
+        heartbeatIntervalRef.current = setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                try {
+                    ws.send(JSON.stringify({ type: 'ping' }));
+                } catch (error) {
+                    console.error('Error sending heartbeat:', error);
+                }
+            } else {
+                stopHeartbeat();
+            }
+        }, 30000);
+    };
+
+    const stopHeartbeat = () => {
+        if (heartbeatIntervalRef.current) {
+            clearInterval(heartbeatIntervalRef.current);
+            heartbeatIntervalRef.current = null;
+        }
+    };
 
     const connect = () => {
         if (connecting || !company?.api_key || !agentId) return;
@@ -31,13 +61,47 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
             setIsConnecting(false);
             setConnecting(false);
             setReconnectCount(0);
+
+            startHeartbeat(ws);
+
             toast({
                 title: "Connected",
                 description: "Successfully connected to agent",
             });
         };
 
-        ws.onmessage = handleMessage;
+        ws.onmessage = (event) => {
+            handleMessage(event);
+
+            try {
+                const data = JSON.parse(event.data);
+
+                if (data.type !== 'stream_chunk') {
+                    console.log('WebSocket message received:', data.type);
+                }
+
+                if (data.type === 'stream_chunk' && data.text_content) {
+                    setStreamingResponses(prev => {
+                        const msgId = data.msg_id;
+                        const existingResponse = prev[msgId] || '';
+                        return {
+                            ...prev,
+                            [msgId]: existingResponse + data.text_content
+                        };
+                    });
+                }
+
+                if (data.type === 'stream_end') {
+                    setStreamingResponses(prev => {
+                        const updated = { ...prev };
+                        delete updated[data.msg_id];
+                        return updated;
+                    });
+                }
+            } catch (error) {
+                console.error('Error in WebSocket internal message processing:', error);
+            }
+        };
 
         ws.onclose = (event) => {
             console.log('WebSocket disconnected', event.code);
@@ -45,7 +109,8 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
             setIsConnecting(false);
             setConnecting(false);
 
-            // Stop reconnection if we've already hit max attempts overall
+            stopHeartbeat();
+
             if (maxAttemptsReachedRef.current) {
                 return;
             }
@@ -57,6 +122,7 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
                         description: "Chat session ended",
                     });
                     break;
+
                 case 4001:
                     maxAttemptsReachedRef.current = true;
                     toast({
@@ -65,6 +131,7 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
                         variant: "destructive"
                     });
                     break;
+
                 case 403:
                     maxAttemptsReachedRef.current = true;
                     toast({
@@ -73,17 +140,21 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
                         variant: "destructive"
                     });
                     break;
-                case 500:
-                    if (reconnectCount < maxReconnectAttempts) {
-                        const nextReconnectCount = reconnectCount + 1;
-                        const backoffDelay = Math.min(1000 * Math.pow(2, nextReconnectCount - 1), 30000);
 
-                        console.log(`Server error (500). Attempting reconnection in ${backoffDelay}ms... (${nextReconnectCount}/${maxReconnectAttempts})`);
-                        toast({
-                            title: "Server Error",
-                            description: `Attempting to reconnect (${nextReconnectCount}/${maxReconnectAttempts})...`,
-                            duration: 3000,
-                        });
+                case 500:
+                    if (reconnectCount < 3) {
+                        const nextReconnectCount = reconnectCount + 1;
+                        const backoffDelay = Math.min(2000 * Math.pow(2, nextReconnectCount), 30000);
+
+                        console.log(`Server error (500). Attempting reconnection in ${backoffDelay}ms... (${nextReconnectCount}/3)`);
+
+                        if (nextReconnectCount === 1) {
+                            toast({
+                                title: "Server Error",
+                                description: "Attempting to reconnect...",
+                                duration: 3000,
+                            });
+                        }
 
                         setReconnectCount(nextReconnectCount);
 
@@ -105,20 +176,24 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
                         });
                     }
                     break;
+
                 default:
                     if (reconnectCount < maxReconnectAttempts) {
                         const nextReconnectCount = reconnectCount + 1;
+                        const delay = Math.min(1000 * Math.pow(2, nextReconnectCount - 1), 30000);
 
                         console.log(`Attempting reconnection in ${delay}ms... (${nextReconnectCount}/${maxReconnectAttempts})`);
-                        toast({
-                            title: "Connection Lost",
-                            description: `Attempting to reconnect (${nextReconnectCount}/${maxReconnectAttempts})...`,
-                            duration: 3000,
-                        });
+
+                        if (nextReconnectCount === 1) {
+                            toast({
+                                title: "Connection Lost",
+                                description: "Attempting to reconnect...",
+                                duration: 3000,
+                            });
+                        }
 
                         setReconnectCount(nextReconnectCount);
 
-                        // Clear any existing timeout
                         if (reconnectTimeoutRef.current) {
                             clearTimeout(reconnectTimeoutRef.current);
                         }
@@ -161,15 +236,12 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
             clearTimeout(reconnectTimeoutRef.current);
             reconnectTimeoutRef.current = null;
         }
+
+        stopHeartbeat();
     };
 
-    // Use a ref to track if we've hit the max reconnect attempts overall
-    const maxAttemptsReachedRef = useRef(false);
-
-    // Reset connection state when agentId or company changes
     useEffect(() => {
         if (company?.id && agentId) {
-            // Reset reconnection state
             setReconnectCount(0);
             maxAttemptsReachedRef.current = false;
             connect();
@@ -181,13 +253,13 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
     }, [company?.id, agentId]);
 
     const sendMessage = (content: string) => {
-        if (!content.trim() || !socket) return;
+        if (!content.trim() || !socket) return false;
 
         try {
             const message = {
                 type: 'message',
                 message: content.trim(),
-                require_audio: true
+                audio_enabled: audioEnabled
             };
 
             socket.send(JSON.stringify(message));
@@ -206,8 +278,9 @@ export const useWebSocket = ({ agentId, company, handleMessage }: UseWebSocketPr
     return {
         socket,
         isConnecting,
+        streamingResponses,
         connect,
         disconnect,
         sendMessage
     };
-}
+};

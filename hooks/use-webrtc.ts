@@ -5,15 +5,23 @@ interface UseWebRTCProps {
     agentId: string | null;
     company: any;
     onMessage: (message: any) => void;
+    audioEnabled?: boolean; // New: flag to enable/disable audio output
 }
 
-export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
+export const useWebRTC = ({ agentId, company, onMessage, audioEnabled = true }: UseWebRTCProps) => {
     const [rtcConnected, setRtcConnected] = useState<boolean>(false);
     const [isStreaming, setIsStreaming] = useState<boolean>(false);
     const [webrtcStatus, setWebrtcStatus] = useState<string>('disconnected');
     const [reconnectCount, setReconnectCount] = useState<number>(0);
     const [connecting, setConnecting] = useState<boolean>(false);
 
+    // Audio processing refs
+    const audioContext = useRef<AudioContext | null>(null);
+    const audioQueue = useRef<AudioBuffer[]>([]);
+    const isPlayingAudio = useRef<boolean>(false);
+    const processorRef = useRef<ScriptProcessorNode | null>(null);
+
+    // WebRTC refs
     const rtcSocketRef = useRef<WebSocket | null>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -22,6 +30,104 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
     const chunkCountRef = useRef<number>(0);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const maxReconnectAttempts = 5;
+    const maxAttemptsReachedRef = useRef(false);
+
+    // Initialize Web Audio API context
+    const initializeAudioContext = () => {
+        try {
+            if (audioContext.current) return; // Already initialized
+
+            audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)({
+                sampleRate: 16000,
+            });
+
+            // Some browsers require user interaction to start audio context
+            if (audioContext.current.state === 'suspended') {
+                const resumeAudio = () => {
+                    audioContext.current?.resume();
+                    document.removeEventListener('click', resumeAudio);
+                };
+                document.addEventListener('click', resumeAudio);
+            }
+
+            console.log('Audio context initialized');
+        } catch (error) {
+            console.error('Failed to initialize AudioContext:', error);
+            toast({
+                title: "Audio Error",
+                description: "Your browser may have limited audio support",
+                variant: "destructive"
+            });
+        }
+    };
+
+    // Play next audio chunk in queue
+    const playNextAudioChunk = () => {
+        if (audioQueue.current.length === 0) {
+            isPlayingAudio.current = false;
+            return;
+        }
+
+        isPlayingAudio.current = true;
+        const audioBuffer = audioQueue.current.shift();
+
+        if (!audioBuffer || !audioContext.current) {
+            console.warn('Audio buffer or context not available');
+            isPlayingAudio.current = false;
+            return;
+        }
+
+        try {
+            // Create source node
+            const source = audioContext.current.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.current.destination);
+
+            // When playback ends, play next chunk
+            source.onended = () => {
+                playNextAudioChunk();
+            };
+
+            // Start playback
+            source.start();
+        } catch (error) {
+            console.error('Error playing audio chunk:', error);
+            // Try to play next chunk on error
+            playNextAudioChunk();
+        }
+    };
+
+    // Process and queue audio chunk for playback
+    const processAudioChunk = async (base64Audio: string): Promise<boolean> => {
+        try {
+            if (!audioEnabled || !audioContext.current) {
+                return false;
+            }
+
+            // Decode base64 audio
+            const audioData = atob(base64Audio);
+            const audioArray = new Uint8Array(audioData.length);
+            for (let i = 0; i < audioData.length; i++) {
+                audioArray[i] = audioData.charCodeAt(i);
+            }
+
+            // Create audio buffer
+            const audioBuffer = await audioContext.current.decodeAudioData(audioArray.buffer);
+
+            // Queue audio chunk
+            audioQueue.current.push(audioBuffer);
+
+            // Start playing if not already
+            if (!isPlayingAudio.current) {
+                playNextAudioChunk();
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error processing audio chunk:', error);
+            return false;
+        }
+    };
 
     const setupWebRTC = () => {
         if (!window.RTCPeerConnection) {
@@ -34,6 +140,9 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
         }
 
         if (connecting || !company?.api_key || !agentId) return false;
+
+        // Initialize audio context for playback
+        initializeAudioContext();
 
         setConnecting(true);
         setWebrtcStatus('connecting');
@@ -48,6 +157,12 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
             console.log('WebRTC signaling WebSocket connected');
             setWebrtcStatus('signaling');
             setConnecting(false);
+
+            // Send initial config request to get ICE servers
+            rtcSocket.send(JSON.stringify({
+                type: 'config_request',
+                client_id: peerId
+            }));
         };
 
         rtcSocket.onclose = (event) => {
@@ -94,7 +209,6 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
                     } else {
                         maxAttemptsReachedRef.current = true;
                         console.log("Max WebRTC reconnection attempts reached for server error");
-                        // Don't show toast to prevent notification spam
                     }
                 } else if (reconnectCount < maxReconnectAttempts) {
                     // Other errors - standard retry logic
@@ -150,8 +264,21 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
             try {
                 const message = JSON.parse(event.data);
 
+                // Skip verbose logging for stream chunks to avoid console spam
+                if (message.type !== 'stream_chunk') {
+                    console.log('WebRTC message received:', message.type);
+                }
+
                 switch (message.type) {
+                    case 'connection_ack':
+                        console.log('Connection ack received');
+                        if (message.status === 'success') {
+                            setWebrtcStatus('connected');
+                            setRtcConnected(true);
+                        }
+                        break;
                     case 'config':
+                        // Initialize peer connection with ICE servers
                         initializePeerConnection(message.ice_servers);
                         break;
 
@@ -179,9 +306,21 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
                         }
                         break;
 
+                    case 'stream_chunk':
+                        // Handle streamed audio content
+                        if (message.audio_content && audioEnabled) {
+                            await processAudioChunk(message.audio_content);
+                        }
+
+                        // Pass message to parent for further processing (e.g., text)
+                        onMessage(message);
+                        break;
+
+                    case 'stream_end':
                     case 'stream':
                     case 'pong':
-                        // Heartbeat response
+                        // Pass to parent component
+                        onMessage(message);
                         break;
 
                     default:
@@ -227,6 +366,11 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
                     peerConnection.iceConnectionState === 'completed') {
                     setWebrtcStatus('connected');
                     setRtcConnected(true);
+
+                    toast({
+                        title: "Audio Connected",
+                        description: "Voice connection ready",
+                    });
                 } else if (peerConnection.iceConnectionState === 'failed' ||
                     peerConnection.iceConnectionState === 'disconnected' ||
                     peerConnection.iceConnectionState === 'closed') {
@@ -258,11 +402,15 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
 
         try {
             if (data.type === 'offer') {
+                console.log('Received offer, setting remote description');
                 await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
+                console.log('Creating answer');
                 const answer = await peerConnectionRef.current.createAnswer();
+                console.log('Setting local description');
                 await peerConnectionRef.current.setLocalDescription(answer);
 
-                rtcSocketRef?.current?.send(JSON.stringify({
+                console.log('Sending answer');
+                rtcSocketRef.current?.send(JSON.stringify({
                     type: 'signal',
                     to_peer: 'server',
                     data: {
@@ -272,9 +420,11 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
                 }));
 
             } else if (data.type === 'answer') {
+                console.log('Received answer, setting remote description');
                 await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
 
             } else if (data.type === 'ice_candidate' && data.candidate) {
+                console.log('Received ICE candidate');
                 await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         } catch (error) {
@@ -283,156 +433,175 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
     };
 
     const startAudioStream = async () => {
-        if (isStreaming || webrtcStatus !== 'connected') return;
+        console.log("WEBRTC STATUS", webrtcStatus);
+        console.log("WEBRTC STATUS CONDITION", isStreaming || webrtcStatus !== 'connected');
+        if (isStreaming || webrtcStatus !== 'connected') return false;
 
         try {
-            // Request microphone access
+            console.log("Requesting microphone access...");
             const audioStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    channelCount: 1,
-                    sampleRate: 16000,
                     echoCancellation: true,
-                    noiseSuppression: true
+                    noiseSuppression: true,
                 },
-                video: false
+                video: false,
             });
 
             audioStreamRef.current = audioStream;
 
-            audioStream.getAudioTracks().forEach(track => {
-                peerConnectionRef?.current?.addTrack(track, audioStream);
-            });
-
-            const offer = await peerConnectionRef?.current?.createOffer();
-            await peerConnectionRef?.current?.setLocalDescription(offer);
-
+            // Notify backend to start stream
             if (rtcSocketRef.current?.readyState === WebSocket.OPEN) {
-                rtcSocketRef.current.send(JSON.stringify({
-                    type: 'signal',
-                    to_peer: 'server',
-                    data: {
-                        type: 'offer',
-                        sdp: peerConnectionRef?.current?.localDescription
-                    }
-                }));
-
-                const options = {
-                    mimeType: 'audio/webm;codecs=opus',
-                    audioBitsPerSecond: 16000
-                };
-
-                const recorder = new MediaRecorder(audioStream, options);
-                mediaRecorderRef.current = recorder;
-
-                chunkCountRef.current = 0;
-
-                recorder.ondataavailable = async (event) => {
-                    if (event.data.size > 0 && rtcSocketRef.current?.readyState === WebSocket.OPEN) {
-                        try {
-                            const reader = new FileReader();
-                            reader.readAsDataURL(event.data);
-
-                            reader.onloadend = () => {
-                                const base64data = reader?.result?.toString().split(',')[1];
-
-                                rtcSocketRef.current?.send(JSON.stringify({
-                                    type: 'audio',
-                                    action: 'audio_chunk',
-                                    chunk_data: {
-                                        chunk_number: chunkCountRef.current++,
-                                        audio_data: base64data,
-                                        timestamp: new Date().toISOString()
-                                    }
-                                }));
-                            };
-                        } catch (err) {
-                            console.error('Error sending audio chunk:', err);
-                        }
-                    }
-                };
-
-                recorder.start(500);
-
                 rtcSocketRef.current.send(JSON.stringify({
                     type: 'audio',
                     action: 'start_stream',
                     metadata: {
-                        format: 'webm',
-                        codec: 'opus',
+                        format: 'pcm',
+                        codec: 'linear16',
                         sample_rate: 16000,
                         channels: 1,
                         agent_id: agentId,
-                        client_timestamp: new Date().toISOString()
-                    }
+                        client_timestamp: new Date().toISOString(),
+                    },
                 }));
-
-                setIsStreaming(true);
-                return true;
-            } else {
-                throw new Error("WebRTC socket not connected");
             }
 
+            // Create audio context and processor for direct audio processing
+            if (!audioContext.current) {
+                initializeAudioContext();
+            }
+
+            if (!audioContext.current) {
+                throw new Error("Failed to initialize audio context");
+            }
+
+            const source = audioContext.current.createMediaStreamSource(audioStream);
+            const processor = audioContext.current.createScriptProcessor(4096, 1, 1);
+
+            source.connect(processor);
+            processor.connect(audioContext.current.destination);
+
+            chunkCountRef.current = 0;
+
+            // Process audio data
+            processor.onaudioprocess = (event) => {
+                const inputData = event.inputBuffer.getChannelData(0);
+                const buffer = new ArrayBuffer(inputData.length * 2);
+                const output = new Int16Array(buffer);
+
+                // Calculate max level for voice activity detection
+                let maxLevel = 0;
+                for (let i = 0; i < inputData.length; i++) {
+                    maxLevel = Math.max(maxLevel, Math.abs(inputData[i]));
+                    output[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
+                }
+
+                if (chunkCountRef.current % 10 === 0) {
+                    console.log(`Audio chunk #${chunkCountRef.current}, max level: ${maxLevel}`);
+                }
+
+                // Only send if we have actual audio (not just silence)
+                if (maxLevel > 0.005) {
+                    // Convert to base64
+                    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
+                    // Send to server
+                    if (rtcSocketRef.current?.readyState === WebSocket.OPEN) {
+                        rtcSocketRef.current.send(JSON.stringify({
+                            type: 'audio',
+                            action: 'audio_chunk',
+                            chunk_data: {
+                                chunk_number: chunkCountRef.current++,
+                                audio_data: base64Audio,
+                                timestamp: new Date().toISOString(),
+                            },
+                        }));
+                    }
+                } else {
+                    // Still increment counter but don't send silence
+                    chunkCountRef.current++;
+                }
+            };
+
+            processorRef.current = processor;
+
+            setIsStreaming(true);
+            toast({
+                title: '🎙️ Audio streaming started',
+                duration: 2000
+            });
+
+            return true;
         } catch (error) {
             console.error('Error starting audio stream:', error);
             toast({
-                title: "Audio Error",
+                title: 'Audio Error',
                 description: (error as Error).message || "Failed to access microphone",
-                variant: "destructive"
+                variant: 'destructive'
             });
-
-            if (audioStreamRef.current) {
-                audioStreamRef.current.getTracks().forEach(track => track.stop());
-                audioStreamRef.current = null;
-            }
-
             return false;
         }
     };
 
     const stopAudioStream = () => {
-        if (!isStreaming) return;
+        if (!isStreaming) return false;
 
         try {
-            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-                mediaRecorderRef.current.stop();
-                mediaRecorderRef.current = null;
-            }
-
+            // Stop audio tracks
             if (audioStreamRef.current) {
                 audioStreamRef.current.getTracks().forEach(track => track.stop());
                 audioStreamRef.current = null;
             }
 
-            if (rtcSocketRef.current?.readyState === WebSocket.OPEN && streamIdRef.current) {
+            // Clean up processor
+            if (processorRef.current) {
+                processorRef.current.disconnect();
+                processorRef.current = null;
+            }
+
+            // Send end_stream notification
+            if (rtcSocketRef.current?.readyState === WebSocket.OPEN) {
                 rtcSocketRef.current.send(JSON.stringify({
                     type: 'audio',
                     action: 'end_stream',
                     metadata: {
                         stream_id: streamIdRef.current,
                         total_chunks: chunkCountRef.current,
-                        client_timestamp: new Date().toISOString()
-                    }
+                        client_timestamp: new Date().toISOString(),
+                    },
                 }));
             }
 
             setIsStreaming(false);
+            toast({
+                title: '🎙️ Audio streaming stopped',
+                duration: 2000
+            });
+
             return true;
         } catch (error) {
             console.error('Error stopping audio stream:', error);
+            toast({
+                title: 'Audio Error',
+                description: (error as Error).message,
+                variant: 'destructive'
+            });
             return false;
         }
     };
 
     const cleanupRTCConnection = () => {
+        // Stop streaming if active
         if (isStreaming) {
             stopAudioStream();
         }
 
+        // Close peer connection
         if (peerConnectionRef.current) {
             peerConnectionRef.current.close();
             peerConnectionRef.current = null;
         }
 
+        // Close signaling connection
         if (rtcSocketRef.current && rtcSocketRef.current.readyState !== WebSocket.CLOSED) {
             try {
                 rtcSocketRef.current.close();
@@ -442,20 +611,24 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
             rtcSocketRef.current = null;
         }
 
+        // Reset audio queue
+        audioQueue.current = [];
+        isPlayingAudio.current = false;
+
         // Update state
         setRtcConnected(false);
         setIsStreaming(false);
         setWebrtcStatus('disconnected');
     };
 
-    // Use a ref to track if we've hit the max reconnect attempts
-    const maxAttemptsReachedRef = useRef(false);
-
     useEffect(() => {
         if (company?.id && agentId) {
             // Reset reconnection state when inputs change
             setReconnectCount(0);
             maxAttemptsReachedRef.current = false;
+
+            // Initialize audio context
+            initializeAudioContext();
 
             // Use a longer delay to ensure WebSocket setup has completed or failed
             const setupDelay = setTimeout(() => {
@@ -483,9 +656,12 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
         }
     };
 
-    // Play audio from base64 string
+    // Play audio from base64 string (legacy method)
     const playAudio = async (base64Audio: string) => {
         try {
+            // If audio is disabled, return early
+            if (!audioEnabled) return false;
+
             const audioData = atob(base64Audio);
             const audioArray = new Uint8Array(audioData.length);
             for (let i = 0; i < audioData.length; i++) {
@@ -517,6 +693,7 @@ export const useWebRTC = ({ agentId, company, onMessage }: UseWebRTCProps) => {
         stopAudioStream,
         toggleAudioStream,
         cleanupRTCConnection,
-        playAudio
+        playAudio,
+        processAudioChunk
     };
-}
+};
