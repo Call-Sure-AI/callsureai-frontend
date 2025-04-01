@@ -301,7 +301,7 @@ const baseVoices = [
     accent: "Dutch",
     language: "Dutch",
     sampleUrl: "/voices/male-dutch-nl.mp3",
-    audioLength: "00:08"
+    audioLength: "00:10"
   },
   {
     name: "Turkish - Female",
@@ -522,8 +522,17 @@ const AnimatedVoicesCarousel = () => {
       cancelAnimationFrame(animationRef.current);
     }
     
-    // Create and play new audio
+    // Create audio element
     const audio = new Audio(voice.sampleUrl);
+    
+    // Handle errors (including missing files)
+    audio.addEventListener('error', (e) => {
+      console.warn(`Audio file not found or error: ${voice.sampleUrl}`, e);
+      setPlayingVoice(null);
+      // You could show a toast notification or alert here
+    });
+    
+    // Only set up playback if the file loads successfully
     audio.addEventListener('loadedmetadata', () => {
       setProgress(0);
       audio.play();
@@ -539,13 +548,7 @@ const AnimatedVoicesCarousel = () => {
         cancelAnimationFrame(animationRef.current);
       }
     });
-    
-    audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
-      setPlayingVoice(null);
-    });
   };
-
   return (
     <section id="test-voices" className="py-12 bg-gray-50 overflow-hidden">
       <style jsx global>{`
