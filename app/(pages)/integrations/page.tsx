@@ -127,8 +127,10 @@ const IntegrationCard = ({ title, description, icon: Icon, category, status }: {
             <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">{category}</span>
                 <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#0A1E4E] bg-indigo-50 rounded-lg hover:bg-indigo-100">
-                    Connect
-                    <Share2 className="w-4 h-4 ml-2" />
+                    Compatible
+                    <svg className="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 7l5 5-5 5" />
+                    </svg>
                 </button>
             </div>
         </div>

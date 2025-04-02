@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";  // Add this import
-import { useState } from "react";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -13,8 +13,19 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user } = useCurrentUser();
 
+    const scrollToSection = (sectionId) => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            setIsMobileMenuOpen(false); // Close mobile menu if open
+            window.scrollTo({
+                top: section.offsetTop - 80, // Adjust offset to account for navbar height
+                behavior: "smooth"
+            });
+        }
+    };
+
     const navItems = [
-        { label: "Features", href: "/features" },
+        { label: "Features", action: () => scrollToSection("analytics-section") },
         { label: "Pricing", href: "/pricing" },
         { label: "Resources", href: "/resources" },
         { label: "Integrations", href: "/integrations" },
@@ -107,15 +118,24 @@ const Navbar = () => {
                                 transition={{ delay: index * 0.1 + 0.2 }}
                                 className="mx-3"
                             >
-                                <Link
-                                    href={item.href}
-                                    className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
-                                    // @ts-ignore
-                                    whilehover={{ scale: 1.05 }}
-                                    whiletap={{ scale: 0.95 }}
-                                >
-                                    {item.label}
-                                </Link>
+                                {item.action ? (
+                                    <button
+                                        onClick={item.action}
+                                        className="text-slate-600 hover:text-[#0A1E4E] transition-colors cursor-pointer"
+                                    >
+                                        {item.label}
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={item.href}
+                                        className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
+                                        // @ts-ignore
+                                        whilehover={{ scale: 1.05 }}
+                                        whiletap={{ scale: 0.95 }}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                )}
                             </motion.div>
                         ))}
                     </div>
@@ -197,26 +217,37 @@ const Navbar = () => {
                                         key={item.label}
                                         variants={itemAnimation}
                                     >
-                                        <Link
-                                            href={item.href}
-                                            className="w-full justify-start text-slate-600 hover:text-[#0A1E4E] hover:bg-slate-100/80"
-                                        >
-                                            {item.label}
-                                        </Link>
+                                        {item.action ? (
+                                            <button
+                                                onClick={item.action}
+                                                className="block w-full text-left px-4 py-2 text-slate-600 hover:text-[#0A1E4E] hover:bg-slate-100/80"
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                className="block w-full px-4 py-2 text-slate-600 hover:text-[#0A1E4E] hover:bg-slate-100/80"
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        )}
                                     </motion.div>
                                 ))}
                                 {user && user?.email ? (
                                     <UserProfileIcon />
                                 ) : (
                                     <motion.div variants={itemAnimation}>
-                                        <Button
-                                            variant="animated"
-                                            size="animated"
-                                            className="w-[90%] sm:hidden ml-4"
-                                            showArrow
-                                        >
-                                            Sign up
-                                        </Button>
+                                        <Link href="/auth">
+                                            <Button
+                                                variant="animated"
+                                                size="animated"
+                                                className="w-[90%] sm:hidden ml-4"
+                                                showArrow
+                                            >
+                                                Sign up
+                                            </Button>
+                                        </Link>
                                     </motion.div>
                                 )}
                             </div>

@@ -211,8 +211,6 @@ const baseVoices = [
     sampleUrl: '/voices/male-french-fr.mp3',
     audioLength: '00:08'
   },
-
-
   {
     name: "Italian - Female",
     displayName: "Giulia Rossi",
@@ -321,8 +319,6 @@ const baseVoices = [
     sampleUrl: "/voices/male-turkish-tr.mp3",
     audioLength: "00:08"
   },
-
-
   {
     name: 'Polish - Female',
     displayName: 'Anna Kowalska',
@@ -343,21 +339,17 @@ const baseVoices = [
   }
 ];
 
-// Generate voices for rows
-const generateVoices = (startId: number, count: number): Voice[] => {
-  const voices = [];
-  for (let i = 0; i < count; i++) {
-    const baseIndex = i % baseVoices.length;
-    voices.push({
-      ...baseVoices[baseIndex],
-      id: startId + i
-    });
-  }
-  return voices;
+// Generate voices with unique IDs for each row
+const generateVoices = (startId: number): Voice[] => {
+  return baseVoices.map((voice, index) => ({
+    ...voice,
+    id: startId + index
+  }));
 };
 
-const firstRowVoices = generateVoices(1, 21);
-const secondRowVoices = generateVoices(100, 21);
+// Generate complete sets of voices for each row, without limiting the number
+const firstRowVoices = generateVoices(1);
+const secondRowVoices = generateVoices(100);
 
 interface VoiceCardProps {
   voice: Voice;
@@ -435,6 +427,9 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ voices, direction, onPlay, pl
     row.style.animationPlayState = isPaused ? 'paused' : 'running';
   }, [isPaused]);
 
+  // Create a duplicate set of cards to ensure continuous scrolling
+  const duplicatedVoices = [...voices, ...voices];
+
   return (
     <div 
       className="flex overflow-hidden my-4 w-full"
@@ -447,14 +442,14 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ voices, direction, onPlay, pl
         className="flex"
         style={{
           animationName: direction === 'rtl' ? 'scrollRightToLeft' : 'scrollLeftToRight',
-          animationDuration: '30s',
+          animationDuration: '60s', // Increased duration to allow for more cards
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
         }}
       >
-        {voices.map((voice) => (
+        {duplicatedVoices.map((voice, index) => (
           <VoiceCard 
-            key={voice.id} 
+            key={`${voice.id}-${index}`} 
             voice={voice} 
             isPlaying={!!(playingVoice && playingVoice.id === voice.id)}
             onPlay={onPlay}
@@ -471,6 +466,7 @@ const AnimatedVoicesCarousel = () => {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animationRef = useRef<number | null>(null);
+  const playingCardRef = useRef<{ startTime: number, duration: number } | null>(null);
 
   // Clean up function
   useEffect(() => {
@@ -486,17 +482,36 @@ const AnimatedVoicesCarousel = () => {
 
   // Update progress using requestAnimationFrame for smooth animation
   const updateProgress = () => {
-    if (audioRef.current) {
-      const percentage = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-      setProgress(percentage);
+    if (audioRef.current && playingCardRef.current) {
+      const elapsed = audioRef.current.currentTime;
+      const duration = audioRef.current.duration;
       
-      if (percentage < 100) {
+      // For smoother animation, let's create a non-linear progress
+      // Using easeInOutQuad curve to make it accelerate in middle sections
+      const normalProgress = elapsed / duration;
+      
+      // Apply easing function and multiply by 0.5 to make it progressing at half the rate
+      // This makes it visually seem like it's moving at half the rate initially
+      // Later parts will move faster for a natural feel
+      const eased = normalProgress < 0.5
+        ? 2 * normalProgress * normalProgress 
+        : 1 - Math.pow(-2 * normalProgress + 2, 2) / 2;
+      
+      // Now stretch it out to fill the bar completely
+      const adjustedPercentage = Math.min(eased * 100 * 1.5, 100);
+      
+      setProgress(adjustedPercentage);
+      
+      // Continue animation if audio is still playing
+      if (!audioRef.current.ended) {
         animationRef.current = requestAnimationFrame(updateProgress);
+      } else {
+        // Smoothly animate to 100% when ended
+        setProgress(100);
       }
     }
   };
 
-  // Replace the handlePlay function with this corrected version
   const handlePlay = (voice: Voice) => {
     // If clicking the same voice that's already playing
     if (playingVoice && playingVoice.id === voice.id && audioRef.current) {
@@ -529,26 +544,50 @@ const AnimatedVoicesCarousel = () => {
     audio.addEventListener('error', (e) => {
       console.warn(`Audio file not found or error: ${voice.sampleUrl}`, e);
       setPlayingVoice(null);
-      // You could show a toast notification or alert here
+      setProgress(0);
     });
     
     // Only set up playback if the file loads successfully
     audio.addEventListener('loadedmetadata', () => {
+      // Reset the progress to 0
       setProgress(0);
-      audio.play();
+      
+      // Store reference to the audio element
       audioRef.current = audio;
+      
+      // Set the playing voice
       setPlayingVoice(voice);
+      
+      // Store start time and duration for progress calculation
+      playingCardRef.current = {
+        startTime: Date.now(),
+        duration: audio.duration * 1000 // Convert to milliseconds
+      };
+      
+      // Start playback
+      audio.play();
+      
+      // Start updating the progress
       animationRef.current = requestAnimationFrame(updateProgress);
     });
     
     audio.addEventListener('ended', () => {
-      setPlayingVoice(null);
-      setProgress(0);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      // Set progress to 100% when audio ends
+      setProgress(100);
+      
+      // Set a timeout to reset everything after showing full progress
+      setTimeout(() => {
+        setPlayingVoice(null);
+        setProgress(0);
+        playingCardRef.current = null;
+        
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      }, 300); // Short delay to show the completed progress
     });
   };
+
   return (
     <section id="test-voices" className="py-12 bg-gray-50 overflow-hidden">
       <style jsx global>{`
@@ -591,21 +630,21 @@ const AnimatedVoicesCarousel = () => {
       <div className="px-4 relative max-w-full">
         <div className="pt-0 pb-0 text-center">
         <div className="inline-flex flex-wrap items-center gap-0.75 bg-blue-50 backdrop-blur px-2 sm:px-3 py-1.5 sm:py-2 mb-6 rounded-full shadow-sm">
-  <div
-    className="animate-[scale_2s_ease-in-out_infinite]"
-    style={{
-      animationName: "scale",
-      animationDuration: "2s",
-      animationIterationCount: "infinite",
-      animationTimingFunction: "ease-in-out"
-    }}
-  >
-    <div className="h-4 w-4 sm:h-5 sm:w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mr-1.5 sm:mr-2">
-      <Mic className="h-2 w-2 sm:h-3 sm:w-3 text-white" />
-    </div>
-  </div>
-  <span className="text-blue-800 text-xs sm:text-sm font-medium whitespace-normal">Our Most Used Voices</span>
-</div>
+          <div
+            className="animate-[scale_2s_ease-in-out_infinite]"
+            style={{
+              animationName: "scale",
+              animationDuration: "2s",
+              animationIterationCount: "infinite",
+              animationTimingFunction: "ease-in-out"
+            }}
+          >
+            <div className="h-4 w-4 sm:h-5 sm:w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mr-1.5 sm:mr-2">
+              <Mic className="h-2 w-2 sm:h-3 sm:w-3 text-white" />
+            </div>
+          </div>
+          <span className="text-blue-800 text-xs sm:text-sm font-medium whitespace-normal">Our Most Used Voices</span>
+        </div>
           <h2 className="text-4xl md:text-5xl font-bold max-w-5xl mx-auto mb-4" style={{ lineHeight: 1.2 }}>
             <GradientText>Explore</GradientText> Our Premium <GradientText>Voice Collection</GradientText>
           </h2>

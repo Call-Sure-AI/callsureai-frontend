@@ -820,7 +820,7 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div id="analytics-section" className="min-h-screen bg-gray-50">
       <div className="pt-10 md:pt-20 pb-0 text-center px-4">
         <div className="inline-flex items-center gap-0.75 bg-blue-50 backdrop-blur px-2 py-1 md:px-3 md:py-2 mb-4 md:mb-6 rounded-full shadow-sm">
           <motion.div
