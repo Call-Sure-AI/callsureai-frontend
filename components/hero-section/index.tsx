@@ -39,6 +39,11 @@ const HeroSection = () => {
         setShowCalendly(false);
     };
     
+    // Function to handle "Try It Now" button click
+    const handleTryItNow = () => {
+        window.location.href = "https://waitlist.callsure.ai/";
+    };
+    
     return (
         <div
             ref={heroRef}
@@ -153,6 +158,7 @@ const HeroSection = () => {
                                 variant="animated"
                                 size="animated"
                                 showArrow
+                                onClick={handleTryItNow}
                             >
                                 Try It Now
                             </Button>
