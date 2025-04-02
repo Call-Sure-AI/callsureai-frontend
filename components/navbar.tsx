@@ -13,7 +13,7 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user } = useCurrentUser();
 
-    const scrollToSection = (sectionId) => {
+    const scrollToSection = (sectionId: string) => {
         const section = document.getElementById(sectionId);
         if (section) {
             setIsMobileMenuOpen(false); // Close mobile menu if open
@@ -129,9 +129,6 @@ const Navbar = () => {
                                     <Link
                                         href={item.href}
                                         className="text-slate-600 hover:text-[#0A1E4E] transition-colors"
-                                        // @ts-ignore
-                                        whilehover={{ scale: 1.05 }}
-                                        whiletap={{ scale: 0.95 }}
                                     >
                                         {item.label}
                                     </Link>
