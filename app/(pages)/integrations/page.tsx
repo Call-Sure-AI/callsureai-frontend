@@ -2260,32 +2260,27 @@ export default function Home() {
                     <motion.p
                         variants={fadeInUp}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-lg text-slate-500 text-center mb-6 max-w-3xl mx-auto relative z-10"
+                        className="text-lg text-slate-500 text-center mb-0 max-w-3xl mx-auto relative z-10"
                     >
                         Seamlessly Integrate the AI voice agents with powerful tools and services to boost customer care capabilities.
                     </motion.p>
             </motion.main>
             </div>
 
-                <div className="mb-8">
-                    <div className="relative max-w-md mx-auto">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={handleSearch}
-                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            placeholder="Search integrations..."
-                        />
-
-                    {/* Add the debugging div here */}
-                    {/* <div className="text-xs text-gray-400 mt-2">
-                        Current search: &quot;{searchTerm}&quot; (Integrations: {filteredIntegrations.length})
-                    </div> */}
+            <div className="mb-8 flex justify-center">
+                <div className="relative max-w-7xl mx-auto flex justify-center">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <Search className="h-6 w-6 text-gray-400" />
                     </div>
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        className="block w-full md:w-[700px] lg:w-[900px] pl-14 pr-3 py-4 border border-gray-300 rounded-full leading-15 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-base shadow-sm"
+                        placeholder="Search integrations..."
+                    />
                 </div>
+            </div>
 
                 <CategoryFilter
                     categories={categories}

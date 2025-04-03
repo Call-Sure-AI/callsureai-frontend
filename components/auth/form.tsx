@@ -16,25 +16,40 @@ const AuthForm = () => {
         setIsLogin(toLogin);
     };
 
+    // Updated variants with reduced distance and added a slight scale effect
     const formVariants = {
         enter: (direction: number) => ({
-            x: direction > 0 ? 1000 : -1000,
-            opacity: 0
+            x: direction > 0 ? 500 : -500,
+            opacity: 0,
+            scale: 0.9,
         }),
         center: {
             x: 0,
-            opacity: 1
+            opacity: 1,
+            scale: 1,
+            transition: {
+                x: { type: "spring", stiffness: 250, damping: 25 },
+                opacity: { duration: 0.2 },
+                scale: { duration: 0.2 }
+            }
         },
         exit: (direction: number) => ({
-            x: direction < 0 ? 1000 : -1000,
-            opacity: 0
+            x: direction < 0 ? 500 : -500,
+            opacity: 0,
+            scale: 0.9,
+            transition: {
+                x: { type: "spring", stiffness: 250, damping: 25 },
+                opacity: { duration: 0.2 },
+                scale: { duration: 0.2 }
+            }
         })
     };
 
     return (
         <div className="flex items-center justify-center bg-gray-50 pt-32 pb-16 px-4">
             <div className="w-full max-w-4xl min-h-[600px] bg-white rounded-3xl shadow-lg flex flex-col lg:flex-row overflow-hidden">
-                <AnimatePresence mode="wait" initial={false} custom={direction}>
+                {/* Use popLayout for smoother transitions between elements */}
+                <AnimatePresence mode="popLayout" initial={false} custom={direction}>
                     {isLogin ? (
                         <motion.div
                             key="login"
@@ -44,7 +59,6 @@ const AuthForm = () => {
                             initial="enter"
                             animate="center"
                             exit="exit"
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         >
                             <div className="w-full lg:w-1/2 bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] p-6 lg:p-12 flex flex-col justify-center text-white text-center lg:text-left order-2 lg:order-1">
                                 <div className="lg:mt-0 -mt-4">
@@ -94,7 +108,6 @@ const AuthForm = () => {
                             initial="enter"
                             animate="center"
                             exit="exit"
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         >
                             <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center order-1">
                                 <h2 className="text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-center lg:text-left">Sign Up</h2>
@@ -159,6 +172,5 @@ const InputField = ({ type, placeholder, value, onChange, icon }: {
         </span>
     </div>
 );
-
 
 export default AuthForm;
