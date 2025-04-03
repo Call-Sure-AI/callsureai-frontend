@@ -3,7 +3,7 @@
 import { motion, useAnimationControls } from "framer-motion";
 // import Image from "next/image";
 import { memo, useEffect, useState, useCallback } from "react";
-import { Quote } from "lucide-react";
+import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { TestimonialCardProps } from "@/types";
 import { testimonials } from "@/constants";
 
@@ -39,8 +39,6 @@ const GradientText = memo(({ children }: GradientTextProps) => (
 ));
 
 GradientText.displayName = "GradientText";
-
-
 
 const TestimonialCard = memo(({ testimonial, index }: TestimonialCardProps) => (
     <motion.div
@@ -89,11 +87,9 @@ const TestimonialSection = () => {
     const itemsPerPage = isMobile ? 2 : 3;
     const totalPages = Math.ceil(testimonials.length / itemsPerPage);
 
-    const animateToNextSlide = useCallback(async () => {
+    const animateSlide = useCallback(async (nextPage: number) => {
         if (isTransitioning) return;
         setIsTransitioning(true);
-
-        const nextPage = (currentPage + 1) % totalPages;
 
         await controls.start({
             transform: `translateX(-${nextPage * (100 / totalPages)}%)`,
@@ -102,7 +98,17 @@ const TestimonialSection = () => {
 
         setCurrentPage(nextPage);
         setIsTransitioning(false);
-    }, [currentPage, controls, totalPages, isTransitioning]);
+    }, [controls, totalPages, isTransitioning]);
+
+    const animateToNextSlide = useCallback(async () => {
+        const nextPage = (currentPage + 1) % totalPages;
+        animateSlide(nextPage);
+    }, [currentPage, totalPages, animateSlide]);
+
+    const animateToPrevSlide = useCallback(async () => {
+        const prevPage = (currentPage - 1 + totalPages) % totalPages;
+        animateSlide(prevPage);
+    }, [currentPage, totalPages, animateSlide]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -112,18 +118,10 @@ const TestimonialSection = () => {
         return () => clearInterval(interval);
     }, [animateToNextSlide]);
 
-    const handleDotClick = useCallback(async (index: number) => {
+    const handleDotClick = useCallback((index: number) => {
         if (isTransitioning || index === currentPage) return;
-        setIsTransitioning(true);
-
-        await controls.start({
-            transform: `translateX(-${index * (100 / totalPages)}%)`,
-            transition: { duration: 0.8, ease: "easeInOut" }
-        });
-
-        setCurrentPage(index);
-        setIsTransitioning(false);
-    }, [controls, isTransitioning, currentPage, totalPages]);
+        animateSlide(index);
+    }, [isTransitioning, currentPage, animateSlide]);
 
     return (
         <div className="py-16 px-4 bg-gradient-to-b from-white to-blue-50 overflow-hidden">
@@ -144,6 +142,16 @@ const TestimonialSection = () => {
             </motion.div>
 
             <div className="relative max-w-7xl mx-auto overflow-hidden">
+                {/* Left Arrow */}
+                <button
+                    onClick={animateToPrevSlide}
+                    disabled={isTransitioning}
+                    className="absolute left-4 md:left-8 top-[46%] z-10 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg text-[#3362A6] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    aria-label="Previous testimonials"
+                >
+                    <ChevronLeft size={20} className="md:w-6 md:h-6" />
+                </button>
+
                 <motion.div
                     animate={controls}
                     initial={false}
@@ -165,19 +173,30 @@ const TestimonialSection = () => {
                                 className="w-full"
                                 style={{ flex: `0 0 ${100 / totalPages}%` }}
                             >
-                                <div className="grid md:grid-cols-3 grid-cols-1 gap-8 px-4">
+                                <div className="grid md:grid-cols-3 grid-cols-1 gap-8 md:gap-0 px-12 md:px-16">
                                     {pageTestimonials.map((testimonial, index) => (
-                                        <TestimonialCard
-                                            key={`${pageIndex}-${index}`}
-                                            testimonial={testimonial}
-                                            index={index}
-                                        />
+                                        <div key={`${pageIndex}-${index}`} className="md:px-6 px-6 max-w-[100%] md:max-w-full mx-auto">
+                                            <TestimonialCard
+                                                testimonial={testimonial}
+                                                index={index}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         );
                     })}
                 </motion.div>
+
+                {/* Right Arrow */}
+                <button
+                    onClick={animateToNextSlide}
+                    disabled={isTransitioning}
+                    className="absolute right-4 md:right-8 top-[46%] z-10 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg text-[#3362A6] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    aria-label="Next testimonials"
+                >
+                    <ChevronRight size={20} className="md:w-6 md:h-6" />
+                </button>
 
                 <div className="flex justify-center gap-2 mt-8">
                     {Array.from({ length: totalPages }).map((_, index) => (
