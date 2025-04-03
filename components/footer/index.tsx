@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { AnimatedButton } from "@/components/ui/button";
+import Link from "next/link"; // Add this import for proper navigation
 
 type MessageType = 'success' | 'error';
 interface Message {
@@ -15,6 +16,14 @@ const Footer = () => {
     const [email, setEmail] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<Message | null>(null);
+
+    // Navigation items - matching the navbar items
+    const navItems = [
+        { label: "Features", href: "/features" },
+        { label: "Pricing", href: "/pricing" },
+        { label: "Resources", href: "/resources" },
+        { label: "Integrations", href: "/integrations" },
+    ];
 
     const fadeInUpVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -85,10 +94,15 @@ const Footer = () => {
                     variants={fadeInUpVariants}
                     className="flex flex-col md:flex-row justify-center md:space-x-8 space-y-4 md:space-y-0 mb-10 md:mb-20"
                 >
-                    <a href="#features" className="text-center md:text-left text-sm hover:text-blue-200 transition-colors">Features</a>
-                    <a href="#pricing" className="text-center md:text-left text-sm hover:text-blue-200 transition-colors">Pricing</a>
-                    <a href="#resources" className="text-center md:text-left text-sm hover:text-blue-200 transition-colors">Resources</a>
-                    <a href="#integration-section" className="text-center md:text-left text-sm hover:text-blue-200 transition-colors">Integrations</a>
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.label}
+                            href={item.href}
+                            className="text-center md:text-left text-sm hover:text-blue-200 transition-colors"
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
                 </motion.div>
 
                 <motion.div
@@ -155,7 +169,7 @@ const Footer = () => {
                         <div className="flex flex-col md:flex-row gap-4 md:gap-5 text-center md:text-left md:order-1">
                             <a href="https://tos.callsure.ai/" className="cursor-pointer hover:text-white transition-colors">Terms of Service</a>
                             <a href="https://privacy.callsure.ai/" className="cursor-pointer hover:text-white transition-colors">Privacy Policy</a>
-                            <a href="/contact" className="cursor-pointer hover:text-white transition-colors">Contact Us</a>
+                            <Link href="/contact" className="cursor-pointer hover:text-white transition-colors">Contact Us</Link>
                         </div>
 
                         {/* Center - Copyright */}
