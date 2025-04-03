@@ -79,12 +79,21 @@ const Banner = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="max-w-2xl relative z-10"
+                className="max-w-3xl relative z-10"
             >
                 <h1 className="text-2xl md:text-5xl font-bold bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] bg-clip-text text-transparent leading-tight mb-6 md:mb-8">
-                    Ready to Supercharge Your Customer Relationships?
+                    <span className="inline-block bg-[#363636]/95 text-transparent bg-clip-text animate-gradient-xy pb-0">
+                        Ready to{" "}
+                        <span className="inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
+                        Supercharge
+                        </span>{" "}
+                        Your{" "}
+                        <span className="inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
+                        Customer Relationships
+                        </span>
+                        ?
+                    </span>
                 </h1>
-
                 <Button variant="animated" size="animated" showArrow>
                     Learn More
                 </Button>

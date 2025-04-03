@@ -146,7 +146,7 @@ const TestimonialSection = () => {
                 <button
                     onClick={animateToPrevSlide}
                     disabled={isTransitioning}
-                    className="absolute left-4 md:left-8 top-[46%] z-10 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg text-[#3362A6] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="absolute left-0 md:left-4 top-[46%] z-10 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg text-[#3362A6] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     aria-label="Previous testimonials"
                 >
                     <ChevronLeft size={20} className="md:w-6 md:h-6" />
@@ -173,7 +173,7 @@ const TestimonialSection = () => {
                                 className="w-full"
                                 style={{ flex: `0 0 ${100 / totalPages}%` }}
                             >
-                                <div className="grid md:grid-cols-3 grid-cols-1 gap-8 md:gap-0 px-12 md:px-16">
+                                <div className="grid md:grid-cols-3 grid-cols-1 gap-8 md:gap-0 px-4 md:px-16">
                                     {pageTestimonials.map((testimonial, index) => (
                                         <div key={`${pageIndex}-${index}`} className="md:px-6 px-6 max-w-[100%] md:max-w-full mx-auto">
                                             <TestimonialCard
@@ -192,7 +192,7 @@ const TestimonialSection = () => {
                 <button
                     onClick={animateToNextSlide}
                     disabled={isTransitioning}
-                    className="absolute right-4 md:right-8 top-[46%] z-10 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg text-[#3362A6] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="absolute right-0 md:right-4 top-[46%] z-10 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg text-[#3362A6] transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     aria-label="Next testimonials"
                 >
                     <ChevronRight size={20} className="md:w-6 md:h-6" />
