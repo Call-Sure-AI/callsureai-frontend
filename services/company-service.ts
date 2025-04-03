@@ -1,6 +1,66 @@
 // services/company-service.ts
 
 /**
+ * Format phone number to match the required regex pattern: /^\+?[1-9]\d{1,19}$/
+ * @param phoneNumber The phone number to format
+ * @returns Formatted phone number
+ */
+const formatPhoneNumber = (phoneNumber: string): string => {
+    if (!phoneNumber) return '';
+    
+    // Remove any non-digit characters except for leading '+'
+    let formatted = phoneNumber.trim();
+    
+    // If it doesn't start with '+', keep only digits
+    if (!formatted.startsWith('+')) {
+        formatted = formatted.replace(/\D/g, '');
+        
+        // If the number starts with a 0, remove it (as regex requires [1-9])
+        if (formatted.startsWith('0')) {
+            formatted = formatted.substring(1);
+        }
+        
+        // Add '+' if the number doesn't have it
+        if (formatted && !formatted.startsWith('+')) {
+            formatted = '+' + formatted;
+        }
+    } else {
+        // If it starts with '+', keep the '+' and remove non-digits after it
+        formatted = '+' + formatted.substring(1).replace(/\D/g, '');
+    }
+    
+    // Ensure it matches the pattern /^\+?[1-9]\d{1,19}$/
+    if (formatted && !/^\+?[1-9]\d{1,19}$/.test(formatted)) {
+        console.warn('Phone number does not match required format, attempting to fix', formatted);
+        
+        // If it still doesn't match, try to fix it
+        if (formatted.startsWith('+') && formatted.length > 1) {
+            // Find the first non-zero digit after the '+'
+            const firstNonZeroIndex = [...formatted.substring(1)].findIndex(c => c !== '0' && /\d/.test(c));
+            
+            if (firstNonZeroIndex !== -1) {
+                formatted = '+' + formatted.substring(firstNonZeroIndex + 1);
+            } else {
+                // If there are no non-zero digits, default to empty
+                formatted = '';
+            }
+        } else if (formatted.length > 0 && !formatted.startsWith('+')) {
+            // Find the first non-zero digit
+            const firstNonZeroIndex = [...formatted].findIndex(c => c !== '0' && /\d/.test(c));
+            
+            if (firstNonZeroIndex !== -1) {
+                formatted = '+' + formatted.substring(firstNonZeroIndex);
+            } else {
+                // If there are no non-zero digits, default to empty
+                formatted = '';
+            }
+        }
+    }
+    
+    return formatted;
+};
+
+/**
  * Create or update a company
  * @param formData The form data for the company
  * @param token Authentication token
@@ -10,12 +70,15 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
         // Format address
         const address = formData.address ? `${formData.address}, ${formData.city}, ${formData.state}, ${formData.zip_code}` : '';
 
+        // Format phone number to match the required pattern
+        const formattedPhone = formData.phone_number ? formatPhoneNumber(formData.phone_number) : '';
+
         // Log attempt (with sensitive data redacted)
         console.log('Attempting to create/update company with data:', {
             name: `${formData.first_name} ${formData.last_name}`,
             business_name: formData.business_name,
             email: formData.email ? `${formData.email.substring(0, 3)}...` : undefined,
-            phone_number: formData.phone_number ? `${formData.phone_number.substring(0, 3)}...` : undefined,
+            phone_number: formattedPhone ? `${formattedPhone.substring(0, 3)}...` : undefined,
             has_address: !!address,
             has_logo: !!formData.logo
         });
@@ -35,10 +98,24 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
                 name: `${formData.first_name} ${formData.last_name}`,
                 business_name: formData.business_name,
                 email: formData.email,
-                phone_number: formData.phone_number,
+                phone_number: formattedPhone, // Use the formatted phone number
                 address: address,
                 user_id: formData.userId,
                 logo: formData.logo,
+                // Add required settings object with default values to match schema
+                settings: {
+                    notification_preferences: {
+                        email: true,
+                        sms: true
+                    },
+                    working_hours: {
+                        start: "09:00",
+                        end: "17:00",
+                        timezone: "UTC"
+                    }
+                },
+                // Include these optional fields if they need default values
+                website: formData.website || "", // Optional field as per schema
             }),
             signal: controller.signal,
         });
@@ -47,10 +124,15 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
+            // Try to get detailed error message
             const errorData = await response.json().catch(() => ({ 
                 error: `Server returned ${response.status}: ${response.statusText}` 
             }));
-            throw new Error(errorData.error || 'Failed to create/update company');
+            
+            // Log detailed error for debugging
+            console.error('Server error details:', errorData);
+            
+            throw new Error(errorData.error || errorData.message || 'Failed to create/update company');
         }
 
         return await response.json();
@@ -234,9 +316,29 @@ const updateCompany = async (id: string, formData: any, token: string) => {
             throw new Error('Company ID is required');
         }
 
+        // Format phone number if present
+        if (formData.phone_number) {
+            formData.phone_number = formatPhoneNumber(formData.phone_number);
+        }
+
         // Set up timeout for the request
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+        // Make sure we have the required settings object
+        if (!formData.settings) {
+            formData.settings = {
+                notification_preferences: {
+                    email: true,
+                    sms: true
+                },
+                working_hours: {
+                    start: "09:00",
+                    end: "17:00",
+                    timezone: "UTC"
+                }
+            };
+        }
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
         const response = await fetch(`${apiUrl}/api/company/${id}`, {
