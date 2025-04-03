@@ -1,3 +1,4 @@
+// components/voice-section/AnimatedVoicesCarousel.tsx
 "use client";
 
 import React, { memo, useState, useRef, useEffect } from 'react';

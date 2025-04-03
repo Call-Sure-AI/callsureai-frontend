@@ -1,3 +1,4 @@
+// components/hero-section/index.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Rocket } from "lucide-react";
 import VideoSection from "@/components/ui/videosection";
+import BackgroundAnimation from "@/components/background-animation";
 
 const HeroSection = () => {
     const [showCalendly, setShowCalendly] = useState(false);
@@ -46,37 +48,7 @@ const HeroSection = () => {
             className="min-h-screen bg-gradient-to-b from-[#EEF3FF] to-white relative overflow-hidden outline-none"
         >
             {/* Background animated elements */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <motion.div
-                    animate={{
-                        rotate: [360, 0],
-                        y: [0, -20, 0],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear",
-                    }}
-                    className="absolute top-1/2 right-[15%] w-32 h-32 border border-blue-200/30 rounded-lg"
-                />
-                {/* Additional background animations */}
-                <motion.div
-                    animate={{
-                        rotate: [360, 0],
-                        scale: [0.8, 1, 0.8],
-                    }}
-                    transition={{
-                        duration: 30,
-                        repeat: Infinity,
-                        ease: "linear",
-                    }}
-                    className="absolute left-20 top-20 w-40 h-40 border border-blue-100/20 rounded-3xl"
-                    style={{
-                        background: "linear-gradient(45deg, rgba(10,30,78,0.03) 0%, rgba(220,230,255,0.05) 100%)",
-                    }}
-                />
-                {/* More animated divs */}
-            </div>
+            <BackgroundAnimation />
 
             {/* Main content */}
             <motion.main
