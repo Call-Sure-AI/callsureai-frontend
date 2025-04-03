@@ -1,66 +1,6 @@
 // services/company-service.ts
 
 /**
- * Format phone number to match the required regex pattern: /^\+?[1-9]\d{1,19}$/
- * @param phoneNumber The phone number to format
- * @returns Formatted phone number
- */
-const formatPhoneNumber = (phoneNumber: string): string => {
-    if (!phoneNumber) return '';
-    
-    // Remove any non-digit characters except for leading '+'
-    let formatted = phoneNumber.trim();
-    
-    // If it doesn't start with '+', keep only digits
-    if (!formatted.startsWith('+')) {
-        formatted = formatted.replace(/\D/g, '');
-        
-        // If the number starts with a 0, remove it (as regex requires [1-9])
-        if (formatted.startsWith('0')) {
-            formatted = formatted.substring(1);
-        }
-        
-        // Add '+' if the number doesn't have it
-        if (formatted && !formatted.startsWith('+')) {
-            formatted = '+' + formatted;
-        }
-    } else {
-        // If it starts with '+', keep the '+' and remove non-digits after it
-        formatted = '+' + formatted.substring(1).replace(/\D/g, '');
-    }
-    
-    // Ensure it matches the pattern /^\+?[1-9]\d{1,19}$/
-    if (formatted && !/^\+?[1-9]\d{1,19}$/.test(formatted)) {
-        console.warn('Phone number does not match required format, attempting to fix', formatted);
-        
-        // If it still doesn't match, try to fix it
-        if (formatted.startsWith('+') && formatted.length > 1) {
-            // Find the first non-zero digit after the '+'
-            const firstNonZeroIndex = [...formatted.substring(1)].findIndex(c => c !== '0' && /\d/.test(c));
-            
-            if (firstNonZeroIndex !== -1) {
-                formatted = '+' + formatted.substring(firstNonZeroIndex + 1);
-            } else {
-                // If there are no non-zero digits, default to empty
-                formatted = '';
-            }
-        } else if (formatted.length > 0 && !formatted.startsWith('+')) {
-            // Find the first non-zero digit
-            const firstNonZeroIndex = [...formatted].findIndex(c => c !== '0' && /\d/.test(c));
-            
-            if (firstNonZeroIndex !== -1) {
-                formatted = '+' + formatted.substring(firstNonZeroIndex);
-            } else {
-                // If there are no non-zero digits, default to empty
-                formatted = '';
-            }
-        }
-    }
-    
-    return formatted;
-};
-
-/**
  * Create or update a company
  * @param formData The form data for the company
  * @param token Authentication token
@@ -70,15 +10,12 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
         // Format address
         const address = formData.address ? `${formData.address}, ${formData.city}, ${formData.state}, ${formData.zip_code}` : '';
 
-        // Format phone number to match the required pattern
-        const formattedPhone = formData.phone_number ? formatPhoneNumber(formData.phone_number) : '';
-
         // Log attempt (with sensitive data redacted)
         console.log('Attempting to create/update company with data:', {
             name: `${formData.first_name} ${formData.last_name}`,
             business_name: formData.business_name,
             email: formData.email ? `${formData.email.substring(0, 3)}...` : undefined,
-            phone_number: formattedPhone ? `${formattedPhone.substring(0, 3)}...` : undefined,
+            phone_number: formData.phone_number ? `${formData.phone_number.substring(0, 3)}...` : undefined,
             has_address: !!address,
             has_logo: !!formData.logo
         });
@@ -98,7 +35,7 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
                 name: `${formData.first_name} ${formData.last_name}`,
                 business_name: formData.business_name,
                 email: formData.email,
-                phone_number: formattedPhone, // Use the formatted phone number
+                phone_number: formData.phone_number,
                 address: address,
                 user_id: formData.userId,
                 logo: formData.logo,
@@ -314,11 +251,6 @@ const updateCompany = async (id: string, formData: any, token: string) => {
     try {
         if (!id) {
             throw new Error('Company ID is required');
-        }
-
-        // Format phone number if present
-        if (formData.phone_number) {
-            formData.phone_number = formatPhoneNumber(formData.phone_number);
         }
 
         // Set up timeout for the request
