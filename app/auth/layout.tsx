@@ -1,12 +1,14 @@
 import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex h-screen text-black">
+        <div className="flex flex-col text-black">
             <Navbar />
-            <div className="flex-1">
+            <div>
                 {children}
             </div>
+            <Footer />
         </div>
     );
 }

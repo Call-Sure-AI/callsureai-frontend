@@ -6,7 +6,7 @@ import { User, Lock, Mail } from 'lucide-react';
 import { SocialLogin } from '@/components/auth/social-login';
 
 const AuthForm = () => {
-    const [isLogin, setIsLogin] = useState(true);
+    const [isLogin, setIsLogin] = useState(false); // Changed from true to false
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [direction, setDirection] = useState(0);
@@ -32,7 +32,7 @@ const AuthForm = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="flex items-center justify-center bg-gray-50 pt-32 pb-16 px-4">
             <div className="w-full max-w-4xl min-h-[600px] bg-white rounded-3xl shadow-lg flex flex-col lg:flex-row overflow-hidden">
                 <AnimatePresence mode="wait" initial={false} custom={direction}>
                     {isLogin ? (
@@ -46,7 +46,7 @@ const AuthForm = () => {
                             exit="exit"
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         >
-                            <div className="w-full lg:w-1/2 bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 p-6 lg:p-12 flex flex-col justify-center text-white text-center lg:text-left order-2 lg:order-1">
+                            <div className="w-full lg:w-1/2 bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] p-6 lg:p-12 flex flex-col justify-center text-white text-center lg:text-left order-2 lg:order-1">
                                 <div className="lg:mt-0 -mt-4">
                                     <h2 className="text-3xl lg:text-4xl font-bold mb-2 lg:mb-4">Hello, Welcome!</h2>
                                     <p className="mb-4 lg:mb-8">Don&apos;t have an account?</p>
@@ -78,7 +78,7 @@ const AuthForm = () => {
                                     <div className="text-right">
                                         <a href="#" className="text-[#8B9FFF] text-sm">Forgot Password?</a>
                                     </div>
-                                    <button className="w-full bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 text-white py-3 lg:py-4 rounded-lg hover:bg-[#7B8FEF] transition-colors">
+                                    <button className="w-full bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] hover:from-[#162a47]/90 hover:via-[#3362A6]/90 hover:to-[#162a47]/90 text-white py-3 lg:py-4 rounded-lg transition-colors">
                                         Login
                                     </button>
                                     <SocialLogin />
@@ -113,13 +113,13 @@ const AuthForm = () => {
                                         onChange={setPassword}
                                         icon={<Lock size={20} />}
                                     />
-                                    <button className="w-full bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 text-white py-3 lg:py-4 rounded-lg hover:bg-[#7B8FEF] transition-colors">
+                                    <button className="w-full bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] hover:from-[#162a47]/90 hover:via-[#3362A6]/90 hover:to-[#162a47]/90 text-white py-3 lg:py-4 rounded-lg transition-colors">
                                         Sign Up
                                     </button>
                                     <SocialLogin isSignup />
                                 </form>
                             </div>
-                            <div className="w-full lg:w-1/2 bg-gradient-to-br from-[#0A1E4E] to-[#0A1E4E]/80 p-6 lg:p-12 flex flex-col justify-center text-white text-center lg:text-left order-2">
+                            <div className="w-full lg:w-1/2 bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] p-6 lg:p-12 flex flex-col justify-center text-white text-center lg:text-left order-2">
                                 <div className="lg:mt-0 -mt-4">
                                     <h2 className="text-3xl lg:text-4xl font-bold mb-2 lg:mb-4">Welcome Back!</h2>
                                     <p className="mb-4 lg:mb-8">Already have an account?</p>

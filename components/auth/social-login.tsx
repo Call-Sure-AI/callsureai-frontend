@@ -35,17 +35,26 @@ export const SocialLogin = ({ isSignup = false }) => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center text-center text-gray-500 mt-6">
+        <div className="flex flex-col items-center justify-center text-center text-gray-500 mt-6 w-full">
             <p className="mb-4 text-sm lg:text-base">
                 or {isSignup ? 'Sign Up' : 'login'} with Google
             </p>
-
-            <GoogleLogin
-                onSuccess={handleGoogleLogin}
-                onError={() => setError('Google login failed')}
-                useOneTap
-            />
-
+    
+            <div className="w-full flex justify-center">
+                <div className="w-full">
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={() => setError('Google login failed')}
+                        useOneTap
+                        width="100%"
+                        shape="rectangular"
+                        theme="outline"
+                        size="large"
+                        text={isSignup ? "signup_with" : "signin_with"}
+                    />
+                </div>
+            </div>
+    
             {error && (
                 <p className="text-red-500 text-sm mt-2">{error}</p>
             )}
