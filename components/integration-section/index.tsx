@@ -162,7 +162,9 @@ const IntegrationSection = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <AnimatedButton text="Experience It Live" icon={<ChevronRight className="h-4 w-4" />} />
+                            <a href="https://waitlist.callsure.ai/" target="_blank" rel="noopener noreferrer">
+                                <AnimatedButton text="Experience It Live" icon={<ChevronRight className="h-4 w-4" />} />
+                            </a>
                         </motion.div>
                     </motion.div>
 

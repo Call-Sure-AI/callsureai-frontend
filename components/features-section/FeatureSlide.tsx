@@ -1,3 +1,4 @@
+// components/features-section/FeatureSlide.tsx
 "use client";
 
 import React from "react";

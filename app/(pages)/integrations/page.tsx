@@ -2209,13 +2209,13 @@ export default function Home() {
             <motion.main
                 initial="hidden"
                 animate="visible"
-                className="relative pt-12 sm:pt-14 md:pt-14 pb-6 sm:pb-8 md:pb-2 px-4 sm:px-6"
+                className="relative pt-12 sm:pt-4 md:pt-4 pb-6 sm:pb-8 md:pb-2 px-4 sm:px-6"
             >
                     {/* Badge */}
                     <motion.div
                         variants={fadeInUp}
                         transition={{ duration: 0.6 }}
-                        className="flex justify-center mb-8"
+                        className="flex justify-center mb-4"
                     >
                         <div className="flex items-center gap-3 bg-blue-50 backdrop-blur px-3 py-1.5 rounded-full shadow-sm">
                             <motion.div
@@ -2243,15 +2243,15 @@ export default function Home() {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="relative z-10"
                     >
-                        <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-4 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
+                        <h1 className="text-5xl sm:text-5xl lg:text-6xl font-bold text-center mb-2 max-w-6xl sm:max-w-7xl lg:max-w-8xl mx-auto leading-[1.1] relative">
                             <span className="inline-block bg-[#363636]/95 text-transparent bg-clip-text animate-gradient-xy pb-0">
                                 Supports{" "}
                                 <span className="inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
-                                2K+ Integrations
+                                2000+ Integrations
                                 </span>{" "}
                                 across {" "}
                                 <span className="inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
-                                Industries & Businesses
+                                Industries and Businesses
                                 </span>
                             </span>
                         </h1>

@@ -304,7 +304,7 @@ const IntegrationCarousel = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             variants={fadeIn}
             className="bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-white mt-0 pt-12 pb-4"
         >

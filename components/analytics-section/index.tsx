@@ -1,3 +1,4 @@
+// components/analytics-section/index.tsx
 "use client";
 
 import React, { memo, useRef, useState, useEffect } from "react";
@@ -235,7 +236,7 @@ export default function AnalyticsPage() {
     {
       title: "Human Touch When You Need It",
       description:
-        "Live agent handoff ensures customers get personal attention when AI assistance isn't enough.",
+        "Live agent handoff ensures customers get personal attention when AI assistance isn't enough. The AI can seamlessly transfer the conversation to a human agent.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -263,7 +264,7 @@ export default function AnalyticsPage() {
     {
       title: "Real-Time Human Intervention",
       description:
-        "Seamless transition to human support agents whenever additional assistance is required.",
+        "Seamless transition to human support agents whenever additional assistance is required. The AI can intelligently identify when to escalate a conversation.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -342,7 +343,7 @@ export default function AnalyticsPage() {
     {
       title: "Multi-Language Support",
       description:
-        "Communication in both Hindi and English, allowing customers to interact in their preferred language.",
+        "Communication in over 30 languages with real-time translation capabilities. Supports multiple dialects and accents.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -377,7 +378,7 @@ export default function AnalyticsPage() {
     {
       title: "Smart and Always Learning",
       description:
-        "AI that improves in real-time, becoming more effective with each conversation.",
+        "AI that improves in real-time, becoming more effective with each conversation. Feedback loop ensures continuous learning.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -454,7 +455,7 @@ export default function AnalyticsPage() {
     {
       title: "Top-Level Security",
       description:
-        "End-to-end protection for all customer data and interactions.",
+        "End-to-end protection for all customer data & interactions. We are GDPR, CCPA, ACC, ISO 27001, SOC 2, RGDP, EU-U.S. Privacy Shield, and HIPAA compliant.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -522,7 +523,7 @@ export default function AnalyticsPage() {
     {
       title: "Seamless System Integration",
       description:
-        "Easy connection with existing business systems without complicated setup.",
+        "Easy connection with existing business systems without complicated setup. Technical support available 24/7.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -595,7 +596,7 @@ export default function AnalyticsPage() {
     {
       title: "Database Integration",
       description:
-        "Connection to your business database for highly personalized customer responses.",
+        "Connection to your business database for highly personalized customer responses. The AI can access customer data, order history, and more.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -637,7 +638,7 @@ export default function AnalyticsPage() {
     {
       title: "Complex Query Handling",
       description:
-        "Sophisticated AI models that can address complicated customer inquiries.",
+        "Sophisticated AI models that can address complicated customer inquiries. These models are designed to understand and respond to intricate questions.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -667,7 +668,7 @@ export default function AnalyticsPage() {
     {
       title: "Document Upload Capabilities",
       description:
-        "Support for customer document uploads to handle complex service requests.",
+        "Support for customer document uploads to handle complex service requests. The AI can analyze and respond to document content, such as invoices or contracts.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -725,7 +726,7 @@ export default function AnalyticsPage() {
     {
       title: "Real-Time Monitoring and Analytics",
       description:
-        "Live dashboards and transcript access for quality assurance and improvement.",
+        "Live dashboards and transcript access for quality assurance and improvement. Real-time data analytics for performance tracking and optimization.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">
@@ -772,7 +773,7 @@ export default function AnalyticsPage() {
     {
       title: "Continuous Business-Specific Training",
       description:
-        "Monthly updates and ongoing AI training customized specifically for your business operations.",
+        "Monthly updates and ongoing AI training customized specifically for your business operations. This ensures the AI remains relevant and effective.",
       content: (
         <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-8 px-4 md:p-8">
           <div className="flex flex-col items-center gap-4 md:gap-6">

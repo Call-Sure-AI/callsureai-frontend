@@ -39,11 +39,6 @@ const HeroSection = () => {
         setShowCalendly(false);
     };
     
-    // Function to handle "Try It Now" button click
-    const handleTryItNow = () => {
-        window.location.href = "https://waitlist.callsure.ai/";
-    };
-    
     return (
         <div
             ref={heroRef}
@@ -153,15 +148,16 @@ const HeroSection = () => {
                         className="flex flex-col sm:flex-row justify-center gap-4 mt-4 mb-6 relative z-10"
                     >
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button
-                                className="w-full sm:w-auto text-lg font-bold"
-                                variant="animated"
-                                size="animated"
-                                showArrow
-                                onClick={handleTryItNow}
-                            >
-                                Try It Now
-                            </Button>
+                            <a href="https://waitlist.callsure.ai/" target="_blank" rel="noopener noreferrer">
+                                <Button
+                                    className="w-full sm:w-auto text-lg font-bold"
+                                    variant="animated"
+                                    size="animated"
+                                    showArrow
+                                >
+                                    Try It Now
+                                </Button>
+                            </a>
                         </motion.div>
 
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

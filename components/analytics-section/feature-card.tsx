@@ -1,3 +1,4 @@
+// components/analytics-section/feature-card.tsx
 "use client";
 
 import React from 'react';

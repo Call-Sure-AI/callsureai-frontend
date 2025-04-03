@@ -1,3 +1,4 @@
+// components/features-section/index.tsx
 "use client";
 
 import React, { memo, useState, useEffect, useRef } from "react";
