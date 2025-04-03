@@ -132,46 +132,55 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             }
 
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
-            const response = await fetch(`${apiUrl}/api/company`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                // Adding timeout mechanism
-                signal: AbortSignal.timeout(10000) // 10-second timeout
-            });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+            
+            try {
+                const response = await fetch(`${apiUrl}/api/company`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
 
-            if (response.ok) {
-                const companyData: CompanyData = await response.json();
-                const processedData = processCompanyData(
-                    companyData,
-                    user.email as string,
-                    user.image as string
-                );
-                setCompany(processedData);
-                setFailedAttempts(0);
-                setIsOffline(false);
-            } else if (response.status === 404) {
-                // Company not found - could be a new user
-                console.log('Company not found, using default data');
-                
-                // Keep using existing company data if we have it
-                if (!company) {
-                    setCompany(createDefaultCompany());
+                if (response.ok) {
+                    const companyData: CompanyData = await response.json();
+                    const processedData = processCompanyData(
+                        companyData,
+                        user.email as string,
+                        user.image as string
+                    );
+                    setCompany(processedData);
+                    setFailedAttempts(0);
+                    setIsOffline(false);
+                } else if (response.status === 404) {
+                    // Company not found - could be a new user
+                    console.log('Company not found, using default data');
+                    
+                    // Keep using existing company data if we have it
+                    if (!company) {
+                        setCompany(createDefaultCompany());
+                    }
+                    
+                    // Don't set an error for 404 - this is expected for new users
+                } else {
+                    const errorData = await response.json().catch(() => ({ message: `Server error: ${response.status}` }));
+                    setError(errorData.message || 'Failed to fetch company data');
+                    
+                    setFailedAttempts(prev => prev + 1);
+                    
+                    // If we've failed multiple times, use default data for better UX
+                    if (failedAttempts >= 2 && !company) {
+                        console.warn('Multiple failed attempts to fetch company data. Using default data.');
+                        setCompany(createDefaultCompany());
+                    }
                 }
-                
-                // Don't set an error for 404 - this is expected for new users
-            } else {
-                const errorData = await response.json().catch(() => ({ message: `Server error: ${response.status}` }));
-                setError(errorData.message || 'Failed to fetch company data');
-                
-                setFailedAttempts(prev => prev + 1);
-                
-                // If we've failed multiple times, use default data for better UX
-                if (failedAttempts >= 2 && !company) {
-                    console.warn('Multiple failed attempts to fetch company data. Using default data.');
-                    setCompany(createDefaultCompany());
-                }
+            } catch (fetchError) {
+                clearTimeout(timeoutId);
+                throw fetchError;
             }
         } catch (err: any) {
             console.error('Error fetching company data:', err);
@@ -219,7 +228,8 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                 toast({
                     title: "Offline Mode",
                     description: "Changes saved locally. They will sync when you're back online.",
-                    variant: "warning",
+                    // Use "default" instead of "warning" as your toast only supports "default" and "destructive"
+                    variant: "default",
                 });
                 return true; // Return success in offline mode for better UX
             }
@@ -241,41 +251,45 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                 userId: data.userId || user?.id
             };
 
-            // Try to update on the server
-            await createOrUpdateCompany(apiData, token);
-
-            // No need to fetch immediately after update - we already updated the UI
-            // This helps avoid potential race conditions with the API
-
-            toast({
-                title: "Success",
-                description: "Company profile updated successfully.",
-                variant: "default",
-            });
-
-            return true;
+            try {
+                await createOrUpdateCompany(apiData, token);
+                
+                toast({
+                    title: "Success",
+                    description: "Company profile updated successfully.",
+                    variant: "default",
+                });
+                
+                return true;
+            } catch (apiError) {
+                // If the API call fails, we still have the local changes
+                // Just show a different message
+                if (typeof apiError === 'object' && apiError !== null && 'message' in apiError) {
+                    const errorMessage = (apiError as Error).message || '';
+                    if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('timeout')) {
+                        toast({
+                            title: "Info",
+                            description: "Changes saved locally but couldn't reach server. Will sync when connection is restored.",
+                            variant: "default",
+                        });
+                        return true; // We still return true for better UX
+                    }
+                }
+                
+                // For other types of errors, re-throw to be caught by the outer catch
+                throw apiError;
+            }
         } catch (err: any) {
             console.error('Error updating company data:', err);
+            setError(err.message || 'An error occurred while updating company data');
             
-            // Keep UI changes despite API error for better UX
-            // Just show a warning toast
-            if (err.message.includes('fetch') || err.name === 'AbortError') {
-                setIsOffline(true);
-                toast({
-                    title: "Warning",
-                    description: "Changes saved locally, but couldn't connect to the server. Will sync when connection is restored.",
-                    variant: "warning",
-                });
-                return true; // Return true for better UX in offline scenarios
-            } else {
-                setError(err.message || 'An error occurred while updating company data');
-                toast({
-                    title: "Error",
-                    description: err.message || "Failed to update profile. Please try again.",
-                    variant: "destructive",
-                });
-                return false;
-            }
+            toast({
+                title: "Error",
+                description: err.message || "Failed to update profile. Please try again.",
+                variant: "destructive",
+            });
+            
+            return false;
         } finally {
             setIsLoading(false);
         }
