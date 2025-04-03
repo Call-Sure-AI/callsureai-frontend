@@ -64,30 +64,29 @@ export interface HistoryEntry {
 }
 
 export interface AgentFormData {
-    id?: string;
     user_id: string;
     name: string;
     type: string;
     prompt: string;
     is_active: boolean;
     additional_context: {
-        gender: string;
-        tone: string;
-        language: string;
-        roleDescription: string;
-        businessContext: string;
+      gender: string;
+      tone: string;
+      language: string;
+      // Add these new fields
+      accent?: string;     // The accent from the language option (american, indian, etc.)
+      languageCode?: string; // The language code from the language option (en, hn, etc.)
+      roleDescription: string;
+      businessContext: string;
     };
     advanced_settings: {
-        authUrl: string;
-        clientId: string;
-        clientSecret: string;
-        apis: string[];
+      authUrl: string;
+      clientId: string;
+      clientSecret: string;
+      apis: string[];
     };
     files: string[];
-    company_id?: string;
-    confidence_threshold?: number;
-    template_id?: string;
-}
+  }
 
 export interface ProfileFormData {
     first_name: string;

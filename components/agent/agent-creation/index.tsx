@@ -1,7 +1,6 @@
 // components/agent/agent-creation/index.tsx
 "use client";
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Upload, X, Wand2, User2, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -15,6 +14,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from '@/components/ui/select';
 import {
   Collapsible,
@@ -65,6 +66,57 @@ const initialFormData: FormData = {
   files: [] as string[],
 };
 
+// Voice options
+const genderOptions = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+];
+
+const toneOptions = [
+  { value: 'professional', label: 'Professional' },
+  { value: 'friendly', label: 'Friendly' },
+  { value: 'casual', label: 'Casual' },
+  { value: 'formal', label: 'Formal' },
+  { value: 'enthusiastic', label: 'Enthusiastic' },
+  { value: 'calm', label: 'Calm' },
+];
+
+const languageOptions = [
+  // American
+  { value: 'american-en', label: 'American - English', accent: 'american', language: 'en' },
+  // Indian
+  { value: 'indian-en', label: 'Indian - English', accent: 'indian', language: 'en' },
+  { value: 'indian-hn', label: 'Indian - Hindi', accent: 'indian', language: 'hn' },
+  // British
+  { value: 'british-en', label: 'British - English', accent: 'british', language: 'en' },
+  // Spanish
+  { value: 'spanish-es', label: 'Spanish - Spanish', accent: 'spanish', language: 'es' },
+  // Arabic
+  { value: 'arabic-ar', label: 'Arabic - Arabic', accent: 'arabic', language: 'ar' },
+  // Chinese
+  { value: 'chinese-cn', label: 'Chinese - Chinese', accent: 'chinese', language: 'cn' },
+  // German
+  { value: 'german-de', label: 'German - German', accent: 'german', language: 'de' },
+  // French
+  { value: 'french-fr', label: 'French - French', accent: 'french', language: 'fr' },
+  // Italian
+  { value: 'italian-it', label: 'Italian - Italian', accent: 'italian', language: 'it' },
+  // Portuguese
+  { value: 'portuguese-pt', label: 'Portuguese - Portuguese', accent: 'portuguese', language: 'pt' },
+  // Russian
+  { value: 'russian-ru', label: 'Russian - Russian', accent: 'russian', language: 'ru' },
+  // Japanese
+  { value: 'japanese-jp', label: 'Japanese - Japanese', accent: 'japanese', language: 'jp' },
+  // Korean
+  { value: 'korean-ko', label: 'Korean - Korean', accent: 'korean', language: 'ko' },
+  // Dutch
+  { value: 'dutch-nl', label: 'Dutch - Dutch', accent: 'dutch', language: 'nl' },
+  // Turkish
+  { value: 'turkish-tr', label: 'Turkish - Turkish', accent: 'turkish', language: 'tr' },
+  // Polish
+  { value: 'polish-pl', label: 'Polish - Polish', accent: 'polish', language: 'pl' },
+];
+
 const AgentCreationForm = () => {
   const router = useRouter();
   const { user } = useCurrentUser();
@@ -80,7 +132,49 @@ const AgentCreationForm = () => {
   const [audioError, setAudioError] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const [selectedLanguageOption, setSelectedLanguageOption] = useState<{accent: string, language: string} | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const availableVoiceFiles = [
+    'female-american-en',
+    'female-american-hn',
+    'female-arabic-ar',
+    'female-british-en',
+    'female-chinese-cn',
+    'female-dutch-nl',
+    'female-french-fr',
+    'female-german-de',
+    'female-indian-en',
+    'female-indian-hn',
+    'female-italian-it',
+    'female-japanese-jp',
+    'female-korean-ko',
+    'female-polish-pl',
+    'female-portuguese-pt',
+    'female-russian-ru',
+    'female-spanish-es',
+    'female-turkish-tr',
+    'male-american-en',
+    'male-arabic-ar',
+    'male-british-en',
+    'male-chinese-cn',
+    'male-dutch-nl',
+    'male-french-fr',
+    'male-german-de',
+    'male-indian-en',
+    'male-indian-hn',
+    'male-italian-it',
+    'male-japanese-jp',
+    'male-korean-ko',
+    'male-polish-pl',
+    'male-portuguese-pt',
+    'male-russian-ru',
+    'male-spanish-es',
+    'male-turkish-tr',
+  ];
+  // Add this validation function
+  const checkIfVoiceExists = (gender: string, accent: string, language: string) => {
+    return availableVoiceFiles.includes(`${gender}-${accent}-${language}`);
+  };
   const handleDeleteFile = (indexToDelete: number) => {
     setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToDelete));
   };
@@ -117,62 +211,210 @@ const AgentCreationForm = () => {
     setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
   };
 
-  const getAudioPath = useCallback((gender: string, tone: string, language: string) => {
-    if (!gender || !tone || !language) return null;
-    return `/voices/${gender}-${tone}-${language}.mp3`;
+  // Update your getAudioPath function:
+  const getAudioPath = useCallback((gender: string, accent: string, language: string) => {
+    if (!gender || !accent || !language) return null;
+    
+    // Use absolute URL with explicit path to voices directory
+    return `${window.location.origin}/voices/${gender}-${accent}-${language}.mp3`;
   }, []);
 
-  const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
+  const handleGenderChange = (value: string) => {
     setFormData(prev => {
-      const newData = { ...prev, [type]: value };
+      const newData = { ...prev, gender: value };
 
-      if (newData.gender && newData.tone && newData.language) {
-        loadAudio(newData.gender, newData.tone, newData.language);
+      if (newData.gender && selectedLanguageOption) {
+        loadAudio(newData.gender, selectedLanguageOption.accent, selectedLanguageOption.language);
       }
 
       return newData;
     });
   };
 
-  const loadAudio = useCallback(async (gender: string, tone: string, language: string) => {
+  const handleToneChange = (value: string) => {
+    setFormData(prev => ({ ...prev, tone: value }));
+  };
+
+  const handleLanguageChange = (value: string) => {
+    const langOption = languageOptions.find(opt => opt.value === value);
+    
+    if (langOption) {
+      setSelectedLanguageOption({
+        accent: langOption.accent,
+        language: langOption.language
+      });
+      
+      setFormData(prev => {
+        const newData = { ...prev, language: value };
+        
+        if (newData.gender && langOption) {
+          // Check if this combination exists before attempting to load
+          if (checkIfVoiceExists(newData.gender, langOption.accent, langOption.language)) {
+            loadAudio(newData.gender, langOption.accent, langOption.language);
+          } else {
+            setAudioError(true);
+            toast({
+              title: "Voice Unavailable",
+              description: "This voice combination is not available. Please try a different selection.",
+              variant: "destructive",
+            });
+          }
+        }
+        
+        return newData;
+      });
+    }
+  };
+
+  const loadAudio = useCallback(async (gender: string, accent: string, language: string): Promise<(() => void) | undefined> => {
     setIsAudioLoading(true);
     setAudioError(false);
-
-    const audioPath = getAudioPath(gender, tone, language);
-    if (!audioPath) return;
-
-    const newAudio = new Audio(audioPath);
-
-    try {
-      await new Promise((resolve, reject) => {
-        newAudio.addEventListener('canplaythrough', resolve, { once: true });
-        newAudio.addEventListener('error', reject, { once: true });
-        setTimeout(() => reject(new Error('Audio load timeout')), 5000);
-      });
-
-      newAudio.addEventListener('play', () => setIsPlaying(true));
-      newAudio.addEventListener('pause', () => setIsPlaying(false));
-      newAudio.addEventListener('ended', () => setIsPlaying(false));
-
-      setAudio(newAudio);
-      setAudioError(false);
-    } catch (e: any) {
+  
+    console.log(`Attempting to load voice: ${gender}-${accent}-${language}`);
+    
+    if (!checkIfVoiceExists(gender, accent, language)) {
+      console.log(`Voice not found: ${gender}-${accent}-${language}`);
       setAudioError(true);
+      setIsAudioLoading(false);
       toast({
-        title: "Audio Load Error",
-        description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
+        title: "Voice Unavailable",
+        description: "This voice combination is not available. Please try a different selection.",
         variant: "destructive",
       });
-    } finally {
-      setIsAudioLoading(false);
+      return;
     }
-  }, [getAudioPath, setIsPlaying, setAudio, setAudioError, setIsAudioLoading]);
+  
+    // Use absolute path for audio file
+    const audioPath = `${window.location.origin}/voices/${gender}-${accent}-${language}.mp3`;
+    console.log('Full audio URL:', audioPath);
+    
+    try {
+      // Use the ref to access the audio element
+      if (!audioRef.current) {
+        console.error('Audio element reference not available');
+        throw new Error('Audio element not available');
+      }
+  
+      // Create a variable to track if we've canceled the operation
+      let isCanceled = false;
+      
+      // Set up event listeners for tracking loading state
+      const onCanPlay = () => {
+        if (isCanceled) return;
+        
+        console.log('Audio can play now');
+        setIsAudioLoading(false);
+        setAudioError(false);
+        setAudio(audioRef.current);
+        
+        // Remove event listeners
+        audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
+        audioRef.current?.removeEventListener('error', onError);
+      };
+  
+      const onError = (e: Event) => {
+        if (isCanceled) return;
+        
+        console.error('Audio error details:', {
+          src: audioRef.current?.src,
+          error: e,
+          networkState: audioRef.current?.networkState,
+          readyState: audioRef.current?.readyState
+        });
+        
+        setAudioError(true);
+        setIsAudioLoading(false);
+        
+        // Remove event listeners
+        audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
+        audioRef.current?.removeEventListener('error', onError);
+        
+        toast({
+          title: "Audio Load Error",
+          description: "Could not load the voice sample. Please try a different selection.",
+          variant: "destructive",
+        });
+      };
+  
+      // Clear previous event listeners if any
+      audioRef.current.removeEventListener('canplaythrough', onCanPlay);
+      audioRef.current.removeEventListener('error', onError);
+      
+      // Add new event listeners
+      audioRef.current.addEventListener('canplaythrough', onCanPlay);
+      audioRef.current.addEventListener('error', onError);
+      
+      // Set source and load audio
+      audioRef.current.src = audioPath;
+      audioRef.current.load(); // Important!
+      
+      // Set a safety timeout
+      const timeoutId = setTimeout(() => {
+        if (isAudioLoading && !isCanceled) {
+          isCanceled = true;
+          setIsAudioLoading(false);
+          setAudioError(true);
+          
+          // Remove event listeners
+          audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
+          audioRef.current?.removeEventListener('error', onError);
+          
+          toast({
+            title: "Loading Error",
+            description: "Audio is taking too long to load. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }, 7000);
+      
+      // Return a cleanup function to handle component unmount or re-renders
+      return () => {
+        isCanceled = true;
+        clearTimeout(timeoutId);
+        audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
+        audioRef.current?.removeEventListener('error', onError);
+      };
+      
+    } catch (e: any) {
+      console.error('Error loading audio:', e);
+      setAudioError(true);
+      setIsAudioLoading(false);
+      toast({
+        title: "Audio Load Error",
+        description: e?.message || "Could not load the voice sample. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [isAudioLoading, setIsAudioLoading, setAudioError, setAudio, checkIfVoiceExists, toast]);
+  
+  useEffect(() => {
+    let cleanupFn: (() => void) | undefined;
+    
+    if (formData.gender && selectedLanguageOption) {
+      const result = loadAudio(formData.gender, selectedLanguageOption.accent, selectedLanguageOption.language);
+      // Only assign the cleanup if it's actually a function
+      if (typeof result === 'function') {
+        cleanupFn = result;
+      }
+    }
+  
+    return () => {
+      // Only call the cleanup if it's a function
+      if (typeof cleanupFn === 'function') {
+        cleanupFn();
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, [formData.gender, selectedLanguageOption, loadAudio]);
 
   const handlePlayAudio = () => {
-    if (!audio) return;
-
-    if (audio.paused) {
-      audio.play().catch(error => {
+    if (!audioRef.current) return;
+  
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(error => {
         console.error('Error playing audio:', error);
         toast({
           title: "Playback Error",
@@ -181,9 +423,9 @@ const AgentCreationForm = () => {
         });
       });
     } else {
-      audio.pause();
+      audioRef.current.pause();
     }
-  };
+  }
 
   const uploadFiles = async (files: File[]) => {
     try {
@@ -253,6 +495,9 @@ const AgentCreationForm = () => {
         throw new Error("Company ID is required");
       }
 
+      // Get the selected language option to submit the proper accent and language code
+      const selectedLang = languageOptions.find(opt => opt.value === formData.language);
+      
       const agentData: AgentFormData = {
         user_id: user.id,
         name: formData.name,
@@ -263,6 +508,8 @@ const AgentCreationForm = () => {
           gender: formData.gender,
           tone: formData.tone,
           language: formData.language,
+          accent: selectedLang?.accent || '',
+          languageCode: selectedLang?.language || '',
           roleDescription: formData.roleDescription,
           businessContext: formData.businessContext,
         },
@@ -293,7 +540,23 @@ const AgentCreationForm = () => {
       });
     }
   };
-
+  useEffect(() => {
+    if (audioRef.current) {
+      const onPlay = () => setIsPlaying(true);
+      const onPause = () => setIsPlaying(false);
+      const onEnded = () => setIsPlaying(false);
+      
+      audioRef.current.addEventListener('play', onPlay);
+      audioRef.current.addEventListener('pause', onPause);
+      audioRef.current.addEventListener('ended', onEnded);
+      
+      return () => {
+        audioRef.current?.removeEventListener('play', onPlay);
+        audioRef.current?.removeEventListener('pause', onPause);
+        audioRef.current?.removeEventListener('ended', onEnded);
+      };
+    }
+  }, [audioRef.current]);
   useEffect(() => {
     setIsMounted(true);
 
@@ -308,8 +571,17 @@ const AgentCreationForm = () => {
           tone: data.tone || '',
           language: data.language || ''
         }));
-        if (data.gender && data.tone && data.language) {
-          loadAudio(data.gender, data.tone, data.language);
+        
+        // If we have saved language data, find the matching option
+        if (data.language) {
+          const langOption = languageOptions.find(opt => opt.value === data.language);
+          if (langOption && data.gender) {
+            setSelectedLanguageOption({
+              accent: langOption.accent,
+              language: langOption.language
+            });
+            loadAudio(data.gender, langOption.accent, langOption.language);
+          }
         }
       }
     } catch (error) {
@@ -318,8 +590,8 @@ const AgentCreationForm = () => {
   }, [loadAudio]);
 
   useEffect(() => {
-    if (formData.gender && formData.tone && formData.language) {
-      loadAudio(formData.gender, formData.tone, formData.language);
+    if (formData.gender && selectedLanguageOption) {
+      loadAudio(formData.gender, selectedLanguageOption.accent, selectedLanguageOption.language);
     }
 
     return () => {
@@ -328,14 +600,20 @@ const AgentCreationForm = () => {
         audio.src = '';
       }
     };
-  }, [formData.gender, formData.tone, formData.language, loadAudio, audio]);
+  }, [formData.gender, selectedLanguageOption, loadAudio, audio]);
 
   if (!isMounted) {
     return null;
   }
+  
 
   return (
     <div className="w-full p-6 flex items-center justify-center">
+          {/* Hidden audio element */}
+    <audio 
+      ref={audioRef}
+      style={{ display: "none" }}
+    />
       <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
         <CardHeader className="border-b border-gray-100 pb-6 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
@@ -428,13 +706,16 @@ const AgentCreationForm = () => {
                       <label className="text-sm font-medium text-gray-600 ml-1">
                         Gender*
                       </label>
-                      <Select value={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
+                      <Select value={formData.gender} onValueChange={handleGenderChange}>
                         <SelectTrigger className="w-36">
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
+                          {genderOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -443,13 +724,16 @@ const AgentCreationForm = () => {
                       <label className="text-sm font-medium text-gray-600 ml-1">
                         Tone*
                       </label>
-                      <Select value={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
+                      <Select value={formData.tone} onValueChange={handleToneChange}>
                         <SelectTrigger className="w-36">
                           <SelectValue placeholder="Select tone" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="american">American</SelectItem>
-                          <SelectItem value="indian">Indian</SelectItem>
+                          {toneOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -458,18 +742,56 @@ const AgentCreationForm = () => {
                       <label className="text-sm font-medium text-gray-600 ml-1">
                         Language*
                       </label>
-                      <Select value={formData.language} onValueChange={(value) => handleSelectionChange('language', value)}>
-                        <SelectTrigger className="w-36">
+                      <Select value={formData.language} onValueChange={handleLanguageChange}>
+                        <SelectTrigger className="w-48">
                           <SelectValue placeholder="Select language" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="hn">Hindi</SelectItem>
+                          <SelectGroup>
+                            <SelectLabel>American</SelectLabel>
+                            {languageOptions.filter(opt => opt.accent === 'american').map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel>Indian</SelectLabel>
+                            {languageOptions.filter(opt => opt.accent === 'indian').map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel>British</SelectLabel>
+                            {languageOptions.filter(opt => opt.accent === 'british').map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel>Other Languages</SelectLabel>
+                            {languageOptions.filter(opt => 
+                              !['american', 'indian', 'british'].includes(opt.accent)
+                            ).map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 </div>
+                
+                {audioError && (
+                  <div className="text-xs text-amber-600 mt-2">
+                    This voice combination is not available. Please try a different selection.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -619,8 +941,7 @@ const AgentCreationForm = () => {
                         <label className="block text-sm font-medium text-gray-700">
                           Authentication URL
                         </label>
-                        <Input
-                          value={formData.advanced_settings.authUrl}
+                        <Input value={formData.advanced_settings.authUrl}
                           onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, authUrl: e.target.value })}
                           placeholder="Enter your authentication URL"
                           className="w-full border-gray-200 focus:border-blue-500 h-12"
