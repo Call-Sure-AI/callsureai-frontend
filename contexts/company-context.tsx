@@ -131,7 +131,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                 return;
             }
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://beta.callsure.ai';
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
             
