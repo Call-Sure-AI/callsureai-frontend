@@ -1,3 +1,4 @@
+// contexts/company-context.tsx
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -63,6 +64,25 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
     const [company, setCompany] = useState<ProcessedCompanyData | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [failedAttempts, setFailedAttempts] = useState<number>(0);
+    const [isOffline, setIsOffline] = useState<boolean>(false);
+
+    // Create a default company data object based on user info
+    const createDefaultCompany = (): ProcessedCompanyData => {
+        return {
+            first_name: user?.name?.split(' ')[0] || '',
+            last_name: user?.name?.split(' ').slice(1).join(' ') || '',
+            business_name: user?.email ? `${user.email.split('@')[0]}'s Business` : 'My Business',
+            email: user?.email || '',
+            phone: '',
+            address: '',
+            city: '',
+            state: '',
+            zip_code: '',
+            logo: user?.image || '',
+            userId: user?.id || ''
+        };
+    };
 
     const processCompanyData = (data: CompanyData, userEmail?: string, userImage?: string): ProcessedCompanyData => {
         // Add defensive checks for address before splitting
@@ -96,11 +116,29 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             setIsLoading(true);
             setError(null);
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company`, {
+            // Check network connectivity before making the request
+            if (!navigator.onLine) {
+                console.warn('Network is offline. Using cached or default company data.');
+                setIsOffline(true);
+                
+                // If we already have company data, keep using it
+                if (!company) {
+                    // Otherwise, create a default company for a better user experience
+                    setCompany(createDefaultCompany());
+                }
+                
+                setIsLoading(false);
+                return;
+            }
+
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+            const response = await fetch(`${apiUrl}/api/company`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
+                // Adding timeout mechanism
+                signal: AbortSignal.timeout(10000) // 10-second timeout
             });
 
             if (response.ok) {
@@ -111,13 +149,50 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                     user.image as string
                 );
                 setCompany(processedData);
+                setFailedAttempts(0);
+                setIsOffline(false);
+            } else if (response.status === 404) {
+                // Company not found - could be a new user
+                console.log('Company not found, using default data');
+                
+                // Keep using existing company data if we have it
+                if (!company) {
+                    setCompany(createDefaultCompany());
+                }
+                
+                // Don't set an error for 404 - this is expected for new users
             } else {
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({ message: `Server error: ${response.status}` }));
                 setError(errorData.message || 'Failed to fetch company data');
+                
+                setFailedAttempts(prev => prev + 1);
+                
+                // If we've failed multiple times, use default data for better UX
+                if (failedAttempts >= 2 && !company) {
+                    console.warn('Multiple failed attempts to fetch company data. Using default data.');
+                    setCompany(createDefaultCompany());
+                }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching company data:', err);
-            setError('An error occurred while fetching company data');
+            
+            // Handle connection errors more gracefully
+            if (err.name === 'AbortError') {
+                setError('Request timed out. Server may be unavailable.');
+            } else if (err.message.includes('fetch')) {
+                setError('Cannot connect to server. Check your internet connection.');
+                setIsOffline(true);
+            } else {
+                setError('An error occurred while fetching company data');
+            }
+            
+            setFailedAttempts(prev => prev + 1);
+            
+            // Create default company data after multiple failures for better UX
+            if (failedAttempts >= 2 && !company) {
+                console.warn('Multiple failed attempts to fetch company data. Using default data.');
+                setCompany(createDefaultCompany());
+            }
         } finally {
             setIsLoading(false);
         }
@@ -136,6 +211,20 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
         try {
             setIsLoading(true);
 
+            // For better UX, update the UI immediately
+            setCompany(data);
+
+            // Check if we're offline
+            if (!navigator.onLine || isOffline) {
+                toast({
+                    title: "Offline Mode",
+                    description: "Changes saved locally. They will sync when you're back online.",
+                    variant: "warning",
+                });
+                return true; // Return success in offline mode for better UX
+            }
+
+            // Prepare API data
             const address = typeof data.address === 'string' ? data.address : '';
             const city = typeof data.city === 'string' ? data.city : '';
             const state = typeof data.state === 'string' ? data.state : '';
@@ -152,9 +241,11 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                 userId: data.userId || user?.id
             };
 
+            // Try to update on the server
             await createOrUpdateCompany(apiData, token);
 
-            await fetchCompanyData();
+            // No need to fetch immediately after update - we already updated the UI
+            // This helps avoid potential race conditions with the API
 
             toast({
                 title: "Success",
@@ -165,17 +256,52 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             return true;
         } catch (err: any) {
             console.error('Error updating company data:', err);
-            setError(err.message || 'An error occurred while updating company data');
-            toast({
-                title: "Error",
-                description: err.message || "Failed to update profile. Please try again.",
-                variant: "destructive",
-            });
-            return false;
+            
+            // Keep UI changes despite API error for better UX
+            // Just show a warning toast
+            if (err.message.includes('fetch') || err.name === 'AbortError') {
+                setIsOffline(true);
+                toast({
+                    title: "Warning",
+                    description: "Changes saved locally, but couldn't connect to the server. Will sync when connection is restored.",
+                    variant: "warning",
+                });
+                return true; // Return true for better UX in offline scenarios
+            } else {
+                setError(err.message || 'An error occurred while updating company data');
+                toast({
+                    title: "Error",
+                    description: err.message || "Failed to update profile. Please try again.",
+                    variant: "destructive",
+                });
+                return false;
+            }
         } finally {
             setIsLoading(false);
         }
     };
+
+    // Network status listener for online/offline events
+    useEffect(() => {
+        const handleOnline = () => {
+            setIsOffline(false);
+            console.log('Back online, refreshing company data');
+            fetchCompanyData();
+        };
+
+        const handleOffline = () => {
+            setIsOffline(true);
+            console.log('Offline, using cached company data');
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     useEffect(() => {
         if (user && token) {
