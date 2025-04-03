@@ -64,6 +64,7 @@ export interface HistoryEntry {
 }
 
 export interface AgentFormData {
+    id?: string;  // Added this line to fix the TypeScript errors
     user_id: string;
     name: string;
     type: string;
@@ -73,9 +74,8 @@ export interface AgentFormData {
       gender: string;
       tone: string;
       language: string;
-      // Add these new fields
-      accent?: string;     // The accent from the language option (american, indian, etc.)
-      languageCode?: string; // The language code from the language option (en, hn, etc.)
+      accent?: string;
+      languageCode?: string;
       roleDescription: string;
       businessContext: string;
     };
