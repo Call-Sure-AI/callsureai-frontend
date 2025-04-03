@@ -134,6 +134,7 @@ const AgentCreationForm = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedLanguageOption, setSelectedLanguageOption] = useState<{accent: string, language: string} | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  
   const availableVoiceFiles = [
     'female-american-en',
     'female-american-hn',
@@ -171,10 +172,12 @@ const AgentCreationForm = () => {
     'male-spanish-es',
     'male-turkish-tr',
   ];
-  // Add this validation function
-  const checkIfVoiceExists = (gender: string, accent: string, language: string) => {
+  
+  // Fix: Wrap checkIfVoiceExists in useCallback
+  const checkIfVoiceExists = useCallback((gender: string, accent: string, language: string) => {
     return availableVoiceFiles.includes(`${gender}-${accent}-${language}`);
-  };
+  }, [availableVoiceFiles]);
+  
   const handleDeleteFile = (indexToDelete: number) => {
     setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToDelete));
   };
@@ -211,13 +214,8 @@ const AgentCreationForm = () => {
     setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
   };
 
-  // Update your getAudioPath function:
-  const getAudioPath = useCallback((gender: string, accent: string, language: string) => {
-    if (!gender || !accent || !language) return null;
-    
-    // Use absolute URL with explicit path to voices directory
-    return `${window.location.origin}/voices/${gender}-${accent}-${language}.mp3`;
-  }, []);
+  // Fix: Remove unused function
+  // getAudioPath function was removed since it's not being used
 
   const handleGenderChange = (value: string) => {
     setFormData(prev => {
@@ -298,6 +296,9 @@ const AgentCreationForm = () => {
       // Create a variable to track if we've canceled the operation
       let isCanceled = false;
       
+      // Store a reference to the current audio element
+      const currentAudioRef = audioRef.current;
+      
       // Set up event listeners for tracking loading state
       const onCanPlay = () => {
         if (isCanceled) return;
@@ -305,29 +306,29 @@ const AgentCreationForm = () => {
         console.log('Audio can play now');
         setIsAudioLoading(false);
         setAudioError(false);
-        setAudio(audioRef.current);
+        setAudio(currentAudioRef);
         
         // Remove event listeners
-        audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
-        audioRef.current?.removeEventListener('error', onError);
+        currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+        currentAudioRef.removeEventListener('error', onError);
       };
   
       const onError = (e: Event) => {
         if (isCanceled) return;
         
         console.error('Audio error details:', {
-          src: audioRef.current?.src,
+          src: currentAudioRef.src,
           error: e,
-          networkState: audioRef.current?.networkState,
-          readyState: audioRef.current?.readyState
+          networkState: currentAudioRef.networkState,
+          readyState: currentAudioRef.readyState
         });
         
         setAudioError(true);
         setIsAudioLoading(false);
         
         // Remove event listeners
-        audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
-        audioRef.current?.removeEventListener('error', onError);
+        currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+        currentAudioRef.removeEventListener('error', onError);
         
         toast({
           title: "Audio Load Error",
@@ -337,16 +338,16 @@ const AgentCreationForm = () => {
       };
   
       // Clear previous event listeners if any
-      audioRef.current.removeEventListener('canplaythrough', onCanPlay);
-      audioRef.current.removeEventListener('error', onError);
+      currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+      currentAudioRef.removeEventListener('error', onError);
       
       // Add new event listeners
-      audioRef.current.addEventListener('canplaythrough', onCanPlay);
-      audioRef.current.addEventListener('error', onError);
+      currentAudioRef.addEventListener('canplaythrough', onCanPlay);
+      currentAudioRef.addEventListener('error', onError);
       
       // Set source and load audio
-      audioRef.current.src = audioPath;
-      audioRef.current.load(); // Important!
+      currentAudioRef.src = audioPath;
+      currentAudioRef.load(); // Important!
       
       // Set a safety timeout
       const timeoutId = setTimeout(() => {
@@ -356,8 +357,8 @@ const AgentCreationForm = () => {
           setAudioError(true);
           
           // Remove event listeners
-          audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
-          audioRef.current?.removeEventListener('error', onError);
+          currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+          currentAudioRef.removeEventListener('error', onError);
           
           toast({
             title: "Loading Error",
@@ -371,8 +372,8 @@ const AgentCreationForm = () => {
       return () => {
         isCanceled = true;
         clearTimeout(timeoutId);
-        audioRef.current?.removeEventListener('canplaythrough', onCanPlay);
-        audioRef.current?.removeEventListener('error', onError);
+        currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+        currentAudioRef.removeEventListener('error', onError);
       };
       
     } catch (e: any) {
@@ -385,7 +386,7 @@ const AgentCreationForm = () => {
         variant: "destructive",
       });
     }
-  }, [isAudioLoading, setIsAudioLoading, setAudioError, setAudio, checkIfVoiceExists, toast]);
+  }, [checkIfVoiceExists]);
   
   useEffect(() => {
     let cleanupFn: (() => void) | undefined;
@@ -540,23 +541,26 @@ const AgentCreationForm = () => {
       });
     }
   };
+  
   useEffect(() => {
     if (audioRef.current) {
+      const audioElement = audioRef.current;
       const onPlay = () => setIsPlaying(true);
       const onPause = () => setIsPlaying(false);
       const onEnded = () => setIsPlaying(false);
       
-      audioRef.current.addEventListener('play', onPlay);
-      audioRef.current.addEventListener('pause', onPause);
-      audioRef.current.addEventListener('ended', onEnded);
+      audioElement.addEventListener('play', onPlay);
+      audioElement.addEventListener('pause', onPause);
+      audioElement.addEventListener('ended', onEnded);
       
       return () => {
-        audioRef.current?.removeEventListener('play', onPlay);
-        audioRef.current?.removeEventListener('pause', onPause);
-        audioRef.current?.removeEventListener('ended', onEnded);
+        audioElement.removeEventListener('play', onPlay);
+        audioElement.removeEventListener('pause', onPause);
+        audioElement.removeEventListener('ended', onEnded);
       };
     }
-  }, [audioRef.current]);
+  }, []);
+  
   useEffect(() => {
     setIsMounted(true);
 
@@ -609,11 +613,11 @@ const AgentCreationForm = () => {
 
   return (
     <div className="w-full p-6 flex items-center justify-center">
-          {/* Hidden audio element */}
-    <audio 
-      ref={audioRef}
-      style={{ display: "none" }}
-    />
+      {/* Hidden audio element */}
+      <audio 
+        ref={audioRef}
+        style={{ display: "none" }}
+      />
       <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
         <CardHeader className="border-b border-gray-100 pb-6 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
@@ -660,140 +664,140 @@ const AgentCreationForm = () => {
             </div>
 
             {/* ==== VOICE CUSTOMIZATION ==== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-5 h-5 text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  Voice Customization
-                </h3>
-              </div>
+<div className="space-y-4">
+  <div className="flex items-center gap-2 mb-4">
+    <div className="w-5 h-5 text-blue-600">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    </div>
+    <h3 className="text-lg font-medium text-gray-900">
+      Voice Customization
+    </h3>
+  </div>
 
-              <div className="bg-gray-50 p-6 rounded-xl space-y-6">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handlePlayAudio}
-                    className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
-                                            ${isAudioLoading ? 'cursor-wait' : ''} 
-                                            ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`
-                    }
-                    disabled={!audio || isAudioLoading}
-                  >
-                    {isAudioLoading ? (
-                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      isPlaying ? (
-                        <svg
-                          className={`w-6 h-6 text-white`}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <rect x="6" y="4" width="4" height="16" rx="1" />
-                          <rect x="14" y="4" width="4" height="16" rx="1" />
-                        </svg>
-                      ) : (
-                        <Play className={`w-6 h-6 text-white`} />
-                      )
-                    )}
-                  </button>
+  <div className="bg-gray-50 p-6 rounded-xl space-y-6">
+    <div className="flex items-start gap-4">
+      <button
+        onClick={handlePlayAudio}
+        className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
+                          ${isAudioLoading ? 'cursor-wait' : ''} 
+                          ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'} mt-6`
+        }
+        disabled={!audio || isAudioLoading}
+      >
+        {isAudioLoading ? (
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          isPlaying ? (
+            <svg
+              className={`w-6 h-6 text-white`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
+            </svg>
+          ) : (
+            <Play className={`w-6 h-6 text-white`} />
+          )
+        )}
+      </button>
 
-                  <div className="flex flex-wrap gap-4">
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 ml-1">
-                        Gender*
-                      </label>
-                      <Select value={formData.gender} onValueChange={handleGenderChange}>
-                        <SelectTrigger className="w-36">
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {genderOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+      <div className="flex flex-col md:flex-row gap-4 flex-1">
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-600 ml-1 block mb-1">
+            Gender*
+          </label>
+          <Select value={formData.gender} onValueChange={handleGenderChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              {genderOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 ml-1">
-                        Tone*
-                      </label>
-                      <Select value={formData.tone} onValueChange={handleToneChange}>
-                        <SelectTrigger className="w-36">
-                          <SelectValue placeholder="Select tone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {toneOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-600 ml-1 block mb-1">
+            Tone*
+          </label>
+          <Select value={formData.tone} onValueChange={handleToneChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select tone" />
+            </SelectTrigger>
+            <SelectContent>
+              {toneOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 ml-1">
-                        Language*
-                      </label>
-                      <Select value={formData.language} onValueChange={handleLanguageChange}>
-                        <SelectTrigger className="w-48">
-                          <SelectValue placeholder="Select language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>American</SelectLabel>
-                            {languageOptions.filter(opt => opt.accent === 'american').map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel>Indian</SelectLabel>
-                            {languageOptions.filter(opt => opt.accent === 'indian').map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel>British</SelectLabel>
-                            {languageOptions.filter(opt => opt.accent === 'british').map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel>Other Languages</SelectLabel>
-                            {languageOptions.filter(opt => 
-                              !['american', 'indian', 'british'].includes(opt.accent)
-                            ).map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-                
-                {audioError && (
-                  <div className="text-xs text-amber-600 mt-2">
-                    This voice combination is not available. Please try a different selection.
-                  </div>
-                )}
-              </div>
-            </div>
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-600 ml-1 block mb-1">
+            Language*
+          </label>
+          <Select value={formData.language} onValueChange={handleLanguageChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>American</SelectLabel>
+                {languageOptions.filter(opt => opt.accent === 'american').map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>Indian</SelectLabel>
+                {languageOptions.filter(opt => opt.accent === 'indian').map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>British</SelectLabel>
+                {languageOptions.filter(opt => opt.accent === 'british').map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectGroup>
+                <SelectLabel>Other Languages</SelectLabel>
+                {languageOptions.filter(opt => 
+                  !['american', 'indian', 'british'].includes(opt.accent)
+                ).map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+    
+    {audioError && (
+      <div className="text-xs text-amber-600 mt-2">
+        This voice combination is not available. Please try a different selection.
+      </div>
+    )}
+  </div>
+</div>
 
             {/* ==== ROLE DESCRIPTION ==== */}
             <div className="space-y-4">

@@ -85,6 +85,7 @@ const Navbar = () => {
                                     src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
                                     alt="Callsure AI Logo"
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     className="object-contain"
                                     priority
                                 />
