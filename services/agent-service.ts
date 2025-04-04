@@ -6,6 +6,12 @@ import { AgentFormData } from "@/types";
  */
 export const createAdminAgent = async (params: AgentFormData, company_id: string, user_id: string) => {
     try {
+        console.log('Creating admin agent with data:', {
+            name: params.name,
+            type: params.type,
+            company_id: company_id
+        });
+
         const formData = new FormData();
         formData.append('name', params.name);
         formData.append('user_id', user_id);
@@ -16,25 +22,58 @@ export const createAdminAgent = async (params: AgentFormData, company_id: string
         formData.append('advanced_settings', JSON.stringify(params.advanced_settings));
         formData.append('is_active', JSON.stringify(params.is_active));
 
-        formData.append('file_urls', JSON.stringify(params.files));
+        if (params.files && params.files.length > 0) {
+            formData.append('file_urls', JSON.stringify(params.files));
+        }
 
-        const response = await fetch(`https://stage.callsure.ai/api/v1/admin/agents`, {
+        // Get the token from localStorage (or wherever you store it)
+        const token = localStorage.getItem('auth_token');
+        
+        // Log request info for debugging
+        console.log('Request URL:', `${process.env.NEXT_PUBLIC_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`);
+        console.log('FormData entries:', [...formData.entries()].map(e => e[0]));
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`, {
             method: 'POST',
             body: formData,
+            headers: {
+                // Don't set Content-Type with FormData, browser will set it with boundary
+                'Authorization': token ? `Bearer ${token}` : '' 
+            },
+            // Important for cross-origin requests with credentials
+            credentials: 'include'
         });
 
-        const result = await response.json();
+        // Log response status for debugging
+        console.log('Response status:', response.status, response.statusText);
+
+        // Try to parse JSON response
+        let result;
+        try {
+            const textResponse = await response.text();
+            console.log('Raw response:', textResponse);
+            result = textResponse ? JSON.parse(textResponse) : {};
+        } catch (parseError) {
+            console.error('Error parsing response:', parseError);
+            throw new Error('Invalid response format from server');
+        }
 
         if (!response.ok) {
-            throw new Error(result.error || result.message || 'Failed to create admin agent');
+            throw new Error(result.error || result.message || `Failed to create admin agent (${response.status})`);
         }
 
         return result;
     } catch (error: any) {
         console.error('Error creating admin agent:', error);
+        
+        // Add more specific error messages based on the error type
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+            throw new Error('Network error: Could not connect to the server. Please check your connection and try again.');
+        }
+        
         throw new Error(error?.message || 'Failed to create admin agent');
     }
-}
+};
 
 export const createAgent = async (formData: AgentFormData, token: string) => {
     try {
