@@ -30,10 +30,10 @@ export const createAdminAgent = async (params: AgentFormData, company_id: string
         const token = localStorage.getItem('auth_token');
         
         // Log request info for debugging
-        console.log('Request URL:', `${process.env.NEXT_PUBLIC_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`);
+        console.log('Request URL:', `${process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`);
         console.log('FormData entries:', [...formData.entries()].map(e => e[0]));
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`, {
             method: 'POST',
             body: formData,
             headers: {
