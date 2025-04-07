@@ -893,7 +893,6 @@ const ChatInterface = () => {
         }
     };
 
-    // Initialize speech recognition for voice input
     const initializeSpeechRecognition = () => {
         const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
 

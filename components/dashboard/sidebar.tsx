@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import {
     HomeIcon,
     UserIcon,
     BarChart3Icon,
-    PhoneCallIcon,
     CreditCardIcon,
     UsersIcon,
-    ClockIcon,
     LinkIcon,
     LifeBuoyIcon,
     ChevronLeftIcon,
@@ -19,14 +17,45 @@ import {
     XIcon,
     ChevronUpIcon,
     ChevronDownIcon,
-    BookUser,
-    Settings
+    Settings,
+    MessageCircle,
+    TicketIcon,
+    ShieldAlert,
+    MessageCircleIcon,
+    Clock1Icon,
+    MessageSquare
 } from "lucide-react";
 import Link from 'next/link';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-const getTimeBasedGreeting = () => {
+interface User {
+    name?: string;
+    email?: string;
+}
+
+interface MenuItem {
+    id: string;
+    icon: React.ReactNode;
+    label: string;
+    link?: string;
+    isDropdown?: boolean;
+    items?: SubMenuItem[];
+}
+
+interface SubMenuItem {
+    id: string;
+    label: string;
+    link: string;
+    icon: React.ReactNode;
+}
+
+interface OpenSections {
+    [key: string]: boolean;
+}
+
+
+const getTimeBasedGreeting = (): string => {
     const hour = new Date().getHours();
 
     if (hour >= 5 && hour < 12) {
@@ -38,47 +67,98 @@ const getTimeBasedGreeting = () => {
     }
 };
 
-const Navigation = () => {
-    const { user } = useCurrentUser();
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isAccountsOpen, setIsAccountsOpen] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+const Navigation: React.FC = () => {
+    const { user } = useCurrentUser() as { user: User | null };
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
-    const menuItems = [
-        { icon: <HomeIcon className="w-4 h-4" />, label: 'Home', link: "/dashboard" },
-        { icon: <BarChart3Icon className="w-4 h-4" />, label: 'Analytics', link: '/dashboard/analytics-dashboard' },
-        { icon: <PhoneCallIcon className="w-4 h-4" />, label: 'Call History', link: '/dashboard/call-history-dashboard' },
-    ];
+    const [openSections, setOpenSections] = useState<OpenSections>({
+        conversations: false,
+        callAnalytics: false,
+        userAccess: false,
+        settings: false
+    });
 
-    const accountItems = [
-        { icon: <LinkIcon className="w-4 h-4" />, label: 'Integration', link: '/dashboard/integration' },
-        { icon: <LifeBuoyIcon className="w-4 h-4" />, label: 'Help', link: '/dashboard/help' },
-    ];
+    const toggleSection = useCallback((section: string): void => {
+        setOpenSections(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
+    }, []);
 
-    const settings = [
-        { icon: <UserIcon className="w-4 h-4" />, label: 'Profile', link: '/dashboard/profile-section' },
-        { icon: <CreditCardIcon className="w-4 h-4" />, label: 'Payments', link: '/dashboard/payments-section' },
-    ];
-
-    const accounts = [
-        { icon: <UsersIcon className="w-4 h-4" />, label: 'Access Manager', link: '/dashboard/access-manager' },
-        { icon: <ClockIcon className="w-4 h-4" />, label: 'Account History', link: '/dashboard/account-history' },
-    ];
-
-    const toggleDropdown = (dropdown: string) => {
-        if (dropdown === 'accounts') {
-            setIsAccountsOpen(!isAccountsOpen);
-            if (!isAccountsOpen && isSettingsOpen) {
-                setIsSettingsOpen(false);
-            }
-        } else if (dropdown === 'settings') {
-            setIsSettingsOpen(!isSettingsOpen);
-            if (!isSettingsOpen && isAccountsOpen) {
-                setIsAccountsOpen(false);
-            }
+    const menuStructure: MenuItem[] = [
+        {
+            id: "dashboard",
+            icon: <HomeIcon className="w-4 h-4" />,
+            label: "Dashboard",
+            link: "/dashboard",
+            isDropdown: false
+        },
+        {
+            id: "conversations",
+            icon: <MessageCircle className="w-4 h-4" />,
+            label: "Conversations",
+            isDropdown: true,
+            items: [
+                { id: "live-conversations", label: "Live Conversations", link: "/dashboard/live-conversations", icon: <MessageCircleIcon className="w-4 h-4" /> },
+                { id: "conversation-history", label: "Conversation History", link: "/dashboard/conversation-history", icon: <Clock1Icon className="w-4 h-4" /> }
+            ]
+        },
+        {
+            id: "tickets",
+            icon: <TicketIcon className="w-4 h-4" />,
+            label: "Tickets & Queries",
+            link: "/dashboard/tickets",
+            isDropdown: false
+        },
+        {
+            id: "callAnalytics",
+            icon: <BarChart3Icon className="w-4 h-4" />,
+            label: "Call Analytics",
+            isDropdown: true,
+            items: [
+                { id: "agent-performance", label: "Agent Performance", link: "/dashboard/agent-performance", icon: <ShieldAlert className="w-4 h-4" /> },
+                { id: "call-reports", label: "Call Reports", link: "/dashboard/call-reports", icon: <MessageSquare className="w-4 h-4" /> },
+                { id: "sentiment-analysis", label: "Sentiment Analysis", link: "/dashboard/sentiment-analysis", icon: <MessageSquare className="w-4 h-4" /> },
+                { id: "urgency-detection", label: "Urgency Detection", link: "/dashboard/urgency-detection", icon: <MessageSquare className="w-4 h-4" /> }
+            ]
+        },
+        {
+            id: "userAccess",
+            icon: <UsersIcon className="w-4 h-4" />,
+            label: "Access Management",
+            isDropdown: true,
+            items: [
+                { id: "access-manager", label: "Access Manager", link: "/dashboard/access-manager", icon: <UsersIcon className="w-4 h-4" /> },
+                { id: "account-history", label: "Account History", link: "/dashboard/account-history", icon: <UsersIcon className="w-4 h-4" /> }
+            ]
+        },
+        {
+            id: "settings",
+            icon: <Settings className="w-4 h-4" />,
+            label: "Settings",
+            isDropdown: true,
+            items: [
+                { id: "profile", label: "Profile", link: "/dashboard/profile", icon: <UserIcon className="w-4 h-4" /> },
+                { id: "payment", label: "Payment", link: "/dashboard/payment", icon: <CreditCardIcon className="w-4 h-4" /> },
+                { id: "security", label: "Security & Compliance", link: "/dashboard/security", icon: <ShieldAlert className="w-4 h-4" /> }
+            ]
+        },
+        {
+            id: "integration",
+            icon: <LinkIcon className="w-4 h-4" />,
+            label: "Integration",
+            link: "/dashboard/integration",
+            isDropdown: false
+        },
+        {
+            id: "help",
+            icon: <LifeBuoyIcon className="w-4 h-4" />,
+            label: "Help & Support",
+            link: "/dashboard/help",
+            isDropdown: false
         }
-    };
+    ];
 
     const sidebarVariants = {
         expanded: {
@@ -96,7 +176,6 @@ const Navigation = () => {
         hidden: { opacity: 0, x: -20 }
     };
 
-    // Improved dropdown animation variants
     const dropdownVariants = {
         hidden: {
             height: 0,
@@ -116,23 +195,145 @@ const Navigation = () => {
         }
     };
 
-    const DesktopSidebar = () => (
+
+    const Icon: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => (
+        <div className="relative w-8 h-8 flex items-center justify-center">
+            <span className="relative z-10">{children}</span>
+        </div>
+    ));
+
+    const SmallIcon: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => (
+        <div className="relative w-6 h-6 flex items-center justify-center">
+            <span className="relative z-10 text-xs">{children}</span>
+        </div>
+    ));
+
+    const DesktopDropdownSection: React.FC<{
+        item: MenuItem
+    }> = React.memo(({ item }) => {
+        const isOpen = openSections[item.id];
+
+        return (
+            <>
+                <Button
+                    variant="ghost"
+                    className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
+                    onClick={() => toggleSection(item.id)}
+                >
+                    <div className="flex items-center">
+                        <Icon>{item.icon}</Icon>
+                        <span className="ml-2 truncate">{item.label}</span>
+                    </div>
+                    {isOpen ? (
+                        <ChevronUpIcon className="w-4 h-4" />
+                    ) : (
+                        <ChevronDownIcon className="w-4 h-4" />
+                    )}
+                </Button>
+
+                <AnimatePresence initial={false} mode="wait">
+                    {isOpen && item.items && (
+                        <motion.div
+                            key={`${item.id}-dropdown-desktop`}
+                            variants={dropdownVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            className="space-y-2 pl-10 overflow-hidden"
+                        >
+                            {item.items.map((subItem) => (
+                                <motion.div
+                                    key={subItem.id}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <Link href={subItem.link}>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
+                                        >
+                                            <SmallIcon>{subItem.icon}</SmallIcon>
+                                            <span className="ml-2 truncate">{subItem.label}</span>
+                                        </Button>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </>
+        );
+    });
+
+    const MobileDropdownSection: React.FC<{
+        item: MenuItem,
+        onItemClick?: () => void
+    }> = React.memo(({ item, onItemClick }) => {
+
+        return (
+            <>
+                {item.items && (
+                    <div className="space-y-2 overflow-hidden">
+                        {item.items.map((subItem) => (
+                            <RegularMenuItem
+                                key={subItem.id}
+                                item={subItem}
+                                onItemClick={onItemClick}
+                            />
+                        ))}
+                    </div>
+                )}
+            </>
+        );
+    });
+
+    const RegularMenuItem: React.FC<{
+        item: MenuItem,
+        isMobile?: boolean,
+        isCollapsed?: boolean,
+        onItemClick?: () => void
+    }> = React.memo(({ item, isMobile = false, isCollapsed = false, onItemClick }) => (
+        <Link
+            href={item.link || "#"}
+            onClick={onItemClick}
+        >
+            <Button
+                variant="ghost"
+                className={`w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-${isMobile ? 'gray-100' : 'gray-200'} ${isCollapsed ? "px-2" : ""}`}
+            >
+                <Icon>{item.icon}</Icon>
+                {!isCollapsed && (
+                    <motion.span
+                        variants={contentVariants}
+                        initial="visible"
+                        animate={isCollapsed ? "hidden" : "visible"}
+                    >
+                        {item.label}
+                    </motion.span>
+                )}
+            </Button>
+        </Link>
+    ));
+
+    const DesktopSidebar: React.FC = () => (
         <motion.div
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-2 border-r h-screen hidden lg:block overflow-hidden"
+            className="relative z-20 bg-white p-4 space-y-6 border-r h-screen hidden lg:block overflow-hidden"
         >
-            {
-                !isCollapsed &&
+            {!isCollapsed && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-8 space-y-2 pl-2 flex w-full justify-between items-center border-b-[1px] border-gray-200"
+                    className="mb-8 space-y-2 pl-2 flex w-full justify-between items-center border-b-[1px] border-gray-200 pb-4"
                 >
-                    <h1 className="text-xs text-wrap font-medium mb-4 text-[#0A1E4E] text-ellipsis md:text-sm ">{getTimeBasedGreeting()}, <span className="font-bold">{user?.name}</span></h1>
+                    <h1 className="text-xs text-wrap font-medium text-[#0A1E4E] text-ellipsis md:text-sm">
+                        {getTimeBasedGreeting()}, <span className="font-bold">{user?.name || ""}</span>
+                    </h1>
                 </motion.div>
-            }
+            )}
+
             <Button
                 variant="ghost"
                 size="icon"
@@ -146,291 +347,141 @@ const Navigation = () => {
                 )}
             </Button>
 
-            <div className="space-y-2">
-                {menuItems.map((item, index) => (
-                    <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Link href={item.link}>
-                            <Button
-                                variant="ghost"
-                                className={`w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
-                                    }`}
-                            >
-                                {item.icon}
-                                {!isCollapsed && (
-                                    <motion.span
-                                        variants={contentVariants}
-                                        initial="visible"
-                                        animate={isCollapsed ? "hidden" : "visible"}
-                                        className="ml-2"
+            <div className="space-y-4">
+                {menuStructure.map((item) => (
+                    <div key={item.id} className="space-y-2">
+                        {item.isDropdown ? (
+                            <>
+                                {!isCollapsed ? (
+                                    <DesktopDropdownSection item={item} />
+                                ) : (
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
                                     >
-                                        {item.label}
-                                    </motion.span>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 px-2"
+                                        >
+                                            <Icon>{item.icon}</Icon>
+                                        </Button>
+                                    </motion.div>
                                 )}
-                            </Button>
-                        </Link>
-                    </motion.div>
+                            </>
+                        ) : (
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <RegularMenuItem
+                                    item={item}
+                                    isCollapsed={isCollapsed}
+                                />
+                            </motion.div>
+                        )}
+                    </div>
                 ))}
-            </div>
-
-            <div>
-                {!isCollapsed && (
-                    <motion.div
-                        variants={contentVariants}
-                        initial="visible"
-                        animate={isCollapsed ? "hidden" : "visible"}
-                    >
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
-                            onClick={() => toggleDropdown('accounts')}
-                        >
-                            <div className='flex justify-start items-center'>
-                                <BookUser className='w-4 h-4' />
-                                <span className='ml-4'>Accounts</span>
-                            </div>
-                            {isAccountsOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
-                        </Button>
-                    </motion.div>
-                )}
-
-                <AnimatePresence initial={false}>
-                    {(!isCollapsed && isAccountsOpen) && (
-                        <motion.div
-                            key="accounts-dropdown"
-                            variants={dropdownVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            className="space-y-2 pl-2 overflow-hidden"
-                        >
-                            {accounts.map((item, index) => (
-                                <motion.div
-                                    key={index}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <Link href={item.link}>
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
-                                        >
-                                            {item.icon}
-                                            <span className="ml-2">{item.label}</span>
-                                        </Button>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {!isCollapsed && (
-                    <motion.div
-                        variants={contentVariants}
-                        initial="visible"
-                        animate={isCollapsed ? "hidden" : "visible"}
-                    >
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-between text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
-                            onClick={() => toggleDropdown('settings')}
-                        >
-                            <div className='flex justify-start items-center'>
-                                <Settings className='w-4 h-4' />
-                                <span className='ml-4'>Settings</span>
-                            </div>
-                            {isSettingsOpen ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
-                        </Button>
-                    </motion.div>
-                )}
-
-                <AnimatePresence initial={false}>
-                    {(!isCollapsed && isSettingsOpen) && (
-                        <motion.div
-                            key="settings-dropdown"
-                            variants={dropdownVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            className="space-y-2 pl-2 overflow-hidden"
-                        >
-                            {settings.map((item, index) => (
-                                <motion.div
-                                    key={index}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <Link href={item.link}>
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200"
-                                        >
-                                            {item.icon}
-                                            <span className="ml-2">{item.label}</span>
-                                        </Button>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                <div className="space-y-2 mt-2">
-                    {accountItems.map((item, index) => (
-                        <motion.div
-                            key={index}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <Link href={item.link}>
-                                <Button
-                                    variant="ghost"
-                                    className={`w-full justify-start text-gray-800 hover:text-black hover:bg-gray-200 ${isCollapsed ? "px-2" : ""
-                                        }`}
-                                >
-                                    {item.icon}
-                                    {!isCollapsed && (
-                                        <motion.span
-                                            variants={contentVariants}
-                                            initial="visible"
-                                            animate={isCollapsed ? "hidden" : "visible"}
-                                            className="ml-2"
-                                        >
-                                            {item.label}
-                                        </motion.span>
-                                    )}
-                                </Button>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </div>
             </div>
         </motion.div>
     );
 
-    const MobileMenu = () => (
-        <>
-            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t lg:hidden">
-                <div className="flex justify-between md:justify-evenly items-center px-4 py-2">
-                    {menuItems.slice(0, 4).map((item, index) => (
-                        <Link key={index} href={item.link}>
+    const MobileBottomBar: React.FC = React.memo(() => (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t lg:hidden">
+            <div className="flex justify-between md:justify-evenly items-center px-4 py-2">
+                {menuStructure.slice(0, 4).map((item, index) => (
+                    <Link
+                        key={index}
+                        href={item.isDropdown && item.items ? item.items[0].link : (item.link || "#")}
+                    >
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex flex-col items-center p-2"
+                        >
+                            {item.icon}
+                            <span className="text-xs mt-1">{item.label.split('&')[0]}</span>
+                        </Button>
+                    </Link>
+                ))}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex flex-col items-center p-2"
+                    onClick={() => setIsMobileMenuOpen(true)}
+                >
+                    <MenuIcon className="w-4 h-4" />
+                    <span className="text-xs mt-1">More</span>
+                </Button>
+            </div>
+        </div>
+    ));
+
+    const MobileSlideMenu: React.FC = React.memo(() => {
+        if (!isMobileMenuOpen) return null;
+
+        return (
+            <div className="fixed inset-0 z-50 lg:hidden">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-black/20"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+
+                <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ type: 'tween', duration: 0.3 }}
+                    className="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-xl"
+                >
+                    <div className="p-4 h-full overflow-y-auto">
+                        <div className="flex justify-between items-center mb-8">
+                            <h1 className="text-xl font-bold text-[#0A1E4E]">Menu</h1>
                             <Button
                                 variant="ghost"
-                                size="sm"
-                                className="flex flex-col items-center p-2"
+                                size="icon"
+                                onClick={() => setIsMobileMenuOpen(false)}
                             >
-                                {item.icon}
-                                <span className="text-xs mt-1">{item.label}</span>
+                                <XIcon className="w-6 h-6" />
                             </Button>
-                        </Link>
-                    ))}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex flex-col items-center p-2"
-                        onClick={() => setIsMobileMenuOpen(true)}
-                    >
-                        <MenuIcon className="w-4 h-4" />
-                        <span className="text-xs mt-1">More</span>
-                    </Button>
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
-                        transition={{ type: 'tween', duration: 0.3 }}
-                        className="fixed inset-0 bg-white z-50 lg:hidden"
-                    >
-                        <div className="p-4">
-                            <div className="flex justify-between items-center mb-8">
-                                <h1 className="text-xl font-bold text-[#0A1E4E]">Menu</h1>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    <XIcon className="w-6 h-6" />
-                                </Button>
-                            </div>
-
-                            <div className="space-y-4">
-                                {menuItems.map((item, index) => (
-                                    <Link
-                                        key={index}
-                                        href={item.link}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
-                                        >
-                                            {item.icon}
-                                            <span className="ml-2">{item.label}</span>
-                                        </Button>
-                                    </Link>
-                                ))}
-                                {accounts.map((item, index) => (
-                                    <Link
-                                        key={index}
-                                        href={item.link}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
-                                        >
-                                            {item.icon}
-                                            <span className="ml-2">{item.label}</span>
-                                        </Button>
-                                    </Link>
-                                ))}
-
-                                {accountItems.map((item, index) => (
-                                    <Link
-                                        key={index}
-                                        href={item.link}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
-                                        >
-                                            {item.icon}
-                                            <span className="ml-2">{item.label}</span>
-                                        </Button>
-                                    </Link>
-                                ))}
-
-                                {settings.map((item, index) => (
-                                    <Link
-                                        key={index}
-                                        href={item.link}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-100"
-                                        >
-                                            {item.icon}
-                                            <span className="ml-2">{item.label}</span>
-                                        </Button>
-                                    </Link>
-                                ))}
-                            </div>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </>
-    );
+
+                        <div className="space-y-4">
+                            {menuStructure.map((item) => (
+                                <div key={item.id} className="space-y-2">
+                                    {item.isDropdown ? (
+                                        <MobileDropdownSection
+                                            item={item}
+                                            onItemClick={() => setIsMobileMenuOpen(false)}
+                                        />
+                                    ) : (
+                                        <RegularMenuItem
+                                            item={item}
+                                            isMobile={true}
+                                            onItemClick={() => setIsMobileMenuOpen(false)}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    });
+
+    const MobileMenu: React.FC = () => {
+        return (
+            <>
+                <MobileBottomBar />
+                <AnimatePresence>
+                    {isMobileMenuOpen && <MobileSlideMenu />}
+                </AnimatePresence>
+            </>
+        );
+    };
 
     return (
         <>
