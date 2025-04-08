@@ -6,6 +6,7 @@ import { useCompany } from '@/contexts/company-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { AgentEdit } from '@/components/agent/agent-edit';
 
 interface Message {
     type: 'user' | 'assistant' | 'system';
@@ -32,6 +33,7 @@ const ChatInterface = () => {
     };
 
     const [agentDetails, setAgentDetails] = useState<AgentDetails>({ name: "Agent", type: "" });
+    const [currentAgent, setCurrentAgent] = useState<any | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isConnecting, setIsConnecting] = useState(false);
@@ -93,6 +95,8 @@ const ChatInterface = () => {
             const response = await fetch(`https://stage.callsure.ai/api/v1/admin/agents/${company.id}/${agentId}`);
             if (response.ok) {
                 const data = await response.json();
+                console.log("DATA", data);
+                setCurrentAgent(data);
                 setAgentDetails({
                     name: data.name || "Agent",
                     type: data.type || ""
@@ -1049,11 +1053,13 @@ const ChatInterface = () => {
     return (
         <div className="min-h-screen w-full bg-gray-100">
             <div className="max-w-6xl mx-auto p-4">
-                <div className="mb-4 flex items-center">
+                <div className="mb-4 flex items-center justify-between">
                     <button onClick={onBack} className="flex items-center text-gray-600 hover:text-gray-800">
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Back
                     </button>
+
+                    <AgentEdit {...currentAgent} />
                 </div>
 
                 {!agentId ? (
