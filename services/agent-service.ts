@@ -35,13 +35,7 @@ export const createAdminAgent = async (params: AgentFormData, company_id: string
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`, {
             method: 'POST',
-            body: formData,
-            headers: {
-                // Don't set Content-Type with FormData, browser will set it with boundary
-                'Authorization': token ? `Bearer ${token}` : '' 
-            },
-            // Important for cross-origin requests with credentials
-            credentials: 'include'
+            body: formData
         });
 
         // Log response status for debugging
