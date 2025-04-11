@@ -95,14 +95,11 @@ const Navigation: React.FC = () => {
             isDropdown: false
         },
         {
-            id: "conversations",
-            icon: <MessageCircle className="w-4 h-4" />,
-            label: "Conversations",
-            isDropdown: true,
-            items: [
-                { id: "live-conversations", label: "Live Conversations", link: "/dashboard/live-conversations", icon: <MessageCircleIcon className="w-4 h-4" /> },
-                { id: "conversation-history", label: "Conversation History", link: "/dashboard/conversation-history", icon: <Clock1Icon className="w-4 h-4" /> }
-            ]
+            id: "conversation-history",
+            label: "Conversation History",
+            link: "/dashboard/conversation-history",
+            icon: <Clock1Icon className="w-4 h-4" />,
+            isDropdown: false,
         },
         {
             id: "tickets",
