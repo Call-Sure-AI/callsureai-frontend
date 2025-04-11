@@ -18,10 +18,8 @@ import {
     ChevronUpIcon,
     ChevronDownIcon,
     Settings,
-    MessageCircle,
     TicketIcon,
     ShieldAlert,
-    MessageCircleIcon,
     Clock1Icon,
     MessageSquare
 } from "lucide-react";

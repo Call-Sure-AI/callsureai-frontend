@@ -72,13 +72,14 @@ const ChatInterface = () => {
         if (company?.id && agentId) {
             initializeSpeechRecognition();
             initializeAudioContext();
-
+    
             connectToAgent(agentId);
         }
-
+    
         return () => {
             cleanupConnections();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [company, agentId]);
 
     const fetchAgentDetails = async (agentId: string) => {
