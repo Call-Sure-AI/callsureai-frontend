@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, ArrowLeft, PhoneCall, PhoneOff, AlertCircle, Volume2, VolumeX, MessageSquare, Radio } from 'lucide-react';
+import { Send, ArrowLeft, PhoneCall, PhoneOff, AlertCircle, Volume2, VolumeX, MessageSquare, Radio, StopCircle } from 'lucide-react';
 import { useCompany } from '@/contexts/company-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -72,14 +72,14 @@ const ChatInterface = () => {
         if (company?.id && agentId) {
             initializeSpeechRecognition();
             initializeAudioContext();
-    
+
             connectToAgent(agentId);
         }
-    
+
         return () => {
             cleanupConnections();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [company, agentId]);
 
     const fetchAgentDetails = async (agentId: string) => {
@@ -1185,15 +1185,31 @@ const ChatInterface = () => {
                                     >
                                         {isStreaming ? (
                                             <>
-                                                <PhoneOff className="w-6 h-6" />
-                                                <span>Stop Audio</span>
+                                                <StopCircle className="w-6 h-6" />
                                             </>
                                         ) : (
                                             <>
                                                 <PhoneCall className="w-6 h-6" />
-                                                <span>Start Audio</span>
                                             </>
                                         )}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            cleanupConnections();
+
+                                            setMessages(prev => [...prev, {
+                                                type: 'system',
+                                                content: 'Call ended'
+                                            }]);
+
+                                            setTimeout(() => {
+                                                router.push('/dashboard');
+                                            }, 500);
+                                        }}
+                                        className="p-4 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                        title="End call and return to dashboard"
+                                    >
+                                        <PhoneOff className="w-5 h-5" />
                                     </button>
                                 </div>
                             )}
