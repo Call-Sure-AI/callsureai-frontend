@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Upload, X, User2, Play, PlusCircleIcon } from 'lucide-react';
+import { Upload, X, User2, Play, PlusCircleIcon, CircleX } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -340,6 +340,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
             ease-in-out">
                 <DialogHeader className="sticky top-0 z-10 bg-white p-6 border-b border-gray-100">
                     <DialogTitle className="text-2xl font-semibold">Edit Agent</DialogTitle>
+                    <CircleX className="absolute top-3 right-3 cursor-pointer" onClick={() => buttonRef.current?.click()} />
                 </DialogHeader>
                 <div className="overflow-y-auto max-h-[calc(90vh-130px)] p-0 
                     [&::-webkit-scrollbar]:w-2
