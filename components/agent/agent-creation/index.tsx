@@ -567,7 +567,7 @@ const AgentCreationForm = () => {
                     type="file"
                     multiple
                     className="hidden"
-                    accept='application/pdf'
+                    accept='application/pdf , .docx, .doc, .png , .jpg , .jpeg'
                     onChange={handleFileChange}
                   />
                   <div className="flex flex-col items-center justify-center text-center">

@@ -184,7 +184,7 @@ export const ChatContent = () => {
                 clearTimeout(globalReconnectTimeout);
             };
         }
-    }, []);
+    }, [webrtc, websocket]);
 
     const sendMessage = (content: string) => {
         if (!content.trim() || !websocket.socket) return;

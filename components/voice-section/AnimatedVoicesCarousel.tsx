@@ -443,7 +443,7 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ voices, direction, onPlay, pl
         className="flex"
         style={{
           animationName: direction === 'rtl' ? 'scrollRightToLeft' : 'scrollLeftToRight',
-          animationDuration: '60s', // Increased duration to allow for more cards
+          animationDuration: '240s', // Increased duration to allow for more cards
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
         }}
