@@ -316,8 +316,8 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
     // Safely get API values for textarea
     const getApiTextValue = () => {
-        return Array.isArray(formData.advanced_settings.apis) 
-            ? formData.advanced_settings.apis.join(',') 
+        return Array.isArray(formData.advanced_settings.apis)
+            ? formData.advanced_settings.apis.join(',')
             : '';
     };
 
@@ -603,7 +603,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                                         type="file"
                                         multiple
                                         className="hidden"
-                                        accept='application/pdf'
+                                        accept='application/pdf , .docx, .doc, .png , .jpg , .jpeg'
                                         onChange={handleFileChange}
                                     />
                                     <div className="flex flex-col items-center justify-center text-center">
