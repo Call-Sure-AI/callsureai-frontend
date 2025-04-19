@@ -247,7 +247,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                             className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors duration-200"
                             onClick={onCancel}
                         >
-                            Cancel
+                            Reset
                         </Button>
                         <Button
                             variant="primary"

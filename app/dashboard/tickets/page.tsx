@@ -17,7 +17,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Filter, MoreVertical } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Filter, MoreVertical, Settings, AlertTriangle } from "lucide-react"
 
 const tickets = [
     {
@@ -27,7 +32,8 @@ const tickets = [
         assignedTo: "Sarah Johnson",
         customerDetails: "Acme Corp, John Smith",
         status: "Open",
-        source: "Email"
+        source: "Email",
+        priority: "Medium"
     },
     {
         id: "TKT-002",
@@ -36,7 +42,8 @@ const tickets = [
         assignedTo: "Mike Chen",
         customerDetails: "TechSolutions Inc., Lisa Wong",
         status: "In Progress",
-        source: "Phone"
+        source: "Phone",
+        priority: "High"
     },
     {
         id: "TKT-003",
@@ -45,7 +52,8 @@ const tickets = [
         assignedTo: "Alex Thompson",
         customerDetails: "Global Services, Robert Garcia",
         status: "Resolved",
-        source: "Web Form"
+        source: "Web Form",
+        priority: "Low"
     },
     {
         id: "TKT-004",
@@ -54,12 +62,14 @@ const tickets = [
         assignedTo: "Unassigned",
         customerDetails: "Northern Manufacturing, Emily Taylor",
         status: "New",
-        source: "Chat"
+        source: "Chat",
+        priority: "Critical"
     },
 ]
 
 export default function TicketsPage() {
     const [selectedTicket, setSelectedTicket] = useState<string | null>(null)
+    const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
@@ -84,6 +94,16 @@ export default function TicketsPage() {
         }
     }
 
+    const getPriorityColor = (priority: string) => {
+        switch (priority.toLowerCase()) {
+            case 'critical': return 'bg-red-600 text-white'
+            case 'high': return 'bg-orange-500'
+            case 'medium': return 'bg-yellow-400'
+            case 'low': return 'bg-blue-400'
+            default: return 'bg-gray-400'
+        }
+    }
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
@@ -93,7 +113,13 @@ export default function TicketsPage() {
                         <Filter className="h-4 w-4 mr-2" />
                         Filter
                     </Button>
-                    <Button variant="primary">New Ticket</Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => setSettingsDialogOpen(true)}
+                    >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Ticket Settings
+                    </Button>
                 </div>
             </div>
 
@@ -126,6 +152,7 @@ export default function TicketsPage() {
                             <TableHead>Assigned To</TableHead>
                             <TableHead>Customer Details</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Priority</TableHead>
                             <TableHead>Source</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
@@ -145,6 +172,11 @@ export default function TicketsPage() {
                                 <TableCell>
                                     <Badge className={getStatusColor(ticket.status)}>
                                         {ticket.status}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge className={getPriorityColor(ticket.priority)}>
+                                        {ticket.priority}
                                     </Badge>
                                 </TableCell>
                                 <TableCell>{ticket.source}</TableCell>
@@ -195,6 +227,179 @@ export default function TicketsPage() {
                     </div>
                 </div>
             )}
+
+            {/* Ticket Settings Dialog */}
+            <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+                <DialogContent className="sm:max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Ticket Settings</DialogTitle>
+                        <DialogDescription>
+                            Configure rules for ticket prioritization and automatic assignment
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <Tabs defaultValue="urgency">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="urgency">Urgency Rules</TabsTrigger>
+                            <TabsTrigger value="hni">HNI Priority</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="urgency" className="space-y-4 mt-4">
+                            <div className="space-y-4">
+                                <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-medium">Response Time Based Priority</h3>
+                                            <p className="text-sm text-gray-500">Automatically escalate priority based on waiting time</p>
+                                        </div>
+                                        <Switch />
+                                    </div>
+                                    <div className="mt-4 grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label>Upgrade to Medium after</Label>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Input type="number" placeholder="30" />
+                                                <span>mins</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Label>Upgrade to High after</Label>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Input type="number" placeholder="120" />
+                                                <span>mins</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-medium">Keyword Based Priority</h3>
+                                            <p className="text-sm text-gray-500">Set priority based on specific keywords in ticket</p>
+                                        </div>
+                                        <Switch />
+                                    </div>
+                                    <div className="mt-4 space-y-2">
+                                        <div>
+                                            <Label>Critical Priority Keywords</Label>
+                                            <Input className="mt-1" placeholder="urgent, critical, emergency" />
+                                        </div>
+                                        <div>
+                                            <Label>High Priority Keywords</Label>
+                                            <Input className="mt-1" placeholder="important, error, broken" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-medium">Source Based Priority</h3>
+                                            <p className="text-sm text-gray-500">Set default priority by ticket source</p>
+                                        </div>
+                                        <Switch />
+                                    </div>
+                                    <div className="mt-4 grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label>Phone</Label>
+                                            <select className="w-full mt-1 border rounded p-2">
+                                                <option>High</option>
+                                                <option>Medium</option>
+                                                <option>Low</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <Label>Email</Label>
+                                            <select className="w-full mt-1 border rounded p-2">
+                                                <option>Medium</option>
+                                                <option>High</option>
+                                                <option>Low</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="hni" className="space-y-4 mt-4">
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-amber-50">
+                                <div className="flex items-center gap-2">
+                                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                                    <h3 className="font-medium">HNI Automatic Priority</h3>
+                                </div>
+                                <Switch defaultChecked />
+                            </div>
+
+                            <div className="border rounded-lg p-4">
+                                <h3 className="font-medium mb-2">HNI Customer Detection</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <Label>Account Types Considered HNI</Label>
+                                        <div className="flex gap-2 mt-1">
+                                            <div className="flex items-center gap-2">
+                                                <input type="checkbox" id="premium" defaultChecked />
+                                                <label htmlFor="premium">Premium</label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input type="checkbox" id="enterprise" defaultChecked />
+                                                <label htmlFor="enterprise">Enterprise</label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input type="checkbox" id="vip" defaultChecked />
+                                                <label htmlFor="vip">VIP</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <Label>Annual Spend Threshold ($)</Label>
+                                        <Input type="number" placeholder="100000" className="mt-1" />
+                                    </div>
+
+                                    <div>
+                                        <Label>Default HNI Priority Level</Label>
+                                        <select className="w-full mt-1 border rounded p-2">
+                                            <option>Critical</option>
+                                            <option>High</option>
+                                            <option>Medium</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="border rounded-lg p-4">
+                                <h3 className="font-medium mb-2">HNI Routing Rules</h3>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Automatic Assignment to Senior Agents</Label>
+                                        <Switch defaultChecked />
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <Label>Notify Management on HNI Tickets</Label>
+                                        <Switch defaultChecked />
+                                    </div>
+
+                                    <div>
+                                        <Label>HNI Response SLA (minutes)</Label>
+                                        <Input type="number" placeholder="15" className="mt-1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white">
+                            Save Settings
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

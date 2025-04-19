@@ -25,6 +25,7 @@ export const AgentCard = ({ agent }: { agent: any }) => {
 
     const handleIntegrate = (agent: AgentFormData) => {
         setIntegrationDialogOpen(true);
+        console.log(agent);
     };
 
     return (

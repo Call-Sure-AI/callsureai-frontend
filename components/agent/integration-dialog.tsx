@@ -125,6 +125,8 @@ export const IntegrationDialog: React.FC<IntegrationDialogProps> = ({ open, onOp
             },
         });
 
+        console.log(agentId);
+
         setConfigDialogOpen(false);
     };
 
