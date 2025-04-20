@@ -1,4 +1,3 @@
-// components/agent/agent-creation/index.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -121,10 +120,10 @@ const AgentCreationForm = () => {
     setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
   };
 
-  const getAudioPath = useCallback((gender: string, tone: string, language: string) => {
-    if (!gender || !tone || !language) return null;
-    return `/voices/${gender}-${tone}-${language}.mp3`;
-  }, []);
+  // const getAudioPath = useCallback((gender: string, tone: string, language: string) => {
+  //   if (!gender || !tone || !language) return null;
+  //   return `/voices/${gender}-${tone}-${language}.mp3`;
+  // }, []);
 
   const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
     setFormData(prev => {
@@ -151,7 +150,6 @@ const AgentCreationForm = () => {
         const newData = { ...prev, language: value };
 
         if (newData.gender && langOption) {
-          // Check if this combination exists before attempting to load
           if (checkIfVoiceExists(newData.gender, langOption.accent, langOption.language)) {
             loadAudio(newData.gender, langOption.accent, langOption.language);
           } else {
@@ -617,7 +615,7 @@ const AgentCreationForm = () => {
                           <SelectValue placeholder="Select language" />
                         </SelectTrigger>
                         <SelectContent>
-                          {languageOptions.filter(opt => opt.accent === 'american').map(option => (
+                          {languageOptions.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
