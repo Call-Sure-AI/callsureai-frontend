@@ -280,7 +280,7 @@ export default function Page() {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                         <div className="flex items-center">
                             <CheckCircle2 size={16} className="text-green-500 mr-2" />
-                            <span>No setup fees</span>
+                            <span>1 week Free-Trial</span>
                         </div>
                         <div className="flex items-center">
                             <CheckCircle2 size={16} className="text-green-500 mr-2" />
