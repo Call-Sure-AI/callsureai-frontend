@@ -223,3 +223,87 @@ export const featuresContent = [
         url: "/images/hero2.png",
     },
 ];
+
+
+export const toneOptions = [
+    { value: 'professional', label: 'Professional' },
+    { value: 'friendly', label: 'Friendly' },
+    { value: 'casual', label: 'Casual' },
+    { value: 'formal', label: 'Formal' },
+    { value: 'enthusiastic', label: 'Enthusiastic' },
+    { value: 'calm', label: 'Calm' },
+];
+
+export const languageOptions = [
+    // American
+    { value: 'american-en', label: 'American - English', accent: 'american', language: 'en' },
+    // Indian
+    { value: 'indian-en', label: 'Indian - English', accent: 'indian', language: 'en' },
+    { value: 'indian-hn', label: 'Indian - Hindi', accent: 'indian', language: 'hn' },
+    // British
+    { value: 'british-en', label: 'British - English', accent: 'british', language: 'en' },
+    // Spanish
+    { value: 'spanish-es', label: 'Spanish - Spanish', accent: 'spanish', language: 'es' },
+    // Arabic
+    { value: 'arabic-ar', label: 'Arabic - Arabic', accent: 'arabic', language: 'ar' },
+    // Chinese
+    { value: 'chinese-cn', label: 'Chinese - Chinese', accent: 'chinese', language: 'cn' },
+    // German
+    { value: 'german-de', label: 'German - German', accent: 'german', language: 'de' },
+    // French
+    { value: 'french-fr', label: 'French - French', accent: 'french', language: 'fr' },
+    // Italian
+    { value: 'italian-it', label: 'Italian - Italian', accent: 'italian', language: 'it' },
+    // Portuguese
+    { value: 'portuguese-pt', label: 'Portuguese - Portuguese', accent: 'portuguese', language: 'pt' },
+    // Russian
+    { value: 'russian-ru', label: 'Russian - Russian', accent: 'russian', language: 'ru' },
+    // Japanese
+    { value: 'japanese-jp', label: 'Japanese - Japanese', accent: 'japanese', language: 'jp' },
+    // Korean
+    { value: 'korean-ko', label: 'Korean - Korean', accent: 'korean', language: 'ko' },
+    // Dutch
+    { value: 'dutch-nl', label: 'Dutch - Dutch', accent: 'dutch', language: 'nl' },
+    // Turkish
+    { value: 'turkish-tr', label: 'Turkish - Turkish', accent: 'turkish', language: 'tr' },
+    // Polish
+    { value: 'polish-pl', label: 'Polish - Polish', accent: 'polish', language: 'pl' },
+];
+
+export const availableVoiceFiles = [
+    'female-american-en',
+    'female-american-hn',
+    'female-arabic-ar',
+    'female-british-en',
+    'female-chinese-cn',
+    'female-dutch-nl',
+    'female-french-fr',
+    'female-german-de',
+    'female-indian-en',
+    'female-indian-hn',
+    'female-italian-it',
+    'female-japanese-jp',
+    'female-korean-ko',
+    'female-polish-pl',
+    'female-portuguese-pt',
+    'female-russian-ru',
+    'female-spanish-es',
+    'female-turkish-tr',
+    'male-american-en',
+    'male-arabic-ar',
+    'male-british-en',
+    'male-chinese-cn',
+    'male-dutch-nl',
+    'male-french-fr',
+    'male-german-de',
+    'male-indian-en',
+    'male-indian-hn',
+    'male-italian-it',
+    'male-japanese-jp',
+    'male-korean-ko',
+    'male-polish-pl',
+    'male-portuguese-pt',
+    'male-russian-ru',
+    'male-spanish-es',
+    'male-turkish-tr',
+];
