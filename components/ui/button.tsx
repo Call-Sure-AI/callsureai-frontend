@@ -19,7 +19,6 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // animated: "rounded-full group relative bg-gradient-to-r from-[#0A2260] to-[#0A4EF3] hover:from-[#0A2260]/90 hover:to-[#0A4EF3]/90 transition-all duration-300 overflow-hidden text-white",
         animated: "rounded-full group relative bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] hover:from-[#162a47]/90 hover:via-[#3362A6]/90 hover:to-[#162a47]/90 transition-all duration-300 overflow-hidden text-white",
         primary: "bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white shadow-sm"
       },
@@ -60,11 +59,11 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({ text, icon, ...props })
       {...props}
     >
       {/* Default content */}
-      <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
+      <span className="relative flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[250%] group-hover:scale-110">
         {text} {icon}
       </span>
       {/* Animated content */}
-      <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
+      <span className="absolute flex items-center inset-0 justify-center translate-x-[250%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
         {icon || <ChevronRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />}
       </span>
       {/* Gradient overlay */}
@@ -92,18 +91,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ref={ref}
           {...props}
         >
-          <span className="flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[150%] group-hover:scale-110">
+          <span className="flex items-center gap-2 transition-all duration-300 group-hover:-translate-x-[250%] group-hover:scale-110">
             {children} {showArrow && <ArrowRight className="h-4 w-4" />}
           </span>
           {
             showArrow &&
-            <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
+            <span className="absolute flex items-center inset-0 justify-center translate-x-[250%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
               <ArrowRight className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
             </span>
           }
           {
             showSearchIcon &&
-            <span className="absolute flex items-center inset-0 justify-center translate-x-[150%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
+            <span className="absolute flex items-center inset-0 justify-center translate-x-[250%] group-hover:translate-x-0 group-hover:scale-150 transition-all duration-300">
               <Search className="h-5 w-5 animate-[wiggle_1s_ease-in-out_infinite]" />
             </span>
           }
