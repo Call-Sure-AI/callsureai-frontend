@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, Shield, Gem, Star, Award } from "lucide-react"
+import { CheckCircle2, Shield, Gem, Star, Award, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
@@ -23,6 +23,7 @@ type PricingCardProps = {
     popular?: boolean
     exclusive?: boolean
     icon?: React.ReactNode
+    onContactSales?: () => void
 }
 
 const fadeIn = {
@@ -76,7 +77,8 @@ const PricingCard = ({
     actionLabel, 
     popular, 
     exclusive,
-    icon
+    icon,
+    onContactSales
 }: PricingCardProps) => {
     // Calculate the actual price to display
     const displayPrice = yearlyPrice && isYearly ? yearlyPrice : monthlyPrice
@@ -163,19 +165,20 @@ const PricingCard = ({
                 </div>
                 
                 <CardFooter className="mt-auto pb-6">
-                    <Button 
-                        variant="animated"
-                        size="animated"
-                        showArrow={true}
-                        className={cn(
-                            "w-full", 
-                            {
-                                "from-[#162a47] via-[#3362A6] to-[#162a47]": !popular && !exclusive
-                            }
-                        )}
-                    >
-                        {actionLabel}
-                    </Button>
+                        <Button 
+                            variant="animated"
+                            size="animated"
+                            showArrow={true}
+                            className={cn(
+                                "w-full", 
+                                {
+                                    "from-[#162a47] via-[#3362A6] to-[#162a47]": !popular && !exclusive
+                                }
+                            )}
+                            onClick={exclusive ? onContactSales : undefined}
+                        >
+                            {actionLabel}
+                        </Button>
                 </CardFooter>
             </Card>
         </motion.div>
@@ -191,7 +194,17 @@ const CheckItem = ({ text }: { text: string }) => (
 
 export default function Page() {
     const [isYearly, setIsYearly] = useState(false)
+    const [showCalendly, setShowCalendly] = useState(false)
+    
     const togglePricingPeriod = (value: string) => setIsYearly(parseInt(value) === 1)
+    
+    const openCalendly = () => {
+        setShowCalendly(true);
+    };
+  
+    const closeCalendly = () => {
+        setShowCalendly(false);
+    };
 
     const plans = [
         {
@@ -262,7 +275,12 @@ export default function Page() {
             
             <section className="flex flex-col md:flex-row justify-center items-center md:items-stretch gap-10 mt-8 max-w-5xl mx-auto">
                 {plans.map((plan) => (
-                    <PricingCard key={plan.title} {...plan} isYearly={isYearly} />
+                    <PricingCard 
+                        key={plan.title} 
+                        {...plan} 
+                        isYearly={isYearly}
+                        onContactSales={plan.exclusive ? openCalendly : undefined}
+                    />
                 ))}
             </section>
             
@@ -315,9 +333,31 @@ export default function Page() {
                 transition={{ delay: 0.6 }}
             >
                 <p className="text-gray-600">
-                    Need a custom solution? <a href="#" className="text-blue-600 font-medium">Contact our sales team</a> for a personalized quote.
+                    Need a custom solution? <a href="#" onClick={openCalendly} className="text-blue-600 font-medium">Contact our sales team</a> for a personalized quote.
                 </p>
             </motion.div>
+
+            {/* Calendly Modal */}
+            {showCalendly && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg w-full max-w-6xl h-5/6 relative">
+                        <button 
+                            onClick={closeCalendly}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                        >
+                            <X size={24} />
+                        </button>
+                        <div className="h-full">
+                            <iframe
+                                src="https://calendly.com/callsureai/meet-with-callsure-ai-team"
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
