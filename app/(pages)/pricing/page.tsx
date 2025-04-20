@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, Shield, Gem, Star, Award } from "lucide-react"
+import { CheckCircle2, Shield, Gem, Star, Award, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
@@ -122,10 +122,10 @@ const PricingCard = ({
                         
                         <div className="flex items-end gap-2 mt-2">
                             <h3 className="text-4xl font-bold">
-                                {displayPrice ? `${displayPrice}` : "Custom"}
+                                {displayPrice ? `$${displayPrice}` : "Custom"}
                             </h3>
                             <span className="text-gray-500 pb-1">
-                                {yearlyPrice && isYearly ? "$/year" : monthlyPrice ? "$/month" : null}
+                                {yearlyPrice && isYearly ? "/year" : monthlyPrice ? "/month" : null}
                             </span>
                         </div>
                         
@@ -143,7 +143,8 @@ const PricingCard = ({
                                 Save ${monthlyPrice * 12 - yearlyPrice} with annual billing
                             </div>
                         )}
-                                                {isYearly && exclusive && (
+                        
+                        {isYearly && exclusive && (
                             <div className="mt-3 text-green-600 font-medium text-sm flex items-center">
                                 <CheckCircle2 size={14} className="mr-1" />
                                 Save upto 60% with annual billing
