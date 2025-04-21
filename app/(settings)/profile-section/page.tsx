@@ -21,7 +21,7 @@ const ProfileSection = () => {
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
     const { refreshActivities } = useActivities();
-    const { company, isLoading, updateCompanyData } = useCompany();
+    const { company, isLoading, updateCompanyData, refreshCompanyData } = useCompany();
 
     const [formData, setFormData] = useState<ProfileFormData>({
         first_name: '',
@@ -115,7 +115,10 @@ const ProfileSection = () => {
             });
 
             if (success) {
-                await refreshActivities();
+                Promise.all([
+                    refreshActivities(),
+                    refreshCompanyData()
+                ]);
                 toast({
                     title: "Success",
                     description: "Profile updated successfully.",

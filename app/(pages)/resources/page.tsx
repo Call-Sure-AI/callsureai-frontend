@@ -40,25 +40,25 @@ export default function Home() {
             title: "Documentation",
             description: "Comprehensive guides and API references for getting started with our platform.",
             icon: FileText,
-            link: "/docs"
+            link: "/resources/docs"
         },
         {
             title: "Video Tutorials",
             description: "Step-by-step video guides to help you master different features and functionalities.",
             icon: Video,
-            link: "/tutorials"
+            link: "/resources/tutorials"
         },
         {
             title: "Blog Articles",
             description: "Latest updates, best practices, and in-depth technical articles from our team.",
             icon: Book,
-            link: "/blog"
+            link: "/resources/blog"
         },
         {
             title: "External Resources",
             description: "Curated list of helpful third-party tools, libraries, and learning materials.",
             icon: Link,
-            link: "/external"
+            link: "/resources/external"
         }
     ];
 

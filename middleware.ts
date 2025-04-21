@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 
 const ALLOWED_EMAILS = [
     'callsureai@gmail.com',
+    '10topnotch7007@gmail.com',
 ]
 
 export function middleware(request: NextRequest) {

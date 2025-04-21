@@ -103,7 +103,7 @@ const Navigation: React.FC = () => {
             id: "tickets",
             icon: <TicketIcon className="w-4 h-4" />,
             label: "Tickets & Queries",
-            link: "/dashboard/tickets",
+            link: "/tickets",
             isDropdown: false
         },
         {
@@ -134,9 +134,9 @@ const Navigation: React.FC = () => {
             label: "Settings",
             isDropdown: true,
             items: [
-                { id: "profile", label: "Profile", link: "/dashboard/profile-section", icon: <UserIcon className="w-4 h-4" /> },
-                { id: "payment", label: "Payment", link: "/dashboard/payments-section", icon: <CreditCardIcon className="w-4 h-4" /> },
-                { id: "security", label: "Security & Compliance", link: "/dashboard/security", icon: <ShieldAlert className="w-4 h-4" /> }
+                { id: "profile", label: "Profile", link: "/profile-section", icon: <UserIcon className="w-4 h-4" /> },
+                { id: "payment", label: "Payment", link: "/payments-section", icon: <CreditCardIcon className="w-4 h-4" /> },
+                { id: "security", label: "Security & Compliance", link: "/security", icon: <ShieldAlert className="w-4 h-4" /> }
             ]
         },
         {

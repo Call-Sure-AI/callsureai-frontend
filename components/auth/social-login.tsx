@@ -23,7 +23,7 @@ export const SocialLogin = ({ isSignup = false }) => {
             window.dispatchEvent(new Event('storage'));
 
             if (data.newUser) {
-                router.push('/dashboard/profile-section');
+                router.push('/profile-section');
                 return;
             }
             router.push('/dashboard');
