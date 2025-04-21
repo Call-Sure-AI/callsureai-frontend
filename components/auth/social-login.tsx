@@ -12,7 +12,10 @@ export const SocialLogin = ({ isSignup = false }) => {
         try {
             const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
                 idToken: response.credential,
-            });
+            },
+                {
+                    withCredentials: true
+                });
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -39,7 +42,7 @@ export const SocialLogin = ({ isSignup = false }) => {
             <p className="mb-4 text-sm lg:text-base">
                 or {isSignup ? 'Sign Up' : 'login'} with Google
             </p>
-    
+
             <div className="w-full flex justify-center">
                 <div className="w-full">
                     <GoogleLogin
@@ -54,7 +57,7 @@ export const SocialLogin = ({ isSignup = false }) => {
                     />
                 </div>
             </div>
-    
+
             {error && (
                 <p className="text-red-500 text-sm mt-2">{error}</p>
             )}
