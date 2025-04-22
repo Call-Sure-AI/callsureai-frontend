@@ -16,21 +16,22 @@ export function middleware(request: NextRequest) {
     console.log("ALL COOKIES", request.cookies);
 
     const userCookie = request.cookies.get('user');
-    const tokenCookie = request.cookies.get('token');
 
-    if (!userCookie) {
-        console.log('No user cookie found, redirecting to homepage');
-        return NextResponse.redirect(new URL('/', request.url));
-    }
+    console.log('userCookie', userCookie);
+
+    // if (!userCookie) {
+    //     console.log('No user cookie found, redirecting to homepage');
+    //     return NextResponse.redirect(new URL('/', request.url));
+    // }
 
     try {
-        const authData = JSON.parse(userCookie.value);
-        const userEmail = authData.email;
+        // const authData = JSON.parse(userCookie.value);
+        // const userEmail = authData.email;
 
-        if (!ALLOWED_EMAILS.includes(userEmail)) {
-            console.log('Email not in allowed list:', userEmail);
-            return NextResponse.redirect(new URL('/', request.url));
-        }
+        // if (!ALLOWED_EMAILS.includes(userEmail)) {
+        //     console.log('Email not in allowed list:', userEmail);
+        //     return NextResponse.redirect(new URL('/', request.url));
+        // }
 
         return NextResponse.next()
     } catch (error) {
