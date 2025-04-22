@@ -8,32 +8,34 @@ const ALLOWED_EMAILS = [
 ]
 
 export function middleware(request: NextRequest) {
-    const path = request.nextUrl.pathname
+    const path = request.nextUrl.pathname;
     if (path === '/' || path === '/auth' || path.startsWith('/api/')) {
-        return NextResponse.next()
+        return NextResponse.next();
     }
 
-    const userCookie = request.cookies.get('user')
-    const tokenCookie = request.cookies.get('token')
+    console.log("ALL COOKIES", request.cookies);
+
+    const userCookie = request.cookies.get('user');
+    const tokenCookie = request.cookies.get('token');
 
     if (!userCookie) {
-        console.log('No user cookie found, redirecting to homepage')
-        return NextResponse.redirect(new URL('/', request.url))
+        console.log('No user cookie found, redirecting to homepage');
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     try {
-        const authData = JSON.parse(userCookie.value)
-        const userEmail = authData.email
+        const authData = JSON.parse(userCookie.value);
+        const userEmail = authData.email;
 
         if (!ALLOWED_EMAILS.includes(userEmail)) {
-            console.log('Email not in allowed list:', userEmail)
-            return NextResponse.redirect(new URL('/', request.url))
+            console.log('Email not in allowed list:', userEmail);
+            return NextResponse.redirect(new URL('/', request.url));
         }
 
         return NextResponse.next()
     } catch (error) {
-        console.error('Error parsing auth cookie:', error)
-        return NextResponse.redirect(new URL('/', request.url))
+        console.error('Error parsing auth cookie:', error);
+        return NextResponse.redirect(new URL('/', request.url));
     }
 }
 
