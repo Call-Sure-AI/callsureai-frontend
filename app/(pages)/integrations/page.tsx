@@ -106,7 +106,7 @@ const Message = (props: any) => (
     </svg>
   );
 
-const IntegrationCard = ({ title, description, icon: Icon, category, status }: { title: string, description: string, icon: any, category: string, status: string }) => {
+  const IntegrationCard = ({ title, description, icon: Icon, category, status }: { title: string, description: string, icon: any, category: string, status: string }) => {
     return (
         <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-all border border-gray-100">
             <div className="flex items-center justify-between mb-4">
@@ -126,12 +126,12 @@ const IntegrationCard = ({ title, description, icon: Icon, category, status }: {
             <p className="text-gray-600 mb-4">{description}</p>
             <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">{category}</span>
-                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#0A1E4E] bg-indigo-50 rounded-lg hover:bg-indigo-100">
+                <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-[#0A1E4E] bg-indigo-50 rounded-full">
                     Compatible
-                    <svg className="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 7l5 5-5 5" />
+                    <svg className="w-3 h-3 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                </button>
+                </span>
             </div>
         </div>
     );
