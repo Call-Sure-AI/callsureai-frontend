@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { AnimatedButton } from "@/components/ui/button";
-import Link from "next/link";
+// import Link from "next/link";
 import ContactModal from '../contact-us-modal';
 
 type MessageType = 'success' | 'error';
@@ -20,12 +20,12 @@ const Footer = () => {
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
     // Navigation items - matching the navbar items
-    const navItems = [
-        { label: "Features", href: "/features" },
-        { label: "Pricing", href: "/pricing" },
-        { label: "Resources", href: "/resources" },
-        { label: "Integrations", href: "/integrations" },
-    ];
+    // const navItems = [
+    //     { label: "Features", href: "/features" },
+    //     { label: "Pricing", href: "/pricing" },
+    //     { label: "Resources", href: "/resources" },
+    //     { label: "Integrations", href: "/integrations" },
+    // ];
 
     const fadeInUpVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -102,7 +102,7 @@ const Footer = () => {
                         variants={fadeInUpVariants}
                         className="flex flex-col md:flex-row justify-center md:space-x-8 space-y-4 md:space-y-0 mb-10 md:mb-20"
                     >
-                        {navItems.map((item) => (
+                        {/* {navItems.map((item) => (
                             <Link
                                 key={item.label}
                                 href={item.href}
@@ -110,7 +110,7 @@ const Footer = () => {
                             >
                                 {item.label}
                             </Link>
-                        ))}
+                        ))} */}
                     </motion.div>
 
                     <motion.div
