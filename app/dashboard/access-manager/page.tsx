@@ -1,27 +1,108 @@
+
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, ChevronDown, Users, Mail, Shield, Search } from 'lucide-react';
+import { Plus, X, ChevronDown, Users, Mail, Shield, Search, Loader2 } from 'lucide-react';
 import { AccessLevel, AccessLevelName, AccessManagerProps, SelectedAccessMap, User } from '@/types';
 import { Button } from '@/components/ui/button';
+import axios from 'axios';
+import { toast } from '@/hooks/use-toast';
+import { useCompany } from '@/contexts/company-context';
+import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+
 
 const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
     initialUsers = [],
     onInvite,
     onCancel
 }) => {
+    const { company } = useCompany();
+    const { token } = useIsAuthenticated();
     const [email, setEmail] = useState<string>('');
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [selectedAccess, setSelectedAccess] = useState<SelectedAccessMap>({});
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [users, setUsers] = useState<User[]>(initialUsers.length > 0
-        ? initialUsers
-        : [
-            { id: '1', email: 'example1@email.com' },
-            { id: '2', email: 'example2@email.com' }
-        ]
-    );
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [users, setUsers] = useState<User[]>(initialUsers);
+
+    useEffect(() => {
+        if (company?.id && token) {
+            fetchPendingInvitations();
+        }
+    }, [company?.id, token]);
+
+    const fetchPendingInvitations = async () => {
+        try {
+            setIsLoading(true);
+            const { data } = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/list/${company?.id}`,
+                {
+                    withCredentials: true, headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+
+            const invitationUsers = data.invitations.map((invitation: any) => ({
+                id: `invitation-${invitation.id}`,
+                email: invitation.email,
+                status: 'pending',
+                role: invitation.role
+            }));
+
+            setUsers(prev => {
+                const filteredUsers = prev.filter(user =>
+                    !invitationUsers.some((invUser: any) => invUser.email === user.email)
+                );
+                return [...filteredUsers, ...invitationUsers];
+            });
+
+            const accessMap: SelectedAccessMap = {};
+            data.invitations.forEach((invitation: any) => {
+                accessMap[`invitation-${invitation.id}`] = mapRoleToAccessLevel(invitation.role);
+            });
+            setSelectedAccess(prev => ({ ...prev, ...accessMap }));
+
+        } catch (error) {
+            console.error('Error fetching invitations:', error);
+            toast({
+                title: "Error",
+                description: "Failed to load pending invitations",
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Map roles to access levels
+    const mapRoleToAccessLevel = (role: string): AccessLevelName => {
+        switch (role) {
+            case 'admin':
+                return 'Admin Access';
+            case 'manager':
+                return 'Projects Access';
+            default:
+                return 'Custom Projects Access';
+        }
+    };
+
+    // Map access levels to roles
+    const mapAccessLevelToRole = (accessLevel: AccessLevelName): string => {
+        switch (accessLevel) {
+            case 'Admin Access':
+                return 'admin';
+            case 'Projects Access':
+                return 'manager';
+            case 'Custom Projects Access':
+                return 'member';
+            default:
+                return 'member';
+        }
+    };
 
     const accessLevels: AccessLevel[] = [
         { name: 'Admin Access', icon: Shield },
@@ -41,22 +122,126 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
         setOpenDropdownId(null);
     };
 
-    const handleAddUser = (): void => {
-        if (!email) return;
+    const handleAddUser = async (): Promise<void> => {
+        if (!email || !company?.id) return;
 
-        const newUser: User = {
-            id: `user-${Date.now()}`,
-            email
-        };
+        try {
+            setIsLoading(true);
 
-        setUsers(prev => [...prev, newUser]);
-        setEmail('');
+            const role = mapAccessLevelToRole(selectedAccess[`temp-${email}`] || 'Admin Access');
+
+            const { data } = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/generate`,
+                {
+                    email,
+                    companyId: company.id,
+                    role
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+            await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/send-email`,
+                {
+                    invitationId: data.invitation.id
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                }
+            );
+
+            toast({
+                title: "Success",
+                description: `Invitation sent to ${email}`,
+            });
+
+            // Add the invited user to the list
+            const newUser: User = {
+                id: `invitation-${data.invitation.id}`,
+                email,
+                status: 'pending',
+                role
+            };
+
+            setUsers(prev => [...prev, newUser]);
+            setSelectedAccess(prev => ({
+                ...prev,
+                [`invitation-${data.invitation.id}`]: mapRoleToAccessLevel(role)
+            }));
+
+            setEmail('');
+
+        } catch (err: any) {
+            console.error('Error sending invitation:', err);
+            toast({
+                title: "Error",
+                description: err.response?.data?.error || "Failed to send invitation",
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleRemoveUser = (userId: string): void => {
+    const handleRemoveUser = async (userId: string): Promise<void> => {
+        if (userId.startsWith('invitation-')) {
+            const invitationId = userId.replace('invitation-', '');
+
+            try {
+                setIsLoading(true);
+
+                await axios.delete(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/${invitationId}`,
+                    { withCredentials: true }
+                );
+
+                toast({
+                    title: "Success",
+                    description: "Invitation deleted successfully",
+                });
+
+            } catch (err: any) {
+                console.error('Error deleting invitation:', err);
+                toast({
+                    title: "Error",
+                    description: err.response?.data?.error || "Failed to delete invitation",
+                    variant: "destructive"
+                });
+                return; // Don't remove from UI if deletion failed
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        // Remove from UI
         setUsers(prev => prev.filter(user => user.id !== userId));
         const { [userId]: _, ...restAccess } = selectedAccess; // eslint-disable-line @typescript-eslint/no-unused-vars
         setSelectedAccess(restAccess);
+    };
+
+    const handleInviteSelected = async (): Promise<void> => {
+        if (users.length === 0) return;
+
+        // Here you could batch process invitations if needed
+        // For now, we'll just notify the parent component
+        if (onInvite) {
+            onInvite(users);
+        }
+
+        toast({
+            title: "Success",
+            description: "All invitations have been processed",
+        });
     };
 
     const filteredUsers = users.filter(user =>
@@ -139,16 +324,59 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0A1E4E] focus:border-transparent outline-none transition-all duration-200"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                disabled={isLoading}
                             />
+                        </div>
+                        <div className="relative min-w-[180px]">
+                            <motion.button
+                                className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 transition-colors duration-200"
+                                onClick={() => toggleDropdown('temp-' + email)}
+                                disabled={isLoading}
+                            >
+                                <Shield size={16} className="text-[#0A1E4E]" />
+                                <span>{selectedAccess[`temp-${email}`] || 'Admin Access'}</span>
+                                <ChevronDown
+                                    size={16}
+                                    className={`transform transition-transform duration-200 ${openDropdownId === 'temp-' + email ? 'rotate-180' : ''}`}
+                                />
+                            </motion.button>
+
+                            <AnimatePresence>
+                                {openDropdownId === 'temp-' + email && (
+                                    <motion.div
+                                        className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden"
+                                        variants={dropdownVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="hidden"
+                                    >
+                                        {accessLevels.map(({ name, icon: Icon }) => (
+                                            <motion.button
+                                                key={name}
+                                                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 transition-colors duration-200"
+                                                onClick={() => handleAccessSelect(`temp-${email}`, name)}
+                                                whileHover={{ x: 4 }}
+                                            >
+                                                <Icon size={16} className="text-[#0A1E4E]" />
+                                                {name}
+                                            </motion.button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                         <Button
                             className="px-6 py-3 rounded-xl flex items-center gap-2 shadow-md transition-colors duration-200"
                             variant="primary"
                             onClick={handleAddUser}
-                            disabled={!email}
+                            disabled={!email || isLoading}
                         >
-                            <Plus size={20} />
-                            Add User
+                            {isLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Plus size={20} />
+                            )}
+                            Invite User
                         </Button>
                     </motion.div>
 
@@ -184,12 +412,18 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                                     <div className="bg-blue-100 p-2 rounded-lg">
                                         <Users className="text-[#0A1E4E]" size={24} />
                                     </div>
-                                    <span className="text-xs md:text-lg text-gray-700 font-medium">{user.email}</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs md:text-lg text-gray-700 font-medium">{user.email}</span>
+                                        {user.status === 'pending' && (
+                                            <span className="text-xs text-amber-500">Invitation Pending</span>
+                                        )}
+                                    </div>
 
                                     <div className="relative ml-auto">
                                         <motion.button
                                             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-300 transition-colors duration-200"
                                             onClick={() => toggleDropdown(user.id)}
+                                            disabled={isLoading}
                                         >
                                             <Shield size={16} className="text-[#0A1E4E]" />
                                             <span className='hidden md:block'>{selectedAccess[user.id] || 'Admin Access'}</span>
@@ -229,12 +463,19 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                                         whileTap={{ scale: 0.9 }}
                                         className="text-gray-400 hover:text-red-500 transition-colors duration-200"
                                         onClick={() => handleRemoveUser(user.id)}
+                                        disabled={isLoading}
                                     >
                                         <X size={20} />
                                     </motion.button>
                                 </div>
                             </motion.div>
                         ))}
+
+                        {filteredUsers.length === 0 && (
+                            <div className="text-center p-8 bg-gray-50 rounded-xl border border-gray-200">
+                                <p className="text-gray-500">No users found. Invite someone to get started!</p>
+                            </div>
+                        )}
                     </motion.div>
 
                     {/* Footer Actions */}
@@ -245,16 +486,25 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                         <Button
                             variant="outline"
                             className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors duration-200"
-                            onClick={onCancel}
+                            onClick={() => {
+                                fetchPendingInvitations();
+                                if (onCancel) onCancel();
+                            }}
+                            disabled={isLoading}
                         >
-                            Reset
+                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reset'}
                         </Button>
                         <Button
                             variant="primary"
                             className="px-6 py-4 rounded-xl transition-colors duration-200 shadow-md"
-                            onClick={() => onInvite?.(users)}
+                            onClick={handleInviteSelected}
+                            disabled={filteredUsers.length === 0 || isLoading}
                         >
-                            Invite Selected Users
+                            {isLoading ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                                'Invite All Users'
+                            )}
                         </Button>
                     </motion.div>
                 </div>

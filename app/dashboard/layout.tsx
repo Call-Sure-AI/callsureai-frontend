@@ -12,8 +12,6 @@ export default function DashboardLayout({
 }: { children: React.ReactNode }) {
     const { company } = useCompany();
 
-    console.log('Company:', company);
-
     return (
         <>
             <Navbar />

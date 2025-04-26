@@ -40,6 +40,9 @@ export interface FeatureMetrics {
 export interface User {
     id: string;
     email: string;
+    name?: string;
+    status?: 'active' | 'pending' | 'invited';
+    role?: string;
 }
 
 export interface AccessLevel {
@@ -71,22 +74,22 @@ export interface AgentFormData {
     prompt: string;
     is_active: boolean;
     additional_context: {
-      gender: string;
-      tone: string;
-      language: string;
-      accent?: string;
-      languageCode?: string;
-      roleDescription: string;
-      businessContext: string;
+        gender: string;
+        tone: string;
+        language: string;
+        accent?: string;
+        languageCode?: string;
+        roleDescription: string;
+        businessContext: string;
     };
     advanced_settings: {
-      authUrl: string;
-      clientId: string;
-      clientSecret: string;
-      apis: string[];
+        authUrl: string;
+        clientId: string;
+        clientSecret: string;
+        apis: string[];
     };
     files: string[];
-  }
+}
 
 export interface ProfileFormData {
     first_name: string;
