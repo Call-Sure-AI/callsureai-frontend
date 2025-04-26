@@ -40,7 +40,13 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <head />
+      <head>
+        {/* Adding Google Sign-In client script */}
+        <Script 
+          src="https://accounts.google.com/gsi/client" 
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -52,19 +58,20 @@ export default function RootLayout({
             <Toaster />
           </GoogleOAuthProvider>
         </AppProviders>
-      </body>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
+        {/* Google Analytics scripts inside body */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${googleAnalyticsId}');
           `}
-      </Script>
+        </Script>
+      </body>
     </html>
   );
 }

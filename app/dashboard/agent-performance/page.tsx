@@ -319,7 +319,7 @@ const AgentPerformanceDashboard: React.FC = () => {
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5" />
                     <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" width={100} />
+                    <YAxis type="category" dataKey="name" width={100} style={{ height: 'auto' }}/>
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="calls" name="Calls Handled" fill="#0088FE" />
