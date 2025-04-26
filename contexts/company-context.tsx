@@ -46,20 +46,20 @@ interface CompanyContextType {
 
 const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3): Promise<Response> => {
     let retries = 0;
-    
+
     while (retries < maxRetries) {
         try {
             return await fetch(url, options);
         } catch (err) {
             if (retries === maxRetries - 1) throw err;
-            
+
             retries++;
             console.log(`Retrying fetch (${retries}/${maxRetries})...`);
             // Wait for a bit before retrying (exponential backoff)
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
         }
     }
-    
+
     throw new Error('Maximum retries reached');
 };
 
@@ -135,17 +135,14 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             setIsLoading(true);
             setError(null);
 
-            // Check network connectivity before making the request
             if (!navigator.onLine) {
                 console.warn('Network is offline. Using cached or default company data.');
                 setIsOffline(true);
-                
-                // If we already have company data, keep using it
+
                 if (!company) {
-                    // Otherwise, create a default company for a better user experience
                     setCompany(createDefaultCompany());
                 }
-                
+
                 setIsLoading(false);
                 return;
             }
@@ -153,7 +150,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://beta.callsure.ai';
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
-            
+
             try {
                 const response = await fetchWithRetry(`${apiUrl}/api/company`, {
                     headers: {
@@ -177,19 +174,19 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                 } else if (response.status === 404) {
                     // Company not found - could be a new user
                     console.log('Company not found, using default data');
-                    
+
                     // Keep using existing company data if we have it
                     if (!company) {
                         setCompany(createDefaultCompany());
                     }
-                    
+
                     // Don't set an error for 404 - this is expected for new users
                 } else {
                     const errorData = await response.json().catch(() => ({ message: `Server error: ${response.status}` }));
                     setError(errorData.message || 'Failed to fetch company data');
-                    
+
                     setFailedAttempts(prev => prev + 1);
-                    
+
                     // If we've failed multiple times, use default data for better UX
                     if (failedAttempts >= 2 && !company) {
                         console.warn('Multiple failed attempts to fetch company data. Using default data.');
@@ -202,7 +199,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             }
         } catch (err: any) {
             console.error('Error fetching company data:', err);
-            
+
             // Handle connection errors more gracefully
             if (err.name === 'AbortError') {
                 setError('Request timed out. Server may be unavailable.');
@@ -212,9 +209,9 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             } else {
                 setError('An error occurred while fetching company data');
             }
-            
+
             setFailedAttempts(prev => prev + 1);
-            
+
             // Create default company data after multiple failures for better UX
             if (failedAttempts >= 2 && !company) {
                 console.warn('Multiple failed attempts to fetch company data. Using default data.');
@@ -271,13 +268,13 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
 
             try {
                 await createOrUpdateCompany(apiData, token);
-                
+
                 toast({
                     title: "Success",
                     description: "Company profile updated successfully.",
                     variant: "default",
                 });
-                
+
                 return true;
             } catch (apiError) {
                 // If the API call fails, we still have the local changes
@@ -293,20 +290,20 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                         return true; // We still return true for better UX
                     }
                 }
-                
+
                 // For other types of errors, re-throw to be caught by the outer catch
                 throw apiError;
             }
         } catch (err: any) {
             console.error('Error updating company data:', err);
             setError(err.message || 'An error occurred while updating company data');
-            
+
             toast({
                 title: "Error",
                 description: err.message || "Failed to update profile. Please try again.",
                 variant: "destructive",
             });
-            
+
             return false;
         } finally {
             setIsLoading(false);
