@@ -106,8 +106,8 @@ const DashboardLayout = () => {
 
                             {/* Agents List Section */}
                             <div className="space-y-4">
-                                <h1 className="text-2xl font-bold ml-3 inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
-                                    Your Agents
+                                <h1 className="text-2xl font-bold ml-3 inline-block bg-gradient-to-r from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
+                                    Your <span className="text-black">Agents</span>
                                 </h1>
 
                                 {loading ? (

@@ -95,7 +95,7 @@ export const AgentCard = ({ agent }: { agent: any }) => {
                                         variant="ghost"
                                         aria-label="Integrate"
                                     >
-                                        <span className="text-white">Deploy </span>
+                                        <span className="text-white">Go Live </span>
                                         <Play className="w-4 h-4 text-white" />
 
                                     </Button>
