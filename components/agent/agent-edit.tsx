@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Upload, X, User2, Play, PlusCircleIcon, CircleX } from 'lucide-react';
+import { Upload, X, User2, Play, CircleX, Settings } from "lucide-react";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -325,7 +325,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         <Dialog>
             <DialogTrigger asChild>
                 <Button size="sm" ref={buttonRef} variant="primary" className="text-[#0A1E4E] flex justify-center items-center bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 transition-colors duration-200">
-                    <PlusCircleIcon className="w-4 h-4 mr-2" />
+                    <Settings className="w-4 h-4 mr-2" />
                     Edit Agent Settings
                 </Button>
             </DialogTrigger>

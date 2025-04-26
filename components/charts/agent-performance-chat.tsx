@@ -17,7 +17,7 @@ const AgentPerformanceChart = () => {
         <Card className="bg-white">
             <CardContent className="p-6">
                 <div className="mb-4">
-                    <h2 className="text-lg font-semibold text-black">Agent Performance</h2>
+                    <h2 className="text-xl font-semibold text-black">Agent Performance</h2>
                     <p className="text-sm text-[#0A1E4E]">Calls completed per agent over the week</p>
                 </div>
                 <div className="h-96 w-full">

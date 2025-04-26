@@ -16,11 +16,11 @@ const DashboardLayout = () => {
     const { agents, loading } = useAgents();
 
     const statsCards = [
-        { label: 'Total Calls', value: '5,672', stat: "40% increase", trend: "up" },
-        { label: 'Completed Calls', value: '4,987', stat: "400 active calls", trend: "up" },
-        { label: 'Resolution Rate', value: '89%', stat: "+2.5% increase", trend: "up" },
-        { label: 'Total Bookings', value: '4,510', stat: "32.0% increase", trend: "up" },
-        { label: 'Credit Balance', value: '$1,234', stat: "Can be recharged", trend: "warn" },
+        { label: 'Total Calls', value: '14,894', stat: "40% increase", trend: "up" },
+        { label: 'Completed Calls', value: '13,999', stat: "400 active calls", trend: "up" },
+        { label: 'Resolution Rate', value: '94%', stat: "+2.5% increase", trend: "up" },
+        { label: 'Total Bookings', value: '8,999', stat: "32.0% increase", trend: "up" },
+        { label: 'Credit Balance', value: '$1,444', stat: "Can be recharged", trend: "info" },
     ];
 
     return (
@@ -41,14 +41,18 @@ const DashboardLayout = () => {
                                         <div className="flex flex-col space-y-2">
                                             <div className="text-sm font-medium text-[#0A1E4E]/80">{stat.label}</div>
                                             <div className="text-2xl font-bold text-[#0A1E4E]">{stat.value}</div>
-                                            <div className={`text-sm flex items-center gap-1 ${stat.trend === 'up' ? 'text-green-600' :
-                                                stat.trend === 'down' || stat.trend === 'warn' ? 'text-red-600' :
-                                                    'text-gray-600'
+                                            <div className={`text-sm flex items-center gap-1 ${
+                                                  stat.trend === 'up' ? 'text-green-600' :
+                                                  stat.trend === 'down' ? 'text-red-600' :
+                                                  stat.trend === 'info' ? 'text-blue-600' :
+                                                  stat.trend === 'warn' ? 'text-amber-600' :
+                                                  'text-gray-600'
                                                 }`}>
                                                 {stat.stat}
                                                 {stat.trend === 'up' && <TrendingUpIcon className="w-4 h-4" />}
                                                 {stat.trend === 'down' && <TrendingDownIcon className="w-4 h-4" />}
                                                 {stat.trend === 'warn' && <AlertTriangle className="w-4 h-4" />}
+                                                {stat.trend === 'info' && <PlusCircleIcon className="w-4 h-4" />}
                                                 {!stat.trend && <MinusIcon className="w-4 h-4" />}
                                             </div>
                                         </div>
@@ -81,20 +85,20 @@ const DashboardLayout = () => {
                             <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
                                 <CardContent className="p-6">
                                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
-                                        <div className="space-y-2">
-                                            <h2 className="text-xl font-semibold text-[#0A1E4E]">Set up a new agent</h2>
-                                            <p className="text-[#0A1E4E]/70 text-xs">Create and manage your AI agents</p>
+                                        <div className="space-y-0">
+                                            <h2 className="text-xl font-bold text-[#0A1E4E]">Set up a new agent</h2>
+                                            <p className="text-[#0A1E4E] text-sm">Create and manage your AI agents</p>
                                         </div>
                                         <Link href="/agent/creation">
-                                        <Button variant="animated" className="group relative overflow-hidden">
-                                            <span className="flex items-center transition-all duration-300 group-hover:-translate-x-[250%]">
-                                                <PlusCircleIcon className="w-4 h-4 mr-2" />
-                                                Add Agent
-                                            </span>
-                                            <span className="absolute flex items-center inset-0 justify-center translate-x-[250%] group-hover:translate-x-0 transition-all duration-300">
-                                                <PlusCircleIcon className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
-                                            </span>
-                                        </Button>
+                                        <Button variant="animated" className="group transition-colors duration-300 relative overflow-hidden px-6 py-6">
+    <span className="flex items-center transition-all duration-300">
+        <PlusCircleIcon className="w-4 h-4 mr-2" />
+        Add Agent
+    </span>
+    <span className="absolute flex items-center inset-0 justify-center translate-x-[225%] duration-300">
+        <PlusCircleIcon className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+    </span>
+</Button>
                                     </Link>
                                     </div>
                                 </CardContent>
@@ -102,7 +106,7 @@ const DashboardLayout = () => {
 
                             {/* Agents List Section */}
                             <div className="space-y-4">
-                                <h1 className="text-2xl font-bold text-[#0A1E4E]">
+                                <h1 className="text-2xl font-bold ml-3 inline-block bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy pb-2">
                                     Your Agents
                                 </h1>
 

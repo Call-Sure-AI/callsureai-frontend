@@ -32,7 +32,7 @@ export const AgentCard = ({ agent }: { agent: any }) => {
         <>
             <Card
                 key={agent.id}
-                className="group bg-white hover:shadow-xl hover:shadow-[#0A1E4E]/5 transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#0A1E4E]/20"
+                className="group bg-white shadow-sm hover:shadow-xl hover:shadow-[#0A1E4E]/5 transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#0A1E4E]/20"
             >
                 <CardContent className="p-6 relative h-full">
                     {agent.is_active && (
@@ -80,11 +80,11 @@ export const AgentCard = ({ agent }: { agent: any }) => {
                                     variant="animated"
                                     size="sm"
                                 >
-                                    <span className="flex items-center transition-all duration-300 hover:translate-x-[-250%]">
+                                    <span className="flex items-center transition-all duration-300">
                                     <FlaskConical className="w-4 h-4 mr-2" />
                                         Test It
                                     </span>
-                                    <span className="absolute flex items-center inset-0 justify-center translate-x-[225%] hover:translate-x-0 transition-all duration-300">
+                                    <span className="absolute flex items-center inset-0 justify-center translate-x-[225%] duration-300">
                                         <FlaskConical className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
                                     </span>
                                 </Button>
