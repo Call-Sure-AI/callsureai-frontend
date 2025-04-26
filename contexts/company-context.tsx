@@ -44,6 +44,25 @@ interface CompanyContextType {
     updateCompanyData: (data: ProcessedCompanyData) => Promise<boolean>;
 }
 
+const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3): Promise<Response> => {
+    let retries = 0;
+    
+    while (retries < maxRetries) {
+        try {
+            return await fetch(url, options);
+        } catch (err) {
+            if (retries === maxRetries - 1) throw err;
+            
+            retries++;
+            console.log(`Retrying fetch (${retries}/${maxRetries})...`);
+            // Wait for a bit before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retries)));
+        }
+    }
+    
+    throw new Error('Maximum retries reached');
+};
+
 const CompanyContext = createContext<CompanyContextType>({
     company: null,
     isLoading: false,
@@ -136,14 +155,13 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
             
             try {
-                const response = await fetch(`${apiUrl}/api/company`, {
+                const response = await fetchWithRetry(`${apiUrl}/api/company`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
                     },
                     signal: controller.signal
-                });
-                
+                }, 3);
                 clearTimeout(timeoutId);
 
                 if (response.ok) {
