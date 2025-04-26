@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { capitalizeFirstLetter } from "@/utils/capitalize-letter";
-import { Activity, Bot, Play } from "lucide-react";
+import { Activity, Bot, Play, FlaskConical } from "lucide-react";
 import { Button } from "../ui/button";
 import { AgentEdit } from "./agent-edit";
 import { useRouter } from "next/navigation";
@@ -74,22 +74,30 @@ export const AgentCard = ({ agent }: { agent: any }) => {
                             </div>
                             <div className="flex flex-col items-center justify-between border-t border-gray-100">
                                 <div className="flex items-center space-x-2 mb-4">
-                                    <Button
-                                        onClick={() => handleTestAgent(agent)}
-                                        className="transition-colors duration-200"
-                                        variant="primary"
-                                        size="sm"
-                                    >
-                                        Test Agent
-                                    </Button>
+                                <Button
+                                    onClick={() => handleTestAgent(agent)}
+                                    className="transition-colors duration-300 relative overflow-hidden"
+                                    variant="animated"
+                                    size="sm"
+                                >
+                                    <span className="flex items-center transition-all duration-300 hover:translate-x-[-250%]">
+                                    <FlaskConical className="w-4 h-4 mr-2" />
+                                        Test It
+                                    </span>
+                                    <span className="absolute flex items-center inset-0 justify-center translate-x-[225%] hover:translate-x-0 transition-all duration-300">
+                                        <FlaskConical className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+                                    </span>
+                                </Button>
                                     <Button
                                         onClick={() => handleIntegrate(agent)}
-                                        className="rounded-full w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                                        className="rounded-lg w-auto h-auto px-3 py-2 flex items-center justify-center bg-black hover:bg-black/80 transition-colors duration-200"
                                         size="icon"
                                         variant="ghost"
                                         aria-label="Integrate"
                                     >
-                                        <Play className="w-4 h-4 text-gray-600" />
+                                        <span className="text-white">Deploy </span>
+                                        <Play className="w-4 h-4 text-white" />
+
                                     </Button>
                                 </div>
                                 <AgentEdit {...agent} />

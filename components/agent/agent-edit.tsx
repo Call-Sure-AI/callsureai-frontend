@@ -324,9 +324,9 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button size="sm" ref={buttonRef} className="text-[#0A1E4E] flex justify-center items-center bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20">
+                <Button size="sm" ref={buttonRef} variant="primary" className="text-[#0A1E4E] flex justify-center items-center bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 transition-colors duration-200">
                     <PlusCircleIcon className="w-4 h-4 mr-2" />
-                    Edit Agent
+                    Edit Agent Settings
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-scroll p-0 
@@ -402,14 +402,14 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
                             <div className="bg-gray-50 p-6 rounded-xl space-y-6">
                                 <div className="flex items-center gap-4">
-                                    <button
-                                        onClick={handlePlayAudio}
-                                        className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
-                                        ${isAudioLoading ? 'cursor-wait' : ''} 
-                                        ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`
-                                        }
-                                        disabled={!audio || isAudioLoading}
-                                    >
+                                <button
+                                    onClick={handlePlayAudio}
+                                    className={`w-12 h-12 rounded-full ${audioError ? "bg-red-500" : "bg-black"} shadow-sm flex items-center justify-center transition-colors 
+                                    ${isAudioLoading ? 'cursor-wait' : ''} 
+                                    ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/80'}`
+                                    }
+                                    disabled={!audio || isAudioLoading}
+                                >
                                         {isAudioLoading ? (
                                             <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                                         ) : (

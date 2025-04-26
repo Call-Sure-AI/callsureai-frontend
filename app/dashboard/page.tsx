@@ -86,11 +86,16 @@ const DashboardLayout = () => {
                                             <p className="text-[#0A1E4E]/70 text-xs">Create and manage your AI agents</p>
                                         </div>
                                         <Link href="/agent/creation">
-                                            <Button variant="primary">
+                                        <Button variant="animated" className="group relative overflow-hidden">
+                                            <span className="flex items-center transition-all duration-300 group-hover:-translate-x-[250%]">
                                                 <PlusCircleIcon className="w-4 h-4 mr-2" />
                                                 Add Agent
-                                            </Button>
-                                        </Link>
+                                            </span>
+                                            <span className="absolute flex items-center inset-0 justify-center translate-x-[250%] group-hover:translate-x-0 transition-all duration-300">
+                                                <PlusCircleIcon className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+                                            </span>
+                                        </Button>
+                                    </Link>
                                     </div>
                                 </CardContent>
                             </Card>
