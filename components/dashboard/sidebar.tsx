@@ -320,7 +320,7 @@ const Navigation: React.FC = () => {
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-6 border-r h-screen hidden lg:block overflow-hidden"
+            className="relative z-20 bg-white p-4 space-y-6 border-r h-screen hidden lg:block overflow-visible"
         >
             {!isCollapsed && (
                 <motion.div
@@ -337,7 +337,7 @@ const Navigation: React.FC = () => {
             <Button
                 variant="ghost"
                 size="icon"
-                className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white border shadow-md z-50"
+                className="absolute -right-3 top-4 w-6 h-6 rounded-full bg-white border shadow-md z-50 flex items-center justify-center"
                 onClick={() => setIsCollapsed(!isCollapsed)}
             >
                 {isCollapsed ? (
