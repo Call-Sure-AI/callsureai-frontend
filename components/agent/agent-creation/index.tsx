@@ -292,11 +292,14 @@ const AgentCreationForm = () => {
   }, [checkIfVoiceExists]);
 
   const handlePlayAudio = () => {
-    if (!audio) return;
-
-    if (audio.paused) {
-      audio.play().catch(error => {
+    if (!audio || !audioRef.current) return;
+  
+    if (audioRef.current.paused) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(error => {
         console.error('Error playing audio:', error);
+        setIsPlaying(false);
         toast({
           title: "Playback Error",
           description: "Could not play the voice sample. Please try again.",
@@ -304,7 +307,8 @@ const AgentCreationForm = () => {
         });
       });
     } else {
-      audio.pause();
+      audioRef.current.pause();
+      setIsPlaying(false);
     }
   };
 
@@ -415,18 +419,35 @@ const AgentCreationForm = () => {
   useEffect(() => {
     if (audioRef.current) {
       const audioElement = audioRef.current;
+      
+      // Define event handlers
       const onPlay = () => setIsPlaying(true);
       const onPause = () => setIsPlaying(false);
-      const onEnded = () => setIsPlaying(false);
-
+      const onEnded = () => {
+        console.log('Audio playback ended');
+        setIsPlaying(false);
+      };
+      
+      // Important: Add timeupdate event to check for end of playback
+      const onTimeUpdate = () => {
+        if (audioElement.currentTime >= audioElement.duration - 0.1) {
+          console.log('Audio reached end via timeupdate');
+          setIsPlaying(false);
+        }
+      };
+      
+      // Add all event listeners
       audioElement.addEventListener('play', onPlay);
       audioElement.addEventListener('pause', onPause);
       audioElement.addEventListener('ended', onEnded);
-
+      audioElement.addEventListener('timeupdate', onTimeUpdate);
+      
+      // Cleanup function
       return () => {
         audioElement.removeEventListener('play', onPlay);
         audioElement.removeEventListener('pause', onPause);
         audioElement.removeEventListener('ended', onEnded);
+        audioElement.removeEventListener('timeupdate', onTimeUpdate);
       };
     }
   }, []);
@@ -484,6 +505,8 @@ const AgentCreationForm = () => {
       <audio
         ref={audioRef}
         style={{ display: "none" }}
+        preload="auto"
+        onEnded={() => setIsPlaying(false)}
       />
       <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
         <CardHeader className="border-b border-gray-100 pb-6 sticky top-0 bg-white z-10">
@@ -545,32 +568,32 @@ const AgentCreationForm = () => {
 
               <div className="bg-gray-50 p-6 rounded-xl space-y-6">
                 <div className="flex items-center gap-4">
-                  <button
-                    onClick={handlePlayAudio}
-                    className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
-                                            ${isAudioLoading ? 'cursor-wait' : ''} 
-                                            ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`
-                    }
-                    disabled={!audio || isAudioLoading}
-                  >
-                    {isAudioLoading ? (
-                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      isPlaying ? (
-                        <svg
-                          className={`w-6 h-6 text-white`}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <rect x="6" y="4" width="4" height="16" rx="1" />
-                          <rect x="14" y="4" width="4" height="16" rx="1" />
-                        </svg>
-                      ) : (
-                        <Play className={`w-6 h-6 text-white`} />
-                      )
-                    )}
-                  </button>
+                <button
+  onClick={handlePlayAudio}
+  className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
+              ${isAudioLoading ? 'cursor-wait' : ''} 
+              ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`
+  }
+  disabled={!audio || isAudioLoading}
+>
+  {isAudioLoading ? (
+    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+  ) : (
+    isPlaying ? (
+      <svg
+        className="w-6 h-6 text-white"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <rect x="6" y="4" width="4" height="16" rx="1" />
+        <rect x="14" y="4" width="4" height="16" rx="1" />
+      </svg>
+    ) : (
+      <Play className="w-6 h-6 text-white" />
+    )
+  )}
+</button>
 
                   <div className="flex flex-wrap gap-4">
                     <div className="space-y-1">
