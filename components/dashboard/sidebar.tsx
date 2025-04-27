@@ -26,11 +26,7 @@ import {
 import Link from 'next/link';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-
-interface User {
-    name?: string;
-    email?: string;
-}
+import { User } from '@/types';
 
 interface MenuItem {
     id: string;
@@ -39,6 +35,7 @@ interface MenuItem {
     link?: string;
     isDropdown?: boolean;
     items?: SubMenuItem[];
+    showMenu?: boolean;
 }
 
 interface SubMenuItem {
@@ -90,7 +87,8 @@ const Navigation: React.FC = () => {
             icon: <HomeIcon className="w-4 h-4" />,
             label: "Dashboard",
             link: "/dashboard",
-            isDropdown: false
+            isDropdown: false,
+            showMenu: true
         },
         {
             id: "conversation-history",
@@ -98,13 +96,15 @@ const Navigation: React.FC = () => {
             link: "/dashboard/conversation-history",
             icon: <Clock1Icon className="w-4 h-4" />,
             isDropdown: false,
+            showMenu: true
         },
         {
             id: "tickets",
             icon: <TicketIcon className="w-4 h-4" />,
             label: "Tickets & Queries",
             link: "/tickets",
-            isDropdown: false
+            isDropdown: false,
+            showMenu: true
         },
         {
             id: "callAnalytics",
@@ -116,7 +116,8 @@ const Navigation: React.FC = () => {
                 { id: "call-reports", label: "Call Reports", link: "/dashboard/call-reports", icon: <MessageSquare className="w-4 h-4" /> },
                 { id: "sentiment-analysis", label: "Sentiment Analysis", link: "/dashboard/sentiment-analysis", icon: <MessageSquare className="w-4 h-4" /> },
                 { id: "urgency-detection", label: "Urgency Detection", link: "/dashboard/urgency-detection", icon: <MessageSquare className="w-4 h-4" /> }
-            ]
+            ],
+            showMenu: user?.role === "admin"
         },
         {
             id: "userAccess",
@@ -126,7 +127,8 @@ const Navigation: React.FC = () => {
             items: [
                 { id: "access-manager", label: "Access Manager", link: "/dashboard/access-manager", icon: <UsersIcon className="w-4 h-4" /> },
                 { id: "account-history", label: "Account History", link: "/dashboard/account-history", icon: <UsersIcon className="w-4 h-4" /> }
-            ]
+            ],
+            showMenu: user?.role === "admin"
         },
         {
             id: "settings",
@@ -137,21 +139,24 @@ const Navigation: React.FC = () => {
                 { id: "profile", label: "Profile", link: "/profile-section", icon: <UserIcon className="w-4 h-4" /> },
                 { id: "payment", label: "Payment", link: "/payments-section", icon: <CreditCardIcon className="w-4 h-4" /> },
                 { id: "security", label: "Security & Compliance", link: "/security", icon: <ShieldAlert className="w-4 h-4" /> }
-            ]
+            ],
+            showMenu: true
         },
         {
             id: "integration",
             icon: <LinkIcon className="w-4 h-4" />,
             label: "Integration",
             link: "/dashboard/integration",
-            isDropdown: false
+            isDropdown: false,
+            showMenu: true
         },
         {
             id: "help",
             icon: <LifeBuoyIcon className="w-4 h-4" />,
             label: "Help & Support",
             link: "/dashboard/help",
-            isDropdown: false
+            isDropdown: false,
+            showMenu: true
         }
     ];
 
@@ -345,35 +350,38 @@ const Navigation: React.FC = () => {
             <div className="space-y-4">
                 {menuStructure.map((item) => (
                     <div key={item.id} className="space-y-2">
-                        {item.isDropdown ? (
-                            <>
-                                {!isCollapsed ? (
-                                    <DesktopDropdownSection item={item} />
-                                ) : (
-                                    <motion.div
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 px-2"
+                        {item.showMenu ?
+                            item.isDropdown ? (
+                                <>
+                                    {!isCollapsed ? (
+                                        <DesktopDropdownSection item={item} />
+                                    ) : (
+                                        <motion.div
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
                                         >
-                                            <Icon>{item.icon}</Icon>
-                                        </Button>
-                                    </motion.div>
-                                )}
-                            </>
-                        ) : (
-                            <motion.div
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                <RegularMenuItem
-                                    item={item}
-                                    isCollapsed={isCollapsed}
-                                />
-                            </motion.div>
-                        )}
+                                            <Button
+                                                variant="ghost"
+                                                className="w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-gray-200 px-2"
+                                            >
+                                                <Icon>{item.icon}</Icon>
+                                            </Button>
+                                        </motion.div>
+                                    )}
+                                </>
+                            ) : (
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <RegularMenuItem
+                                        item={item}
+                                        isCollapsed={isCollapsed}
+                                    />
+                                </motion.div>
+                            )
+                            : null
+                        }
                     </div>
                 ))}
             </div>
@@ -446,18 +454,21 @@ const Navigation: React.FC = () => {
                         <div className="space-y-4">
                             {menuStructure.map((item) => (
                                 <div key={item.id} className="space-y-2">
-                                    {item.isDropdown ? (
-                                        <MobileDropdownSection
-                                            item={item}
-                                            onItemClick={() => setIsMobileMenuOpen(false)}
-                                        />
-                                    ) : (
-                                        <RegularMenuItem
-                                            item={item}
-                                            isMobile={true}
-                                            onItemClick={() => setIsMobileMenuOpen(false)}
-                                        />
-                                    )}
+                                    {item.showMenu ?
+                                        item.isDropdown ? (
+                                            <MobileDropdownSection
+                                                item={item}
+                                                onItemClick={() => setIsMobileMenuOpen(false)}
+                                            />
+                                        ) : (
+                                            <RegularMenuItem
+                                                item={item}
+                                                isMobile={true}
+                                                onItemClick={() => setIsMobileMenuOpen(false)}
+                                            />
+                                        )
+                                        : null
+                                    }
                                 </div>
                             ))}
                         </div>

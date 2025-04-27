@@ -30,6 +30,7 @@ import { useActivities } from '@/contexts/activity-context';
 import { useAgents } from '@/contexts/agent-context';
 import { useCompany } from '@/contexts/company-context';
 import { availableVoiceFiles, languageOptions, toneOptions } from '@/constants';
+import AccessDenied from '@/components/dashboard/access-denied';
 
 interface AdvancedSettings {
   authUrl: string;
@@ -477,6 +478,10 @@ const AgentCreationForm = () => {
 
   if (!isMounted) {
     return null;
+  }
+
+  if (user?.role !== "admin") {
+    return <AccessDenied />;
   }
 
   return (

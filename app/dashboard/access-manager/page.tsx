@@ -10,6 +10,8 @@ import axios from 'axios';
 import { toast } from '@/hooks/use-toast';
 import { useCompany } from '@/contexts/company-context';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import AccessDenied from '@/components/dashboard/access-denied';
 
 
 const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
@@ -19,6 +21,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
 }) => {
     const { company } = useCompany();
     const { token } = useIsAuthenticated();
+    const { user } = useCurrentUser();
     const [email, setEmail] = useState<string>('');
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [selectedAccess, setSelectedAccess] = useState<SelectedAccessMap>({});
@@ -285,6 +288,14 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
             }
         }
     };
+
+    if (!user) {
+        return <AccessDenied redirectPath='/auth' />;
+    }
+
+    if (user?.role !== "admin") {
+        return <AccessDenied />;
+    }
 
     return (
         <div className="w-full min-h-screen bg-gray-50 p-8">
