@@ -35,42 +35,48 @@ const helpCategories = [
     title: 'Getting Started',
     icon: <BookOpen className="w-5 h-5" />,
     description: 'Learn the basics of CallSure AI',
-    color: 'bg-blue-100 text-blue-700'
+    color: 'bg-blue-100 text-blue-700',
+    url: '/dashboard'
   },
   {
     id: 'ai-agents', 
     title: 'AI Agents', 
     icon: <MessageSquare className="w-5 h-5" />,
     description: 'Configure and optimize your AI agents',
-    color: 'bg-purple-100 text-purple-700'
+    color: 'bg-purple-100 text-purple-700',
+    url: '/dashboard'
   },
   {
     id: 'integrations', 
     title: 'Integrations', 
     icon: <ArrowUpRight className="w-5 h-5" />,
     description: 'Connect with other tools and platforms',
-    color: 'bg-green-100 text-green-700'
+    color: 'bg-green-100 text-green-700',
+    url: '/integrations'
   },
   {
     id: 'analytics', 
     title: 'Analytics & Reports', 
     icon: <FileText className="w-5 h-5" />,
     description: 'Understand your performance metrics',
-    color: 'bg-amber-100 text-amber-700'
+    color: 'bg-amber-100 text-amber-700',
+    url: '/dashboard/agent-performance'
   },
   {
     id: 'billing', 
     title: 'Billing & Subscription', 
     icon: <CheckCircle className="w-5 h-5" />,
     description: 'Manage your account and payments',
-    color: 'bg-indigo-100 text-indigo-700'
+    color: 'bg-indigo-100 text-indigo-700',
+    url: '/payments-section'
   },
   {
     id: 'support', 
     title: 'Contact Support', 
     icon: <HelpCircle className="w-5 h-5" />,
     description: 'Get help from our team',
-    color: 'bg-rose-100 text-rose-700'
+    color: 'bg-rose-100 text-rose-700',
+    url: '/resources/blog'
   },
 ];
 
@@ -134,7 +140,7 @@ const videoTutorials = [
 ];
 
 const HelpPage: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [contactFormData, setContactFormData] = useState({
@@ -272,9 +278,9 @@ const HelpPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {helpCategories.map((category) => (
                     <Card 
-                      key={category.id}
-                      className="bg-white shadow-sm hover:shadow-md transition-all cursor-pointer border border-gray-100 hover:border-blue-200"
-                      onClick={() => setSelectedCategory(category.id)}
+                        key={category.id}
+                        className="bg-white shadow-sm hover:shadow-md transition-all cursor-pointer border border-gray-100 hover:border-blue-200"
+                        onClick={() => window.open(category.url, '_blank', 'noopener,noreferrer')}
                     >
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
@@ -303,9 +309,13 @@ const HelpPage: React.FC = () => {
                 <h2 className="text-xl font-semibold text-[#0A1E4E]">
                   Video Tutorials
                 </h2>
-                <Button variant="outline" className="text-[#0A1E4E]">
-                  View All Tutorials
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <Button 
+                variant="outline" 
+                className="text-[#0A1E4E]"
+                onClick={() => window.open('https://www.callsure.ai/resources/tutorials', '_blank', 'noopener,noreferrer')}
+                >
+                View All Tutorials
+                <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
               
@@ -379,7 +389,7 @@ const HelpPage: React.FC = () => {
                       <Button 
                         variant="outline" 
                         className="bg-white/10 hover:bg-white/20 border-white/20 text-white"
-                        onClick={() => window.open('mailto:support@callsure.ai')}
+                        onClick={() => window.open('mailto:team@callsure.ai', '_blank', 'noopener,noreferrer')}
                       >
                         <Mail className="w-4 h-4 mr-2" />
                         Email Support
