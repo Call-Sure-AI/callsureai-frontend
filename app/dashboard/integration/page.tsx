@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { integrations } from "@/constants";
+import { PlugIcon } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -152,15 +153,18 @@ const IntegrationSettings: React.FC = () => {
                                     />
                                 )}
                                 <Button
-                                    variant={activeIntegrations[integration.name]?.isActive ? "outline" : "default"}
-                                    className={
-                                        !activeIntegrations[integration.name]?.isActive
-                                            ? "bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white"
-                                            : ""
-                                    }
                                     onClick={() => handleSetupClick(integration)}
+                                    className="transition-colors duration-300 relative overflow-hidden"
+                                    variant="animated"
+                                    size="sm"
                                 >
-                                    {activeIntegrations[integration.name]?.isActive ? "Configure" : "Setup"}
+                                    <span className="flex items-center transition-all duration-300">
+                                        <PlugIcon className="w-4 h-4 mr-2" />
+                                        {activeIntegrations[integration.name]?.isActive ? "Configure" : "Setup"}
+                                    </span>
+                                    <span className="absolute flex items-center inset-0 justify-center translate-x-[225%] duration-300">
+                                        <PlugIcon className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+                                    </span>
                                 </Button>
                             </div>
                         </div>
@@ -212,7 +216,10 @@ const IntegrationSettings: React.FC = () => {
 
             <div className="mt-8">
                 <h2 className="text-lg font-medium mb-4">Add New Integration</h2>
-                <Button className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white">
+                <Button 
+                    className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white"
+                    onClick={() => window.open('http://localhost:3000/integrations', '_blank', 'noopener,noreferrer')}
+                >
                     Browse Available Integrations
                 </Button>
             </div>
