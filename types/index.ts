@@ -41,7 +41,7 @@ export interface User {
     id: string;
     email: string;
     name?: string;
-    status?: 'active' | 'pending' | 'invited';
+    status?: 'active' | 'pending' | 'invited' | "accepted" | "rejected";
     role?: string;
 }
 
