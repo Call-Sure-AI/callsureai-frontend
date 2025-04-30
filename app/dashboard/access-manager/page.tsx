@@ -69,8 +69,6 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
         role: invitation.role,
       }));
 
-      console.log(invitationUsers);
-
       setUsers((prev) => {
         const filteredUsers = prev.filter(
           (user) =>
@@ -99,38 +97,6 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
       setIsLoading(false);
     }
   };
-
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/invitations/accepted/${company?.id}`, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     console.log(data);
-
-  //     const acceptedInvitations = data.acceptedInvitations.map((invitation: any) => ({
-  //       id: `invitation-${invitation.id}`,
-  //       email: invitation.email,
-  //       status: "accepted",
-  //       role: invitation.role,
-  //     }));
-
-  //     setUsers((prev) => [...prev, ...acceptedInvitations]);
-  //   } catch (error) {
-  //     console.error("Error fetching invitations:", error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to load successfull invitations",
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   // Map roles to access levels
   const mapRoleToAccessLevel = (role: string): AccessLevelName => {
