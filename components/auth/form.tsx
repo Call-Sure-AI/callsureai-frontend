@@ -13,7 +13,7 @@ const AuthForm = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
+    const [name] = useState('');
     const [direction, setDirection] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [showOtpOption, setShowOtpOption] = useState(false);
@@ -65,7 +65,7 @@ const AuthForm = () => {
         try {
             if (showOtpOption) {
                 // OTP login flow
-                const { data } = await axios.post(
+                await axios.post(
                     `${process.env.NEXT_PUBLIC_API_URL}/api/auth/otp/request`,
                     { email },
                     { withCredentials: true }
@@ -292,7 +292,7 @@ const AuthForm = () => {
                                                             <div className="flex">
                                                                 <Smartphone size={20} className="text-[#3362A6] flex-shrink-0" />
                                                                 <p className="ml-2 text-sm text-gray-700">
-                                                                    We'll send a one-time password to your email for secure access
+                                                                    We&apos;ll send a one-time password to your email for secure access
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -330,7 +330,7 @@ const AuthForm = () => {
     exit="exit"
 >
     <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center order-1">
-        <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-center lg:text-left">Join Us – Here's How</h2>
+        <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-center lg:text-left">Join Us – Here&apos;s How</h2>
         
         <div className="bg-blue-50 border-l-4 border-[#3362A6] p-6 mb-6 rounded-r-lg">
             <div className="flex flex-col space-y-4">
@@ -343,7 +343,7 @@ const AuthForm = () => {
                     <ul className="space-y-3 text-gray-700">
                         <li className="flex items-start">
                             <span className="inline-block w-5 h-5 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-xs flex items-center justify-center">1</span>
-                            <span>After signing in, you'll be redirected to your company profile</span>
+                            <span>After signing in, you&apos;ll be redirected to your company profile</span>
                         </li>
                         <li className="flex items-start">
                             <span className="inline-block w-5 h-5 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-xs flex items-center justify-center">2</span>
@@ -351,7 +351,7 @@ const AuthForm = () => {
                         </li>
                         <li className="flex items-start">
                             <span className="inline-block w-5 h-5 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-xs flex items-center justify-center">3</span>
-                            <span>Once completed, you'll receive 250 credits automatically</span>
+                            <span>You&apos;ll receive 250 credits automatically</span>
                         </li>
                     </ul>
                 </div>
