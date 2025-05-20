@@ -332,33 +332,37 @@ const AuthForm = () => {
     <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center order-1">
         <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-center lg:text-left">Join Us – Here&apos;s How</h2>
         
-        <div className="bg-blue-50 border-l-4 border-[#3362A6] p-6 mb-6 rounded-r-lg">
-            <div className="flex flex-col space-y-4">
-                <div className="flex items-start">
-                    <Info size={24} className="text-[#3362A6] flex-shrink-0 mt-0.5 mr-3" />
-                    <p className="text-[#162a47] font-medium">Please sign in directly to access your account</p>
-                </div>
-                
-                <div className="pl-9">
-                    <ul className="space-y-3 text-gray-700">
-                        <li className="flex items-start">
-                            <span className="inline-block w-5 h-5 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-xs flex items-center justify-center">1</span>
-                            <span>After signing in, you&apos;ll be redirected to your company profile</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="inline-block w-5 h-5 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-xs flex items-center justify-center">2</span>
-                            <span>You must complete your company profile before accessing the dashboard</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="inline-block w-5 h-5 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-xs flex items-center justify-center">3</span>
-                            <span>You&apos;ll receive 250 credits automatically</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+        <div className="bg-blue-50 border-l-4 border-[#3362A6] p-5 mb-6 rounded-r-lg">
+    <div className="flex flex-col space-y-3">
+        <div className="flex items-start">
+            <Info size={20} className="text-[#3362A6] flex-shrink-0 mt-0.5 mr-3" />
+            <p className="text-[#162a47] font-medium text-sm">Please sign in directly to access your account</p>
         </div>
         
-        <div className="text-center mt-8">
+        <div className="pl-8">
+            <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-[10px] flex items-center justify-center">1</span>
+                    <span>Click on &apos;Go to Sign In&apos; and use OTP or Google Auth if you&apos;re a new user, or sign in with your password if you&apos;re an existing user</span>
+                </li>
+                <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-[10px] flex items-center justify-center">2</span>
+                    <span>After signing in, you&apos;ll be redirected to your company profile</span>
+                </li>
+                <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-[10px] flex items-center justify-center">3</span>
+                    <span>You must complete your company profile before accessing the dashboard</span>
+                </li>
+                <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 rounded-full bg-[#3362A6] text-white flex-shrink-0 mr-2 text-[10px] flex items-center justify-center">4</span>
+                    <span>You&apos;ll receive 250 credits automatically</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+        
+        <div className="text-center mt-4">
             <button
                 type="button"
                 onClick={() => handleFormSwitch(true)}
