@@ -122,7 +122,7 @@ const FAQ: React.FC = () => {
         },
         {
             question: 'How do I get started with Callsure.ai?',
-            answer: "Getting started is simple! Click the 'Sign Up' button on our website, complete a brief questionnaire about your business needs, and our system will create your personalized dashboard within minutes. You'll then work with our implementation team to configure the AI voice, upload your knowledge base, and connect your existing phone system through our API or SIP integration. Training sessions for your team are included in the onboarding process. Most businesses complete the entire setup in 1-2 weeks. For urgent deployments, our fast-track implementation can have you operational in as little as 3 business days.",
+            answer: "Getting started is simple! Click the 'Sign In' button on our website, complete a brief questionnaire about your business needs, and our system will create your personalized dashboard within minutes. You'll then work with our implementation team to configure the AI voice, upload your knowledge base, and connect your existing phone system through our API or SIP integration. Training sessions for your team are included in the onboarding process. Most businesses complete the entire setup in 1-2 weeks. For urgent deployments, our fast-track implementation can have you operational in as little as 3 business days.",
             category: 'Our Plan'
         },
         {

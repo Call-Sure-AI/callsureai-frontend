@@ -105,7 +105,7 @@ const Navbar = () => {
                                         className="hidden sm:flex"
                                         showArrow
                                     >
-                                        Sign up
+                                        Sign In
                                     </Button>
                                 </Link>
                             </motion.div>

@@ -157,7 +157,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     transition={{ type: "spring", duration: 0.5 }}
-                    className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-auto overflow-hidden"
+                    className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl mx-auto overflow-hidden"
                 >
                     <div className="relative p-8">
                         <button

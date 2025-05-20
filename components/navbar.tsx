@@ -156,7 +156,7 @@ const Navbar = () => {
                                             className="hidden sm:flex"
                                             showArrow
                                         >
-                                            Sign up
+                                            Sign In
                                         </Button>
                                     </Link>
                                 </motion.div>
@@ -249,7 +249,7 @@ const Navbar = () => {
                                                 className="w-[90%] sm:hidden ml-4"
                                                 showArrow
                                             >
-                                                Sign up
+                                                Sign In
                                             </Button>
                                         </motion.div>
                                     )}
