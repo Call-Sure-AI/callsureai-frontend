@@ -218,7 +218,7 @@ const IntegrationSettings: React.FC = () => {
                 <h2 className="text-lg font-medium mb-4">Add New Integration</h2>
                 <Button 
                     className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white"
-                    onClick={() => window.open('http://localhost:3000/integrations', '_blank', 'noopener,noreferrer')}
+                    onClick={() => window.open('https://www.callsure.ai/integrations', '_blank', 'noopener,noreferrer')}
                 >
                     Browse Available Integrations
                 </Button>
