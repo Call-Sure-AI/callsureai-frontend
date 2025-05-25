@@ -8,19 +8,10 @@ export const SocialLogin = ({ isSignup = false }) => {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [buttonWidth, setButtonWidth] = useState(320);
-    const [fedcmSupported, setFedcmSupported] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
-    // Check FedCM support on mount
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const supported = 'IdentityCredential' in window;
-            setFedcmSupported(supported);
-        }
-    }, []);
-
-    // Calculate button width based on actual container size
+    // Calculate button width based on container size
     const calculateButtonWidth = (containerWidth: number) => {
         if (containerWidth === 0) return 320;
         const availableWidth = containerWidth - 32;
@@ -131,25 +122,11 @@ export const SocialLogin = ({ isSignup = false }) => {
         }
     };
 
-    const handleGoogleError = (error?: any) => {
-        console.error('Google authentication error:', error);
-        
-        let errorMessage = 'Google authentication failed';
-        
-        if (error?.error === 'popup_closed_by_user') {
-            errorMessage = 'Sign-in was cancelled. Please try again.';
-        } else if (error?.error === 'access_denied') {
-            errorMessage = 'Access denied. Please try again.';
-        } else if (error?.type === 'popup_blocked') {
-            errorMessage = 'Popup was blocked. Please allow popups and try again.';
-        } else {
-            errorMessage = 'Google authentication failed. Please check your connection and try again.';
-        }
-        
-        setError(errorMessage);
+    const handleGoogleError = () => {
+        setError('Google authentication failed. Please try again.');
         toast({
             title: "Authentication Error",
-            description: errorMessage,
+            description: "Google sign-in failed. Please try again.",
             variant: "destructive"
         });
     };
@@ -173,34 +150,22 @@ export const SocialLogin = ({ isSignup = false }) => {
                     <GoogleLogin
                         onSuccess={handleGoogleLogin}
                         onError={handleGoogleError}
-                        useOneTap={true} // ✅ Enable One Tap for better UX
+                        useOneTap={true} // ✅ Enable One Tap (works despite 403 errors)
                         width={buttonWidth}
                         shape="rectangular"
                         theme="outline"
                         size="large"
                         text={isSignup ? "signup_with" : "signin_with"}
-                        auto_select={false} // Keep user control
+                        auto_select={false}
                         cancel_on_tap_outside={true}
-                        itp_support={true} // ✅ Safari Intelligent Tracking Prevention support
-                        use_fedcm_for_prompt={fedcmSupported} // ✅ Use FedCM when available
+                        itp_support={true}
+                        use_fedcm_for_prompt={true} // ✅ Enable FedCM (works despite 403 errors)
                     />
                 )}
             </div>
 
             {error && (
                 <p className="text-red-500 text-xs sm:text-sm mt-2 px-2">{error}</p>
-            )}
-
-            {/* Help text for users experiencing issues */}
-            {error && error.includes('authentication failed') && (
-                <div className="mt-2 text-xs text-gray-500 max-w-md text-center">
-                    <p>If you're having trouble, try:</p>
-                    <ul className="list-disc list-inside mt-1 text-left">
-                        <li>Disable popup blockers</li>
-                        <li>Enable third-party cookies</li>
-                        <li>Try in incognito mode</li>
-                    </ul>
-                </div>
             )}
         </div>
     );
