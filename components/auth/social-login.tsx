@@ -8,33 +8,38 @@ export const SocialLogin = ({ isSignup = false }) => {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [buttonWidth, setButtonWidth] = useState(320);
+    const [fedcmSupported, setFedcmSupported] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
+    // Check FedCM support on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const supported = 'IdentityCredential' in window;
+            setFedcmSupported(supported);
+        }
+    }, []);
+
     // Calculate button width based on actual container size
     const calculateButtonWidth = (containerWidth: number) => {
-        if (containerWidth === 0) return 320; // Default
-        
-        // Calculate based on container width with some padding
-        const availableWidth = containerWidth - 32; // Account for padding
+        if (containerWidth === 0) return 320;
+        const availableWidth = containerWidth - 32;
         
         let calculatedWidth;
-        
         if (availableWidth < 200) {
-            calculatedWidth = Math.max(180, availableWidth); // Very narrow containers
+            calculatedWidth = Math.max(180, availableWidth);
         } else if (availableWidth < 250) {
-            calculatedWidth = 200; // Narrow containers
+            calculatedWidth = 200;
         } else if (availableWidth < 300) {
-            calculatedWidth = 240; // Medium containers
+            calculatedWidth = 240;
         } else if (availableWidth < 350) {
-            calculatedWidth = 280; // Standard containers
+            calculatedWidth = 280;
         } else if (availableWidth < 400) {
-            calculatedWidth = 320; // Wide containers
+            calculatedWidth = 320;
         } else {
-            calculatedWidth = Math.min(350, availableWidth * 0.85); // Very wide containers, cap at 350px
+            calculatedWidth = Math.min(350, availableWidth * 0.85);
         }
         
-        console.log(`🔍 Container: ${containerWidth}px → Available: ${availableWidth}px → Button: ${calculatedWidth}px`);
         return Math.round(calculatedWidth);
     };
 
@@ -48,10 +53,8 @@ export const SocialLogin = ({ isSignup = false }) => {
             }
         };
 
-        // Set initial width
         updateButtonWidth();
 
-        // Use ResizeObserver to watch container size changes
         const resizeObserver = new ResizeObserver(() => {
             updateButtonWidth();
         });
@@ -128,11 +131,25 @@ export const SocialLogin = ({ isSignup = false }) => {
         }
     };
 
-    const handleGoogleError = () => {
-        setError('Google authentication failed. Please try again.');
+    const handleGoogleError = (error?: any) => {
+        console.error('Google authentication error:', error);
+        
+        let errorMessage = 'Google authentication failed';
+        
+        if (error?.error === 'popup_closed_by_user') {
+            errorMessage = 'Sign-in was cancelled. Please try again.';
+        } else if (error?.error === 'access_denied') {
+            errorMessage = 'Access denied. Please try again.';
+        } else if (error?.type === 'popup_blocked') {
+            errorMessage = 'Popup was blocked. Please allow popups and try again.';
+        } else {
+            errorMessage = 'Google authentication failed. Please check your connection and try again.';
+        }
+        
+        setError(errorMessage);
         toast({
             title: "Authentication Error",
-            description: "Google sign-in failed. Please try again.",
+            description: errorMessage,
             variant: "destructive"
         });
     };
@@ -142,8 +159,6 @@ export const SocialLogin = ({ isSignup = false }) => {
             ref={containerRef}
             className="flex flex-col items-center justify-center text-center text-gray-500 mt-6 w-full"
         >
-
-
             <p className="mb-3 sm:mb-4 text-xs sm:text-sm md:text-base lg:text-base px-2">
                 or {isSignup ? 'Sign Up' : 'login'} with Google
             </p>
@@ -158,20 +173,34 @@ export const SocialLogin = ({ isSignup = false }) => {
                     <GoogleLogin
                         onSuccess={handleGoogleLogin}
                         onError={handleGoogleError}
-                        useOneTap={false}
+                        useOneTap={true} // ✅ Enable One Tap for better UX
                         width={buttonWidth}
                         shape="rectangular"
                         theme="outline"
                         size="large"
                         text={isSignup ? "signup_with" : "signin_with"}
-                        auto_select={false}
+                        auto_select={false} // Keep user control
                         cancel_on_tap_outside={true}
+                        itp_support={true} // ✅ Safari Intelligent Tracking Prevention support
+                        use_fedcm_for_prompt={fedcmSupported} // ✅ Use FedCM when available
                     />
                 )}
             </div>
 
             {error && (
                 <p className="text-red-500 text-xs sm:text-sm mt-2 px-2">{error}</p>
+            )}
+
+            {/* Help text for users experiencing issues */}
+            {error && error.includes('authentication failed') && (
+                <div className="mt-2 text-xs text-gray-500 max-w-md text-center">
+                    <p>If you're having trouble, try:</p>
+                    <ul className="list-disc list-inside mt-1 text-left">
+                        <li>Disable popup blockers</li>
+                        <li>Enable third-party cookies</li>
+                        <li>Try in incognito mode</li>
+                    </ul>
+                </div>
             )}
         </div>
     );
