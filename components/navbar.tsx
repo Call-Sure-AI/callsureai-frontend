@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, PhoneCall } from "lucide-react";
+import { Menu, X, PhoneIncoming } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserProfileIcon } from "./auth/user-profile-icon";
@@ -135,7 +135,7 @@ const Navbar = () => {
                                     className="rounded-full from-[#162a47] via-[#3362A6] to-[#162a47] transition-all duration-300 text-black"
                                     title="Contact Us"
                                 >
-                                    <PhoneCall className="h-5 w-5 text-black" />
+                                    <PhoneIncoming className="h-5 w-5 text-black" />
                                 </Button>
                             </motion.div>
 
@@ -234,7 +234,7 @@ const Navbar = () => {
                                                 setIsContactModalOpen(true);
                                             }}
                                         >
-                                            <PhoneCall className="h-5 w-5 mr-2" />
+                                            <PhoneIncoming className="h-5 w-5 mr-2" />
                                             Contact Us
                                         </Button>
                                     </motion.div>
