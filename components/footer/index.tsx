@@ -122,17 +122,17 @@ const Footer = () => {
                     >
                         <h2 className="text-3xl md:text-6xl lg:text-7xl font-semibold mb-6 whitespace-nowrap">Stay Connected!</h2>
 
-                        <form onSubmit={handleSubmit} className="relative">
+                        <form onSubmit={handleSubmit} className="flex flex-col sm:relative">
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email address"
-                                className="w-full pl-4 md:pl-6 py-3 md:py-5 rounded-full bg-transparent border border-blue-400/40 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
+                                className="w-full pl-4 md:pl-6 py-3 md:py-5 sm:pr-32 rounded-full bg-transparent border border-blue-400/40 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
                                 disabled={isSubmitting}
                                 aria-label="Email address"
                             />
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                            <div className="sm:absolute sm:right-2 sm:top-1/2 sm:-translate-y-1/2 mt-3 sm:mt-0">
                                 <AnimatedButton
                                     text="Subscribe"
                                     icon={<Send className="w-4 h-4 md:block hidden" />}
@@ -165,12 +165,13 @@ const Footer = () => {
                         )}
                     </motion.div>
 
+                    {/* Links section - Above the border */}
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUpVariants}
-                        className="flex flex-col gap-8 md:gap-4 text-xs text-blue-200 border-t border-blue-400/20 pt-6"
+                        className="mb-4 text-xs text-blue-200"
                     >
                         <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-0">
                             {/* Left - Terms */}
@@ -186,15 +187,25 @@ const Footer = () => {
                                 </a>
                             </div>
 
-                            <div className="text-center md:text-center md:order-2">
-                                &copy; {new Date().getFullYear()} <b>Callsure AI.</b> All Rights Reserved.
-                            </div>
-
+                            {/* Right - Social Links */}
                             <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-8 md:order-3">
                                 <a href="https://www.instagram.com/callsure.ai/" className="hover:text-white transition-colors">Instagram</a>
                                 <a href="https://www.linkedin.com/company/callsure-ai" className="hover:text-white transition-colors">LinkedIn</a>
                                 <a href="https://x.com/callsureai" className="hover:text-white transition-colors">Twitter</a>
                             </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Copyright section - Below the border */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUpVariants}
+                        className="text-xs text-blue-200 border-t border-blue-400/20 pt-6"
+                    >
+                        <div className="text-center">
+                            &copy; {new Date().getFullYear()} <b>Callsure AI.</b> All Rights Reserved.
                         </div>
                     </motion.div>
                 </div>
