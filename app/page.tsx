@@ -1,10 +1,10 @@
 import Navbar from "@/components/navbar";
-import AnalyticsPage from "@/components/analytics-section";
+// import AnalyticsPage from "@/components/analytics-section";
 import HeroSection from "@/components/hero-section";
 import IntegrationSection from "@/components/integration-section";
 import Footer from "@/components/footer";
 import Banner from "@/components/banner";
-import FAQ from "@/components/faq";
+// import FAQ from "@/components/faq";
 import TestimonialSection from "@/components/testimonials";
 import LogoCarousel from "@/components/logo-carousel";
 import AnimatedVoicesCarousel from '../components/voice-section/AnimatedVoicesCarousel';
