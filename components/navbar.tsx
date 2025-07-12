@@ -20,6 +20,7 @@ const Navbar = () => {
         { label: "Pricing", href: "/pricing" },
         { label: "Resources", href: "/resources" },
         { label: "Integrations", href: "/integrations" },
+        { label: "FAQ", href: "/faq" },
     ];
 
     const navAnimation = {

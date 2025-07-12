@@ -16,12 +16,12 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <DomainCarousel />
-      <AnalyticsPage />
-      <LogoCarousel />
+      {/* <AnalyticsPage /> */}
       <AnimatedVoicesCarousel />
+      <LogoCarousel />
       <IntegrationSection />
       <TestimonialSection />
-      <FAQ />
+      {/* <FAQ /> */}
       <Banner />
       <Footer />
     </div>
