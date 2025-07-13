@@ -32,15 +32,6 @@ const NotFoundPage: React.FC = () => {
         }
     };
 
-    const floatingAnimation = {
-        y: [0, -15, 0],
-        transition: {
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-        }
-    };
-
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8 flex items-center justify-center">
             <motion.div
@@ -52,7 +43,6 @@ const NotFoundPage: React.FC = () => {
                 {/* 404 SVG Illustration */}
                 <motion.div
                     className="mb-8"
-                    animate={floatingAnimation}
                 >
                     <svg className="w-64 h-64 mx-auto" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <motion.circle

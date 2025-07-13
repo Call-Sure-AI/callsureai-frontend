@@ -283,7 +283,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
         staggerChildren: 0.1,
       },
     },
-  };
+  } as Variants;
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
@@ -295,7 +295,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
         ease: "easeOut",
       },
     },
-  };
+  } as Variants;
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10, height: 0 },
@@ -308,7 +308,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
         ease: "easeOut",
       },
     },
-  };
+  } as Variants;
 
   if (!user) {
     return <AccessDenied redirectPath="/auth" />;
