@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import ContactModal from "@/components/contact-us-modal"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -123,40 +124,128 @@ const PricingCard = ({
     )
 }
 
-const AdditionalRevenue = () => (
+type AdditionalRevenueProps = { onClick: () => void };
+
+const AdditionalRevenue: React.FC<AdditionalRevenueProps> = ({ onClick }) => (
     <motion.div
-        className="mt-16 bg-gray-100 rounded-2xl p-8 max-w-6xl mx-auto"
+        className="mt-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 md:p-12 max-w-6xl mx-auto border border-blue-100 shadow-lg"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
         transition={{ delay: 0.6 }}
     >
-        <h3 className="text-2xl font-bold text-[#1e3a8a] text-center mb-8">Additional Revenue Streams</h3>
+        <div className="text-center mb-12">
+            <h3 className="text-3xl md:text-4xl font-bold text-[#1e3a8a] mb-4">
+                Additional Revenue Streams
+            </h3>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                Flexible pricing options and premium features to maximize your investment
+            </p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-            <div>
-                <h4 className="text-lg font-semibold text-[#1e3a8a] mb-4">Volume Discounts</h4>
-                <ul className="space-y-2 text-gray-700">
-                    <li>• 10,000+ minutes: 15% off</li>
-                    <li>• 25,000+ minutes: 25% off</li>
-                    <li>• 50,000+ minutes: 35% discount</li>
-                </ul>
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+            {/* Volume Discounts Section */}
+            <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="flex items-center mb-6">
+                    <div className="bg-green-100 p-3 rounded-full mr-4">
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    <h4 className="text-xl font-bold text-[#1e3a8a]">Volume Discounts</h4>
+                </div>
+
+                <p className="text-gray-600 mb-6 text-sm">
+                    Save more as you scale with our tiered discount structure
+                </p>
+
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-green-400">
+                        <span className="font-medium text-gray-700">10,000+ minutes</span>
+                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            15% off
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-green-500">
+                        <span className="font-medium text-gray-700">25,000+ minutes</span>
+                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            25% off
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-green-600">
+                        <span className="font-medium text-gray-700">50,000+ minutes</span>
+                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            35% off
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <h4 className="text-lg font-semibold text-[#1e3a8a] mb-4">Voice Usage Pricing</h4>
-                <ul className="space-y-2 text-gray-700">
-                    <li>• Voice Quality Pack 1: ₹15/min</li>
-                    <li>• Voice Quality Pack 2: ₹22/min</li>
-                    <li>• Voice Quality Pack 3: ₹35/min</li>
-                </ul>
+            {/* Voice Usage Pricing Section */}
+            <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="flex items-center mb-6">
+                    <div className="bg-blue-100 p-3 rounded-full mr-4">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
+                    <h4 className="text-xl font-bold text-[#1e3a8a]">Voice Usage Pricing</h4>
+                </div>
+
+                <p className="text-gray-600 mb-6 text-sm">
+                    Premium voice quality tiers for enhanced customer experience
+                </p>
+
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-blue-400">
+                        <div>
+                            <span className="font-medium text-gray-700 block">Voice Quality Pack 1</span>
+                            <span className="text-sm text-gray-500">Standard quality</span>
+                        </div>
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            ₹15/min
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                        <div>
+                            <span className="font-medium text-gray-700 block">Voice Quality Pack 2</span>
+                            <span className="text-sm text-gray-500">Enhanced quality</span>
+                        </div>
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            ₹22/min
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-blue-600">
+                        <div>
+                            <span className="font-medium text-gray-700 block">Voice Quality Pack 3</span>
+                            <span className="text-sm text-gray-500">Premium quality</span>
+                        </div>
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            ₹35/min
+                        </span>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center mt-10">
+            <p className="text-gray-600 mb-4">
+                Ready to explore these options for your business?
+            </p>
+            <Button
+                className="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-8 py-3 rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={onClick}
+            >
+                Contact Sales Team
+            </Button>
         </div>
     </motion.div>
 )
 
 export default function Page() {
-    const [showCalendly, setShowCalendly] = useState(false)
+    const [showCalendly, setShowCalendly] = useState(false);
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
     const openCalendly = () => {
         setShowCalendly(true);
@@ -239,56 +328,50 @@ export default function Page() {
     ]
 
     return (
-        <div className="py-16 px-4 md:py-20 bg-white">
-            <PricingHeader
-                title="Pricing Strategy"
-                subtitle="Scalable pricing for businesses of all sizes"
-            />
+        <>
+            <div className="py-16 px-4 md:py-20 bg-white">
+                <PricingHeader
+                    title="Pricing Strategy"
+                    subtitle="Scalable pricing for businesses of all sizes"
+                />
 
-            <section className="flex flex-col lg:flex-row justify-center items-center lg:items-stretch gap-8 mt-12 max-w-7xl mx-auto">
-                {plans.map((plan, index) => (
-                    <PricingCard
-                        key={`pricing-card-${index}-${plan.title}`}
-                        {...plan}
-                    />
-                ))}
-            </section>
+                <section className="flex flex-col lg:flex-row justify-center items-center lg:items-stretch gap-8 mt-12 max-w-7xl mx-auto">
+                    {plans.map((plan, index) => (
+                        <PricingCard
+                            key={`pricing-card-${index}-${plan.title}`}
+                            {...plan}
+                        />
+                    ))}
+                </section>
 
-            <AdditionalRevenue />
+                <AdditionalRevenue onClick={() => setIsContactModalOpen(true)} />
 
-            <motion.div
-                className="mt-12 text-center"
-                initial="hidden"
-                animate="visible"
-                variants={fadeIn}
-                transition={{ delay: 0.7 }}
-            >
-                <p className="text-gray-600">
-                    Need a custom solution? <button onClick={openCalendly} className="text-[#1e3a8a] font-medium hover:underline">Contact our sales team</button> for a personalized quote.
-                </p>
-            </motion.div>
-
-            {/* Calendly Modal */}
-            {showCalendly && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg w-full max-w-6xl h-5/6 relative">
-                        <button
-                            onClick={closeCalendly}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 z-10"
-                        >
-                            <X size={24} />
-                        </button>
-                        <div className="h-full">
-                            <iframe
-                                src="https://calendly.com/callsureai/meet-with-callsure-ai-team"
-                                width="100%"
-                                height="100%"
-                                frameBorder="0"
-                            ></iframe>
+                {/* Calendly Modal */}
+                {showCalendly && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                        <div className="bg-white rounded-lg w-full max-w-6xl h-5/6 relative">
+                            <button
+                                onClick={closeCalendly}
+                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 z-10"
+                            >
+                                <X size={24} />
+                            </button>
+                            <div className="h-full">
+                                <iframe
+                                    src="https://calendly.com/callsureai/meet-with-callsure-ai-team"
+                                    width="100%"
+                                    height="100%"
+                                    frameBorder="0"
+                                ></iframe>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+            <ContactModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+            />
+        </>
     )
 }
