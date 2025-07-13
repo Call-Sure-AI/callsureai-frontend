@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import type { FeatureCardProps } from '@/types';
 
@@ -28,7 +28,7 @@ const cardVariants = {
             ease: "easeOut"
         }
     }
-};
+} as Variants;
 
 const iconVariants = {
     initial: {
@@ -53,7 +53,7 @@ const iconVariants = {
             ease: "easeOut"
         }
     }
-};
+} as Variants;
 
 const contentVariants = {
     initial: {
@@ -68,7 +68,7 @@ const contentVariants = {
             delay: 0.3
         }
     }
-};
+} as Variants;
 
 export const FeatureCard: React.FC<FeatureCardProps> = ({
     icon: Icon,

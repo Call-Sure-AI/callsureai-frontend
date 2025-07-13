@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimationControls } from "framer-motion";
+import { motion, useAnimationControls, Variants } from "framer-motion";
 // import Image from "next/image";
 import { memo, useEffect, useState, useCallback } from "react";
 import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
@@ -12,7 +12,7 @@ const fadeIn = {
     visible: { opacity: 1, y: 0 },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95 },
     visible: {
         opacity: 1,

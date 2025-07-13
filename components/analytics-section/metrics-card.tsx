@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import type { AnalyticMetric } from '@/types';
 
@@ -7,7 +7,7 @@ interface MetricsCardProps {
     metric: AnalyticMetric;
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
     initial: {
         opacity: 0,
         y: 20,
@@ -29,9 +29,9 @@ const cardVariants = {
             ease: "easeOut"
         }
     }
-};
+} as Variants;
 
-const numberVariants = {
+const numberVariants: Variants = {
     initial: { scale: 0.8, opacity: 0 },
     animate: {
         scale: 1,
@@ -45,7 +45,7 @@ const numberVariants = {
     }
 };
 
-const trendVariants = {
+const trendVariants: Variants = {
     initial: { opacity: 0, x: -20 },
     animate: {
         opacity: 1,
@@ -57,7 +57,7 @@ const trendVariants = {
     }
 };
 
-const graphVariants = {
+const graphVariants: Variants = {
     initial: { scaleX: 0, originX: 0 },
     animate: {
         scaleX: 1,

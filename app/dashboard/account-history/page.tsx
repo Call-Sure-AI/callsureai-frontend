@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { History, Download, Search, Clock, User, Filter } from 'lucide-react';
 import { HistoryEntry } from '@/types';
 
@@ -40,7 +40,7 @@ const AccountHistoryDashboard: React.FC = () => {
                 ease: "easeOut"
             }
         }
-    };
+    } as Variants;
 
     const itemVariants = {
         hidden: { opacity: 0, x: -20 },
@@ -52,7 +52,7 @@ const AccountHistoryDashboard: React.FC = () => {
                 ease: "easeOut"
             }
         }
-    };
+    } as Variants;
 
     const filteredHistory = historyData.filter(entry =>
         entry.user.toLowerCase().includes(searchQuery.toLowerCase()) ||

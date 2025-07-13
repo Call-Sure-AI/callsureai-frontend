@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { AnimatedButton } from "@/components/ui/button";
 import { ChevronRight } from 'lucide-react';
 
@@ -29,7 +29,7 @@ const IntegrationSection = () => {
         "M 70% 75% C 65% 65%, 60% 55%, 50% 50%",
     ];
 
-    const containerVariants = {
+    const containerVariants: Variants = {
         initial: { opacity: 0 },
         animate: {
             opacity: 1,
@@ -40,7 +40,7 @@ const IntegrationSection = () => {
         }
     };
 
-    const lineVariants = {
+    const lineVariants: Variants = {
         initial: {
             pathLength: 0,
             opacity: 0
@@ -55,7 +55,7 @@ const IntegrationSection = () => {
         }
     };
 
-    const iconVariants = {
+    const iconVariants: Variants = {
         initial: {
             scale: 0,
             opacity: 0

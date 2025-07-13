@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Clock, Building } from 'lucide-react';
 import type { UserData } from '@/types';
 
@@ -7,7 +7,7 @@ interface UserAnalyticsProps {
     userData: UserData;
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
     initial: {
         opacity: 0,
         y: 20,
@@ -31,7 +31,7 @@ const cardVariants = {
     }
 };
 
-const contentVariants = {
+const contentVariants: Variants = {
     initial: { opacity: 0, x: -20 },
     animate: {
         opacity: 1,

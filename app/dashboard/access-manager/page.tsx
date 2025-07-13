@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
   Plus,
   X,
@@ -322,7 +322,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
     <div className="w-full min-h-screen bg-gray-50 p-8">
       <motion.div
         className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden"
-        variants={containerVariants}
+        variants={containerVariants as Variants}
         initial="hidden"
         animate="visible"
       >
@@ -343,7 +343,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
           {/* Search and Add Section */}
           <motion.div
             className="flex flex-col md:flex-row gap-4 mb-8"
-            variants={itemVariants}
+            variants={itemVariants as Variants}
           >
             <div className="flex-1 relative">
               <Mail
@@ -377,7 +377,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
                 {openDropdownId === "temp-" + email && (
                   <motion.div
                     className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden"
-                    variants={dropdownVariants}
+                    variants={dropdownVariants as Variants}
                     initial="hidden"
                     animate="visible"
                     exit="hidden"

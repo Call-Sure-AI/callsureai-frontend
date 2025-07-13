@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { ChevronDown, MessageCircle } from 'lucide-react';
 
 interface Question {
@@ -166,7 +166,7 @@ const FAQ: React.FC = () => {
         }
     }
 
-    const containerVariants = {
+    const containerVariants: Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
@@ -177,7 +177,7 @@ const FAQ: React.FC = () => {
         }
     };
 
-    const headerVariants = {
+    const headerVariants: Variants = {
         hidden: { opacity: 0, y: -20 },
         visible: {
             opacity: 1,
@@ -189,7 +189,7 @@ const FAQ: React.FC = () => {
         }
     };
 
-    const tabContentVariants = {
+    const tabContentVariants: Variants = {
         enter: {
             opacity: 0,
             y: 20,
@@ -215,7 +215,7 @@ const FAQ: React.FC = () => {
         }
     };
 
-    const questionVariants = {
+    const questionVariants: Variants = {
         hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,

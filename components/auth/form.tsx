@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { User, Lock, Loader2, Info, Smartphone } from 'lucide-react';
 import { SocialLogin } from '@/components/auth/social-login';
 import axios from 'axios';
@@ -162,13 +162,13 @@ const AuthForm = () => {
         setErrors({});
     };
 
-    const contentVariants = {
+    const contentVariants: Variants = {
         initial: { opacity: 0, y: 10 },
         animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
         exit: { opacity: 0, y: -10, transition: { duration: 0.2 } }
     };
 
-    const formVariants = {
+    const formVariants: Variants = {
         enter: (direction: number) => ({
             x: direction > 0 ? 500 : -500,
             opacity: 0,
