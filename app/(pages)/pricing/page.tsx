@@ -41,6 +41,7 @@ interface PricingCardProps {
     popular?: boolean;
     ctaText: string;
     ctaVariant?: "default" | "hero" | "outline";
+    onClick?: () => void;
 }
 
 const PricingCard = ({
@@ -52,6 +53,7 @@ const PricingCard = ({
     features,
     popular = false,
     ctaText,
+    onClick,
 }: PricingCardProps) => {
     return (
         <motion.div
@@ -115,6 +117,7 @@ const PricingCard = ({
                                 : "bg-white hover:bg-gray-50 text-[#1e3a8a] border-2 border-[#1e3a8a]"
                         )}
                         size="lg"
+                        onClick={onClick}
                     >
                         {ctaText}
                     </Button>
@@ -340,6 +343,7 @@ export default function Page() {
                         <PricingCard
                             key={`pricing-card-${index}-${plan.title}`}
                             {...plan}
+                            onClick={openCalendly}
                         />
                     ))}
                 </section>
