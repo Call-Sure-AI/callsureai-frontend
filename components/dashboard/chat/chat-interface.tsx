@@ -49,7 +49,7 @@ const ChatInterface = () => {
     const [inputMode, setInputMode] = useState<'text' | 'audio'>('text');
 
     const [isListening, setIsListening] = useState(false);
-    const recognition = useRef<SpeechRecognition | null>(null);
+    const recognition = useRef<any | null>(null);
 
     const [audioEnabled, setAudioEnabled] = useState(true);
     const audioContext = useRef<AudioContext | null>(null);

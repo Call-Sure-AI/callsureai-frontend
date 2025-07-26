@@ -27,11 +27,7 @@ import { useIsAuthenticated } from "@/hooks/use-is-authenticated";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import AccessDenied from "@/components/dashboard/access-denied";
 
-const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
-  initialUsers = [],
-  onInvite,
-  onCancel,
-}) => {
+const AccessManagerDashboard: React.FC = () => {
   const { company } = useCompany();
   const { token } = useIsAuthenticated();
   const { user } = useCurrentUser();
@@ -40,7 +36,7 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
   const [selectedAccess, setSelectedAccess] = useState<SelectedAccessMap>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     if (company?.id && token) {
@@ -255,12 +251,6 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
 
   const handleInviteSelected = async (): Promise<void> => {
     if (users.length === 0) return;
-
-    // Here you could batch process invitations if needed
-    // For now, we'll just notify the parent component
-    if (onInvite) {
-      onInvite(users);
-    }
 
     toast({
       title: "Success",
@@ -537,7 +527,6 @@ const AccessManagerDashboard: React.FC<AccessManagerProps> = ({
               className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors duration-200"
               onClick={() => {
                 fetchPendingInvitations();
-                if (onCancel) onCancel();
               }}
               disabled={isLoading}
             >
