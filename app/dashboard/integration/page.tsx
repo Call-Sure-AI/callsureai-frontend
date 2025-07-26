@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,54 @@ const IntegrationSettings: React.FC = () => {
     const [activeIntegrations, setActiveIntegrations] = useState<ActiveIntegrations>({});
     const [currentIntegration, setCurrentIntegration] = useState<Integration | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [whatsappDialogOpen, setWhatsappDialogOpen] = useState<boolean>(false);
+    const [fbInitialized, setFbInitialized] = useState<boolean>(false);
+
+    // Facebook SDK initialization
+    useEffect(() => {
+        // Load Facebook SDK
+        const loadFacebookSDK = () => {
+            const script = document.createElement('script');
+            script.async = true;
+            script.defer = true;
+            script.crossOrigin = 'anonymous';
+            script.src = 'https://connect.facebook.net/en_US/sdk.js';
+            document.head.appendChild(script);
+
+            // Initialize Facebook SDK
+            window.fbAsyncInit = function () {
+                window.FB.init({
+                    appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '<APP_ID>',
+                    autoLogAppEvents: true,
+                    xfbml: true,
+                    version: process.env.NEXT_PUBLIC_FACEBOOK_VERSION || '<VERSION>'
+                });
+                setFbInitialized(true);
+            };
+
+            // Session logging message event listener
+            window.addEventListener('message', (event) => {
+                if (!event.origin.endsWith('facebook.com')) return;
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'WA_EMBEDDED_SIGNUP') {
+                        console.log('message event: ', data);
+                        // Handle WhatsApp signup event
+                    }
+                } catch {
+                    console.log('message event: ', event.data);
+                    // Handle other message events
+                }
+            });
+        };
+
+        loadFacebookSDK();
+
+        return () => {
+            // Cleanup if needed
+            window.removeEventListener('message', () => { });
+        };
+    }, []);
 
     const integrationFields: IntegrationFields = {
         LinkedIn: [
@@ -60,6 +108,8 @@ const IntegrationSettings: React.FC = () => {
         WhatsApp: [
             { name: "apiKey", label: "API Key", type: "text" },
             { name: "phoneNumber", label: "Business Phone Number", type: "text" },
+            { name: "configurationId", label: "Configuration ID", type: "text" },
+            { name: "featureType", label: "Feature Type", type: "text" },
         ],
         Facebook: [
             { name: "appId", label: "App ID", type: "text" },
@@ -90,7 +140,42 @@ const IntegrationSettings: React.FC = () => {
 
     const handleSetupClick = (integration: Integration): void => {
         setCurrentIntegration(integration);
-        setDialogOpen(true);
+        if (integration.name === 'WhatsApp') {
+            setWhatsappDialogOpen(true);
+        } else {
+            setDialogOpen(true);
+        }
+    };
+
+    // WhatsApp Facebook login callback
+    const fbLoginCallback = (response: any) => {
+        if (response.authResponse) {
+            const code = response.authResponse.code;
+            console.log('Facebook login response: ', code);
+            // Handle the authorization code here
+            // You can send this code to your backend to complete the WhatsApp integration
+        } else {
+            console.log('Facebook login response: ', response);
+            // Handle login failure
+        }
+    };
+
+    // Launch WhatsApp signup
+    const launchWhatsAppSignup = () => {
+        if (window.FB && fbInitialized) {
+            window.FB.login(fbLoginCallback, {
+                config_id: process.env.NEXT_PUBLIC_WHATSAPP_CONFIG_ID || '<CONFIGURATION_ID>',
+                response_type: 'code',
+                override_default_response_type: true,
+                extras: {
+                    setup: {},
+                    featureType: process.env.NEXT_PUBLIC_WHATSAPP_FEATURE_TYPE || '<FEATURE_TYPE>',
+                    sessionInfoVersion: '3',
+                }
+            });
+        } else {
+            console.error('Facebook SDK not initialized');
+        }
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -108,7 +193,6 @@ const IntegrationSettings: React.FC = () => {
             }
         });
 
-
         setActiveIntegrations({
             ...activeIntegrations,
             [currentIntegration.name]: {
@@ -118,6 +202,30 @@ const IntegrationSettings: React.FC = () => {
         });
 
         setDialogOpen(false);
+    };
+
+    const handleWhatsappSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+        e.preventDefault();
+
+        const formData = new FormData(e.currentTarget);
+        const data: IntegrationConfig = {};
+
+        integrationFields['WhatsApp'].forEach(field => {
+            const value = formData.get(field.name);
+            if (value) {
+                data[field.name] = value.toString();
+            }
+        });
+
+        setActiveIntegrations({
+            ...activeIntegrations,
+            ['WhatsApp']: {
+                isActive: true,
+                config: data,
+            },
+        });
+
+        setWhatsappDialogOpen(false);
     };
 
     const handleToggleIntegration = (integrationName: string): void => {
@@ -172,6 +280,7 @@ const IntegrationSettings: React.FC = () => {
                 ))}
             </div>
 
+            {/* Regular Integration Dialog */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
@@ -214,9 +323,43 @@ const IntegrationSettings: React.FC = () => {
                 </DialogContent>
             </Dialog>
 
+            {/* WhatsApp Integration Dialog */}
+            <Dialog open={whatsappDialogOpen} onOpenChange={setWhatsappDialogOpen}>
+                <DialogContent className="sm:max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Setup WhatsApp Integration</DialogTitle>
+                        <DialogDescription>
+                            Connect your WhatsApp Business account using Facebook login.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleWhatsappSubmit}>
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-4">
+                                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r">
+                                    <p className="text-sm text-blue-700">
+                                        Connect your Facebook account to enable WhatsApp Business integration.
+                                    </p>
+                                </div>
+
+                                <div className="flex justify-center">
+                                    <button
+                                        type="button"
+                                        onClick={launchWhatsAppSignup}
+                                        disabled={!fbInitialized}
+                                        className="bg-[#1877f2] hover:bg-[#1877f2]/90 disabled:bg-gray-400 border-0 rounded px-6 py-2 text-white cursor-pointer font-medium text-base h-10 transition-colors"
+                                    >
+                                        {fbInitialized ? 'Login with Facebook' : 'Loading Facebook SDK...'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
             <div className="mt-8">
                 <h2 className="text-lg font-medium mb-4">Add New Integration</h2>
-                <Button 
+                <Button
                     className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white"
                     onClick={() => window.open('https://www.callsure.ai/integrations', '_blank', 'noopener,noreferrer')}
                 >
