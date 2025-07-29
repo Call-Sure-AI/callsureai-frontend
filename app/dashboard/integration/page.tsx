@@ -45,6 +45,21 @@ interface ActiveIntegration {
 interface ActiveIntegrations {
     [key: string]: ActiveIntegration;
 }
+interface FBAuthResponse {
+    code?: string;
+  }
+  interface FBLoginResponse {
+    authResponse: FBAuthResponse | null;
+    status: string; // "connected" | "unknown" etc.
+  }
+  interface SignupData {
+    code?: string;
+    phone_number_id?: string;
+    waba_id?: string;
+    business_id?: string;
+    status?: 'FINISH' | 'CANCEL';
+    current_step?: string;
+  }  
 
 const IntegrationSettings: React.FC = () => {
     const [activeIntegrations, setActiveIntegrations] = useState<ActiveIntegrations>({});
@@ -52,9 +67,22 @@ const IntegrationSettings: React.FC = () => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [whatsappDialogOpen, setWhatsappDialogOpen] = useState<boolean>(false);
     const [fbInitialized, setFbInitialized] = useState<boolean>(false);
-
+    function sendSignupData(data: SignupData): void {
+        fetch('https//callsure.ai/api/whatsapp/onboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((resp) => {
+            console.log('Backend response:', resp);
+          })
+          .catch((err) => console.error(err));
+      }
+      let signupData: SignupData = {}; 
     // Facebook SDK initialization
     useEffect(() => {
+        
         // Load Facebook SDK
         const loadFacebookSDK = () => {
             const script = document.createElement('script');
@@ -80,9 +108,37 @@ const IntegrationSettings: React.FC = () => {
                 if (!event.origin.endsWith('facebook.com')) return;
                 try {
                     const data = JSON.parse(event.data);
+                    // if (data.type === 'WA_EMBEDDED_SIGNUP') {
+                    //     console.log('message event: ', data);
+                    //     // Handle WhatsApp signup event
+                    // }
                     if (data.type === 'WA_EMBEDDED_SIGNUP') {
-                        console.log('message event: ', data);
-                        // Handle WhatsApp signup event
+                        console.log('Signup event:', data);
+                  
+                        if (data.event === 'FINISH') {
+                          // Store WABA details
+                          signupData = {
+                            ...signupData,
+                            phone_number_id: data.data.phone_number_id,
+                            waba_id: data.data.waba_id,
+                            business_id: data.data.business_id,
+                            status: 'FINISH'
+                          };
+                  
+                          // If we already got code, send everything
+                          if (signupData.code) sendSignupData(signupData);
+                  
+                        } else if (data.event === 'CANCEL') {
+                          // Save cancel info
+                          signupData = {
+                            ...signupData,
+                            current_step: data.data.current_step,
+                            status: 'CANCEL'
+                          };
+                  
+                          // Send cancel event to backend
+                          sendSignupData(signupData);
+                        }
                     }
                 } catch {
                     console.log('message event: ', event.data);
@@ -148,17 +204,25 @@ const IntegrationSettings: React.FC = () => {
     };
 
     // WhatsApp Facebook login callback
-    const fbLoginCallback = (response: any) => {
-        if (response.authResponse) {
-            const code = response.authResponse.code;
-            console.log('Facebook login response: ', code);
-            // Handle the authorization code here
-            // You can send this code to your backend to complete the WhatsApp integration
+    const fbLoginCallback = (response: FBLoginResponse): void => {
+        if (response.authResponse && response.authResponse.code) {
+          const code = response.authResponse.code;
+          console.log('Authorization Code:', code);
+      
+          signupData = { ...signupData, code };
+      
+          // Send data if FINISH event already received
+          if (signupData.phone_number_id) {
+            sendSignupData(signupData);
+          }
         } else {
-            console.log('Facebook login response: ', response);
-            // Handle login failure
+          console.warn('Login canceled or unknown status:', response);
+      
+          // Save cancel state if WA_EMBEDDED_SIGNUP event not received yet
+          signupData = { ...signupData, status: 'CANCEL', current_step: 'FB_LOGIN' };
+          sendSignupData(signupData);
         }
-    };
+      };
 
     // Launch WhatsApp signup
     const launchWhatsAppSignup = () => {
@@ -169,7 +233,8 @@ const IntegrationSettings: React.FC = () => {
                 override_default_response_type: true,
                 extras: {
                     setup: {},
-                    featureType: process.env.NEXT_PUBLIC_WHATSAPP_FEATURE_TYPE || '<FEATURE_TYPE>',
+                    // featureType: process.env.NEXT_PUBLIC_WHATSAPP_FEATURE_TYPE || '<FEATURE_TYPE>',
+                    featureType:'',
                     sessionInfoVersion: '3',
                 }
             });
