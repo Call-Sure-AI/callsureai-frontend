@@ -220,9 +220,16 @@ const AccessManagerDashboard: React.FC = () => {
       try {
         setIsLoading(true);
 
+        // FIX: Add Authorization header to DELETE request
         await axios.delete(
           `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/${invitationId}`,
-          { withCredentials: true },
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,  // ADD THIS!
+            },
+          }
         );
 
         toast({
@@ -245,7 +252,7 @@ const AccessManagerDashboard: React.FC = () => {
 
     // Remove from UI
     setUsers((prev) => prev.filter((user) => user.id !== userId));
-    const { [userId]: _, ...restAccess } = selectedAccess; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { [userId]: _, ...restAccess } = selectedAccess;
     setSelectedAccess(restAccess);
   };
 
