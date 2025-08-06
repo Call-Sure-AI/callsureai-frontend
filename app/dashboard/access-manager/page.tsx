@@ -221,8 +221,10 @@ const AccessManagerDashboard: React.FC = () => {
       try {
         setIsLoading(true);
 
-        await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/${invitationId}`,
+        // Use POST endpoint instead of DELETE
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/${invitationId}/delete`,
+          {}, // Empty body
           {
             withCredentials: true,
             headers: {
@@ -240,11 +242,10 @@ const AccessManagerDashboard: React.FC = () => {
         console.error("Error deleting invitation:", err);
         toast({
           title: "Error",
-          description:
-            err.response?.data?.error || "Failed to delete invitation",
+          description: err.response?.data?.detail || "Failed to delete invitation",
           variant: "destructive",
         });
-        return; // Don't remove from UI if deletion failed
+        return;
       } finally {
         setIsLoading(false);
       }
@@ -252,8 +253,6 @@ const AccessManagerDashboard: React.FC = () => {
 
     // Remove from UI
     setUsers((prev) => prev.filter((user) => user.id !== userId));
-    
-    // Remove from selectedAccess
     const newSelectedAccess = { ...selectedAccess };
     delete newSelectedAccess[userId];
     setSelectedAccess(newSelectedAccess);
