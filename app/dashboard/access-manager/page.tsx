@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
   Plus,
@@ -15,7 +15,6 @@ import {
 import {
   AccessLevel,
   AccessLevelName,
-  AccessManagerProps,
   SelectedAccessMap,
   User,
 } from "@/types";
@@ -38,13 +37,36 @@ const AccessManagerDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
 
-  useEffect(() => {
-    if (company?.id && token) {
-      fetchPendingInvitations();
+  // Map roles to access levels
+  const mapRoleToAccessLevel = (role: string): AccessLevelName => {
+    switch (role) {
+      case "admin":
+        return "Admin Access";
+      case "manager":
+        return "Projects Access";
+      default:
+        return "Custom Projects Access";
     }
-  }, [company?.id, token]);
+  };
 
-  const fetchPendingInvitations = async () => {
+  // Map access levels to roles
+  const mapAccessLevelToRole = (accessLevel: AccessLevelName): string => {
+    switch (accessLevel) {
+      case "Admin Access":
+        return "admin";
+      case "Projects Access":
+        return "manager";
+      case "Custom Projects Access":
+        return "member";
+      default:
+        return "member";
+    }
+  };
+
+  // Define fetchPendingInvitations with useCallback
+  const fetchPendingInvitations = useCallback(async () => {
+    if (!company?.id || !token) return;
+    
     try {
       setIsLoading(true);
       const { data } = await axios.get(
@@ -92,33 +114,12 @@ const AccessManagerDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [company?.id, token]);
 
-  // Map roles to access levels
-  const mapRoleToAccessLevel = (role: string): AccessLevelName => {
-    switch (role) {
-      case "admin":
-        return "Admin Access";
-      case "manager":
-        return "Projects Access";
-      default:
-        return "Custom Projects Access";
-    }
-  };
-
-  // Map access levels to roles
-  const mapAccessLevelToRole = (accessLevel: AccessLevelName): string => {
-    switch (accessLevel) {
-      case "Admin Access":
-        return "admin";
-      case "Projects Access":
-        return "manager";
-      case "Custom Projects Access":
-        return "member";
-      default:
-        return "member";
-    }
-  };
+  // useEffect that depends on fetchPendingInvitations
+  useEffect(() => {
+    fetchPendingInvitations();
+  }, [fetchPendingInvitations]);
 
   const accessLevels: AccessLevel[] = [
     { name: "Admin Access", icon: Shield },
@@ -220,14 +221,13 @@ const AccessManagerDashboard: React.FC = () => {
       try {
         setIsLoading(true);
 
-        // FIX: Add Authorization header to DELETE request
         await axios.delete(
           `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/${invitationId}`,
           {
             withCredentials: true,
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,  // ADD THIS!
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -252,8 +252,11 @@ const AccessManagerDashboard: React.FC = () => {
 
     // Remove from UI
     setUsers((prev) => prev.filter((user) => user.id !== userId));
-    const { [userId]: _, ...restAccess } = selectedAccess;
-    setSelectedAccess(restAccess);
+    
+    // Remove from selectedAccess
+    const newSelectedAccess = { ...selectedAccess };
+    delete newSelectedAccess[userId];
+    setSelectedAccess(newSelectedAccess);
   };
 
   const handleInviteSelected = async (): Promise<void> => {
@@ -317,6 +320,7 @@ const AccessManagerDashboard: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50 p-8">
+      {/* Rest of your JSX remains the same */}
       <motion.div
         className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden"
         variants={containerVariants as Variants}
