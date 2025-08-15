@@ -78,10 +78,6 @@ export const SocialLogin = ({ isSignup = false }) => {
                 `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, 
                 {
                     idToken: response.credential,
-                },
-                {
-                    withCredentials: true,
-                    timeout: 30000,
                 }
             );
 

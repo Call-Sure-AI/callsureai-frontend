@@ -91,6 +91,14 @@ const Navigation: React.FC = () => {
             showMenu: true
         },
         {
+            id: "campaigns",
+            icon: <TicketIcon className="w-4 h-4" />,
+            label: "Campaigns",
+            link: "/campaigns",
+            isDropdown: false,
+            showMenu: true
+        },
+        {
             id: "conversation-history",
             label: "Conversation History",
             link: "/dashboard/conversation-history",
@@ -103,6 +111,14 @@ const Navigation: React.FC = () => {
             icon: <TicketIcon className="w-4 h-4" />,
             label: "Tickets & Queries",
             link: "/tickets",
+            isDropdown: false,
+            showMenu: true
+        },
+        {
+            id: "bookings",
+            icon: <TicketIcon className="w-4 h-4" />,
+            label: "Bookings",
+            link: "/bookings",
             isDropdown: false,
             showMenu: true
         },
