@@ -5,10 +5,23 @@ import campaignService from '@/services/campaign-service'
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated'
 import { useCompany } from './company-context'
 
+interface Campaign {
+    id: string
+    companyId: string
+    name: string
+    description: string
+    status: 'draft' | 'active' | 'paused' | 'completed'
+    leads: any[]
+    settings: any
+    metrics: any
+    createdAt: string
+    updatedAt: string
+}
+
 interface CampaignContextType {
-    campaigns: any[]
+    campaigns: Campaign[]
     loading: boolean
-    createCampaign: (data: any) => Promise<void>
+    createCampaign: (data: any) => Promise<Campaign>
     updateCampaign: (id: string, data: any) => Promise<void>
     deleteCampaign: (id: string) => Promise<void>
     startCampaign: (id: string) => Promise<void>
@@ -19,7 +32,7 @@ interface CampaignContextType {
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined)
 
 export function CampaignProvider({ children }: { children: ReactNode }) {
-    const [campaigns, setCampaigns] = useState<any[]>([])
+    const [campaigns, setCampaigns] = useState<Campaign[]>([])
     const [loading, setLoading] = useState(true)
     const { token } = useIsAuthenticated()
     const { company } = useCompany()
@@ -42,7 +55,7 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
         fetchCampaigns()
     }, [token, company])
 
-    const createCampaign = async (data: any) => {
+    const createCampaign = async (data: any): Promise<Campaign> => {
         if (!token) throw new Error('No authentication token')
         
         const campaign = await campaignService.createCampaign(data, token)
@@ -50,28 +63,28 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
         return campaign
     }
 
-    const updateCampaign = async (id: string, data: any) => {
+    const updateCampaign = async (id: string, data: any): Promise<void> => {
         if (!token) throw new Error('No authentication token')
         
         const updated = await campaignService.updateCampaign(id, data, token)
         setCampaigns(campaigns.map(c => c.id === id ? updated : c))
     }
 
-    const deleteCampaign = async (id: string) => {
+    const deleteCampaign = async (id: string): Promise<void> => {
         if (!token) throw new Error('No authentication token')
         
         await campaignService.deleteCampaign(id, token)
         setCampaigns(campaigns.filter(c => c.id !== id))
     }
 
-    const startCampaign = async (id: string) => {
+    const startCampaign = async (id: string): Promise<void> => {
         if (!token) throw new Error('No authentication token')
         
         await campaignService.startCampaign(id, token)
         await fetchCampaigns()
     }
 
-    const pauseCampaign = async (id: string) => {
+    const pauseCampaign = async (id: string): Promise<void> => {
         if (!token) throw new Error('No authentication token')
         
         await campaignService.pauseCampaign(id, token)
@@ -101,3 +114,6 @@ export function useCampaigns() {
     }
     return context
 }
+
+// Export the Campaign type for use in other components
+export type { Campaign }
