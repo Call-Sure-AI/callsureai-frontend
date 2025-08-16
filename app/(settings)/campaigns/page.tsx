@@ -1,3 +1,4 @@
+// app\(settings)\campaigns\page.tsx
 "use client"
 
 import { useState, useRef, useEffect } from "react"
@@ -22,6 +23,7 @@ import {
     TrendingUp,
     RefreshCw,
     CalendarCheck,
+    Eye,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -193,7 +195,6 @@ export default function CampaignsPage() {
 
     // Mock data for demonstration
     useEffect(() => {
-        // Load campaigns from API or local storage
         const mockCampaigns: Campaign[] = [
             {
                 id: '1',
@@ -268,7 +269,6 @@ export default function CampaignsPage() {
         try {
             setIsLoading(true)
             
-            // Create campaign with leads
             const campaign: Campaign = {
                 id: Date.now().toString(),
                 name: newCampaign.name || 'New Campaign',
@@ -381,198 +381,335 @@ export default function CampaignsPage() {
         }
     }
 
+    // Mobile Campaign Card Component
+    const CampaignCard = ({ campaign }: { campaign: Campaign }) => (
+        <Card className="w-full">
+            <CardContent className="p-4 sm:p-6">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-base sm:text-lg line-clamp-1">
+                            {campaign.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mt-1">
+                            {campaign.description}
+                        </p>
+                        <Badge className={`${getStatusColor(campaign.status)} mt-2`}>
+                            <span className="flex items-center gap-1">
+                                {getStatusIcon(campaign.status)}
+                                {campaign.status}
+                            </span>
+                        </Badge>
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="ml-2">
+                                <MoreVertical className="w-4 h-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {campaign.status === 'draft' && (
+                                <DropdownMenuItem onClick={() => handleStartCampaign(campaign.id)}>
+                                    <Play className="w-4 h-4 mr-2" />
+                                    Start Campaign
+                                </DropdownMenuItem>
+                            )}
+                            {campaign.status === 'active' && (
+                                <DropdownMenuItem onClick={() => handlePauseCampaign(campaign.id)}>
+                                    <Pause className="w-4 h-4 mr-2" />
+                                    Pause Campaign
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedCampaign(campaign)
+                                setShowLeadsDialog(true)
+                            }}>
+                                <Users className="w-4 h-4 mr-2" />
+                                View Leads
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedCampaign(campaign)
+                                setShowSettingsDialog(true)
+                            }}>
+                                <Settings className="w-4 h-4 mr-2" />
+                                Settings
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                
+                {/* Mobile Stats Grid */}
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div>
+                        <p className="text-xs text-gray-500">Leads</p>
+                        <p className="text-lg font-semibold">{campaign.metrics.totalLeads}</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-500">Contacted</p>
+                        <p className="text-lg font-semibold">{campaign.metrics.contacted}</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-500">Booked</p>
+                        <p className="text-lg font-semibold">{campaign.metrics.booked}</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-500">Response Rate</p>
+                        <p className="text-lg font-semibold">{campaign.metrics.responseRate}%</p>
+                    </div>
+                </div>
+                
+                {/* Mobile Action Buttons */}
+                <div className="flex gap-2 mt-4">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => {
+                            setSelectedCampaign(campaign)
+                            setShowLeadsDialog(true)
+                        }}
+                    >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Details
+                    </Button>
+                    {campaign.status === 'draft' && (
+                        <Button 
+                            size="sm" 
+                            className="flex-1 bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
+                            onClick={() => handleStartCampaign(campaign.id)}
+                        >
+                            <Play className="w-4 h-4 mr-1" />
+                            Start
+                        </Button>
+                    )}
+                    {campaign.status === 'active' && (
+                        <Button 
+                            size="sm" 
+                            variant="secondary"
+                            className="flex-1"
+                            onClick={() => handlePauseCampaign(campaign.id)}
+                        >
+                            <Pause className="w-4 h-4 mr-1" />
+                            Pause
+                        </Button>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    )
+
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
+        <div className="p-4 sm:p-6 max-w-[100vw] xl:max-w-7xl mx-auto space-y-4 sm:space-y-6">
+            {/* Header - Responsive */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Sales Campaigns</h1>
-                    <p className="text-gray-500">Automate your outreach and booking processes</p>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                        Sales Campaigns
+                    </h1>
+                    <p className="text-sm sm:text-base text-gray-500">
+                        Automate your outreach and booking processes
+                    </p>
                 </div>
                 <Button 
                     onClick={() => setShowCreateDialog(true)}
-                    className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
+                    className="w-full sm:w-auto bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     New Campaign
                 </Button>
             </div>
 
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Stats Overview - Responsive Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-500">Total Campaigns</p>
-                                <p className="text-2xl font-bold">{campaigns.length}</p>
+                                <p className="text-xs sm:text-sm text-gray-500">Total Campaigns</p>
+                                <p className="text-xl sm:text-2xl font-bold">{campaigns.length}</p>
                             </div>
-                            <Target className="w-8 h-8 text-blue-500" />
+                            <Target className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
                         </div>
                     </CardContent>
                 </Card>
                 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-500">Active Campaigns</p>
-                                <p className="text-2xl font-bold">
+                                <p className="text-xs sm:text-sm text-gray-500">Active</p>
+                                <p className="text-xl sm:text-2xl font-bold">
                                     {campaigns.filter(c => c.status === 'active').length}
                                 </p>
                             </div>
-                            <TrendingUp className="w-8 h-8 text-green-500" />
+                            <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
                         </div>
                     </CardContent>
                 </Card>
                 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-500">Total Leads</p>
-                                <p className="text-2xl font-bold">
+                                <p className="text-xs sm:text-sm text-gray-500">Total Leads</p>
+                                <p className="text-xl sm:text-2xl font-bold">
                                     {campaigns.reduce((acc, c) => acc + c.metrics.totalLeads, 0)}
                                 </p>
                             </div>
-                            <Users className="w-8 h-8 text-purple-500" />
+                            <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
                         </div>
                     </CardContent>
                 </Card>
                 
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-500">Bookings Made</p>
-                                <p className="text-2xl font-bold">
+                                <p className="text-xs sm:text-sm text-gray-500">Bookings</p>
+                                <p className="text-xl sm:text-2xl font-bold">
                                     {campaigns.reduce((acc, c) => acc + c.metrics.booked, 0)}
                                 </p>
                             </div>
-                            <CalendarCheck className="w-8 h-8 text-amber-500" />
+                            <CalendarCheck className="w-6 h-6 sm:w-8 sm:h-8 text-amber-500" />
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Campaigns List */}
+            {/* Campaigns List - Mobile Cards / Desktop Table */}
             <Card>
-                <CardHeader>
-                    <CardTitle>Your Campaigns</CardTitle>
-                    <CardDescription>Manage and monitor your sales automation campaigns</CardDescription>
+                <CardHeader className="px-4 sm:px-6">
+                    <CardTitle className="text-lg sm:text-xl">Your Campaigns</CardTitle>
+                    <CardDescription className="text-sm">
+                        Manage and monitor your sales automation campaigns
+                    </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Campaign</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Leads</TableHead>
-                                <TableHead>Contacted</TableHead>
-                                <TableHead>Booked</TableHead>
-                                <TableHead>Response Rate</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {campaigns.map((campaign) => (
-                                <TableRow key={campaign.id}>
-                                    <TableCell>
-                                        <div>
-                                            <p className="font-medium">{campaign.name}</p>
-                                            <p className="text-sm text-gray-500">{campaign.description}</p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge className={getStatusColor(campaign.status)}>
-                                            <span className="flex items-center gap-1">
-                                                {getStatusIcon(campaign.status)}
-                                                {campaign.status}
-                                            </span>
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>{campaign.metrics.totalLeads}</TableCell>
-                                    <TableCell>{campaign.metrics.contacted}</TableCell>
-                                    <TableCell>{campaign.metrics.booked}</TableCell>
-                                    <TableCell>{campaign.metrics.responseRate}%</TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreVertical className="w-4 h-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                {campaign.status === 'draft' && (
-                                                    <DropdownMenuItem 
-                                                        onClick={() => handleStartCampaign(campaign.id)}
-                                                    >
-                                                        <Play className="w-4 h-4 mr-2" />
-                                                        Start Campaign
-                                                    </DropdownMenuItem>
-                                                )}
-                                                {campaign.status === 'active' && (
-                                                    <DropdownMenuItem 
-                                                        onClick={() => handlePauseCampaign(campaign.id)}
-                                                    >
-                                                        <Pause className="w-4 h-4 mr-2" />
-                                                        Pause Campaign
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem 
-                                                    onClick={() => {
-                                                        setSelectedCampaign(campaign)
-                                                        setShowLeadsDialog(true)
-                                                    }}
-                                                >
-                                                    <Users className="w-4 h-4 mr-2" />
-                                                    View Leads
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem 
-                                                    onClick={() => {
-                                                        setSelectedCampaign(campaign)
-                                                        setShowSettingsDialog(true)
-                                                    }}
-                                                >
-                                                    <Settings className="w-4 h-4 mr-2" />
-                                                    Settings
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="w-4 h-4 mr-2" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                <CardContent className="px-0 sm:px-6">
+                    {/* Mobile View - Cards */}
+                    <div className="block lg:hidden space-y-4 px-4">
+                        {campaigns.map((campaign) => (
+                            <CampaignCard key={campaign.id} campaign={campaign} />
+                        ))}
+                    </div>
+
+                    {/* Desktop View - Table */}
+                    <div className="hidden lg:block overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Campaign</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Leads</TableHead>
+                                    <TableHead>Contacted</TableHead>
+                                    <TableHead>Booked</TableHead>
+                                    <TableHead>Response Rate</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {campaigns.map((campaign) => (
+                                    <TableRow key={campaign.id}>
+                                        <TableCell>
+                                            <div>
+                                                <p className="font-medium">{campaign.name}</p>
+                                                <p className="text-sm text-gray-500">{campaign.description}</p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge className={getStatusColor(campaign.status)}>
+                                                <span className="flex items-center gap-1">
+                                                    {getStatusIcon(campaign.status)}
+                                                    {campaign.status}
+                                                </span>
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>{campaign.metrics.totalLeads}</TableCell>
+                                        <TableCell>{campaign.metrics.contacted}</TableCell>
+                                        <TableCell>{campaign.metrics.booked}</TableCell>
+                                        <TableCell>{campaign.metrics.responseRate}%</TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreVertical className="w-4 h-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    {campaign.status === 'draft' && (
+                                                        <DropdownMenuItem 
+                                                            onClick={() => handleStartCampaign(campaign.id)}
+                                                        >
+                                                            <Play className="w-4 h-4 mr-2" />
+                                                            Start Campaign
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    {campaign.status === 'active' && (
+                                                        <DropdownMenuItem 
+                                                            onClick={() => handlePauseCampaign(campaign.id)}
+                                                        >
+                                                            <Pause className="w-4 h-4 mr-2" />
+                                                            Pause Campaign
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem 
+                                                        onClick={() => {
+                                                            setSelectedCampaign(campaign)
+                                                            setShowLeadsDialog(true)
+                                                        }}
+                                                    >
+                                                        <Users className="w-4 h-4 mr-2" />
+                                                        View Leads
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem 
+                                                        onClick={() => {
+                                                            setSelectedCampaign(campaign)
+                                                            setShowSettingsDialog(true)
+                                                        }}
+                                                    >
+                                                        <Settings className="w-4 h-4 mr-2" />
+                                                        Settings
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem className="text-red-600">
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
 
-            {/* Create Campaign Dialog */}
+            {/* Create Campaign Dialog - Responsive */}
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-[95vw] sm:max-w-lg lg:max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Create New Campaign</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-lg sm:text-xl">Create New Campaign</DialogTitle>
+                        <DialogDescription className="text-sm">
                             Set up your automated sales campaign with custom data fields and booking options
                         </DialogDescription>
                     </DialogHeader>
 
                     <Tabs defaultValue="basics" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="basics">Basics</TabsTrigger>
-                            <TabsTrigger value="data">Data Mapping</TabsTrigger>
-                            <TabsTrigger value="booking">Booking</TabsTrigger>
-                            <TabsTrigger value="automation">Automation</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+                            <TabsTrigger value="basics" className="text-xs sm:text-sm">Basics</TabsTrigger>
+                            <TabsTrigger value="data" className="text-xs sm:text-sm">Data</TabsTrigger>
+                            <TabsTrigger value="booking" className="text-xs sm:text-sm">Booking</TabsTrigger>
+                            <TabsTrigger value="automation" className="text-xs sm:text-sm">Auto</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="basics" className="space-y-4">
+                        <TabsContent value="basics" className="space-y-4 mt-4">
                             <div>
-                                <Label>Campaign Name</Label>
+                                <Label className="text-sm">Campaign Name</Label>
                                 <Input 
                                     placeholder="e.g., Q1 Sales Outreach"
                                     value={newCampaign.name}
@@ -580,11 +717,12 @@ export default function CampaignsPage() {
                                         ...newCampaign,
                                         name: e.target.value
                                     })}
+                                    className="mt-1"
                                 />
                             </div>
 
                             <div>
-                                <Label>Description</Label>
+                                <Label className="text-sm">Description</Label>
                                 <Textarea 
                                     placeholder="Describe your campaign goals..."
                                     value={newCampaign.description}
@@ -592,11 +730,13 @@ export default function CampaignsPage() {
                                         ...newCampaign,
                                         description: e.target.value
                                     })}
+                                    className="mt-1"
+                                    rows={3}
                                 />
                             </div>
 
                             <div>
-                                <Label>Upload Leads CSV</Label>
+                                <Label className="text-sm">Upload Leads CSV</Label>
                                 <div className="mt-2">
                                     <input
                                         ref={fileInputRef}
@@ -622,10 +762,10 @@ export default function CampaignsPage() {
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="data" className="space-y-4">
+                        <TabsContent value="data" className="space-y-4 mt-4">
                             <div className="space-y-2">
-                                <Label>Map CSV Columns to Data Fields</Label>
-                                <p className="text-sm text-gray-500">
+                                <Label className="text-sm">Map CSV Columns to Data Fields</Label>
+                                <p className="text-xs text-gray-500">
                                     Select which columns from your CSV correspond to each data field
                                 </p>
                             </div>
@@ -633,8 +773,8 @@ export default function CampaignsPage() {
                             {csvHeaders.length > 0 && (
                                 <div className="space-y-3">
                                     {['Name', 'Email', 'Phone', 'Company', 'Location'].map((field) => (
-                                        <div key={field} className="grid grid-cols-3 gap-4 items-center">
-                                            <Label>{field}</Label>
+                                        <div key={field} className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 items-center">
+                                            <Label className="text-sm">{field}</Label>
                                             <Select
                                                 onValueChange={(value) => {
                                                     const fields = newCampaign.settings?.dataFields || []
@@ -676,7 +816,7 @@ export default function CampaignsPage() {
                                                     defaultChecked={field === 'Name' || field === 'Email'}
                                                     disabled={field === 'Name' || field === 'Email'}
                                                 />
-                                                <Label>Required</Label>
+                                                <Label className="text-sm">Required</Label>
                                             </div>
                                         </div>
                                     ))}
@@ -686,14 +826,14 @@ export default function CampaignsPage() {
                             {csvHeaders.length === 0 && (
                                 <div className="text-center py-8 text-gray-500">
                                     <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                                    <p>Upload a CSV file first to map columns</p>
+                                    <p className="text-sm">Upload a CSV file first to map columns</p>
                                 </div>
                             )}
                         </TabsContent>
 
-                        <TabsContent value="booking" className="space-y-4">
+                        <TabsContent value="booking" className="space-y-4 mt-4">
                             <div className="flex items-center justify-between">
-                                <Label>Enable Booking</Label>
+                                <Label className="text-sm">Enable Booking</Label>
                                 <Switch 
                                     checked={newCampaign.settings?.bookingEnabled}
                                     onCheckedChange={(checked) => setNewCampaign({
@@ -709,9 +849,9 @@ export default function CampaignsPage() {
                             {newCampaign.settings?.bookingEnabled && (
                                 <>
                                     <div>
-                                        <Label>Calendar Integration</Label>
+                                        <Label className="text-sm">Calendar Integration</Label>
                                         <Select defaultValue="google">
-                                            <SelectTrigger>
+                                            <SelectTrigger className="mt-1">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -722,82 +862,89 @@ export default function CampaignsPage() {
                                         </Select>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <Label>Meeting Duration (minutes)</Label>
-                                            <Input type="number" defaultValue="30" />
+                                            <Label className="text-sm">Meeting Duration (min)</Label>
+                                            <Input type="number" defaultValue="30" className="mt-1" />
                                         </div>
                                         <div>
-                                            <Label>Buffer Time (minutes)</Label>
-                                            <Input type="number" defaultValue="15" />
+                                            <Label className="text-sm">Buffer Time (min)</Label>
+                                            <Input type="number" defaultValue="15" className="mt-1" />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center space-x-2">
                                             <Switch defaultChecked />
-                                            <Label>Send calendar invite to lead</Label>
+                                            <Label className="text-sm">Send calendar invite to lead</Label>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                             <Switch defaultChecked />
-                                            <Label>Send calendar invite to team</Label>
+                                            <Label className="text-sm">Send calendar invite to team</Label>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <Label>Team Email Addresses</Label>
+                                        <Label className="text-sm">Team Email Addresses</Label>
                                         <Textarea 
                                             placeholder="Enter email addresses (one per line)"
                                             rows={3}
+                                            className="mt-1"
                                         />
                                     </div>
                                 </>
                             )}
                         </TabsContent>
 
-                        <TabsContent value="automation" className="space-y-4">
+                        <TabsContent value="automation" className="space-y-4 mt-4">
                             <div>
-                                <Label>Email Template</Label>
+                                <Label className="text-sm">Email Template</Label>
                                 <Textarea 
                                     placeholder="Hi {name}, ..."
-                                    rows={5}
+                                    rows={4}
+                                    className="mt-1"
                                 />
                             </div>
 
                             <div>
-                                <Label>Call Script</Label>
+                                <Label className="text-sm">Call Script</Label>
                                 <Textarea 
                                     placeholder="Hello {name}, I'm calling from..."
-                                    rows={5}
+                                    rows={4}
+                                    className="mt-1"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Max Call Attempts</Label>
-                                    <Input type="number" defaultValue="3" />
+                                    <Label className="text-sm">Max Call Attempts</Label>
+                                    <Input type="number" defaultValue="3" className="mt-1" />
                                 </div>
                                 <div>
-                                    <Label>Call Interval (hours)</Label>
-                                    <Input type="number" defaultValue="24" />
+                                    <Label className="text-sm">Call Interval (hours)</Label>
+                                    <Input type="number" defaultValue="24" className="mt-1" />
                                 </div>
                             </div>
 
                             <div className="flex items-center space-x-2">
                                 <Switch />
-                                <Label>Enable follow-up emails</Label>
+                                <Label className="text-sm">Enable follow-up emails</Label>
                             </div>
                         </TabsContent>
                     </Tabs>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                    <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setShowCreateDialog(false)}
+                            className="w-full sm:w-auto"
+                        >
                             Cancel
                         </Button>
                         <Button 
                             onClick={handleCreateCampaign}
                             disabled={isLoading}
-                            className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
+                            className="w-full sm:w-auto bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
                         >
                             {isLoading ? (
                                 <>
@@ -815,17 +962,61 @@ export default function CampaignsPage() {
                 </DialogContent>
             </Dialog>
 
-            {/* View Leads Dialog */}
+            {/* View Leads Dialog - Responsive */}
             <Dialog open={showLeadsDialog} onOpenChange={setShowLeadsDialog}>
-                <DialogContent className="max-w-6xl max-h-[80vh]">
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-6xl max-h-[80vh]">
                     <DialogHeader>
-                        <DialogTitle>Campaign Leads</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-lg sm:text-xl">Campaign Leads</DialogTitle>
+                        <DialogDescription className="text-sm">
                             {selectedCampaign?.name} - {selectedCampaign?.leads?.length || 0} leads
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="overflow-auto">
+                    {/* Mobile View - Lead Cards */}
+                    <div className="block lg:hidden overflow-auto max-h-[60vh] space-y-3">
+                        {selectedCampaign?.leads?.map((lead) => (
+                            <Card key={lead.id}>
+                                <CardContent className="p-4">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="font-semibold">{lead.name}</p>
+                                            <p className="text-sm text-gray-500">{lead.email}</p>
+                                        </div>
+                                        <Badge className={getStatusColor(lead.status)}>
+                                            {lead.status}
+                                        </Badge>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-sm mt-3">
+                                        <div>
+                                            <p className="text-gray-500">Phone</p>
+                                            <p>{lead.phone || '-'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-500">Company</p>
+                                            <p>{lead.company || '-'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 mt-3">
+                                        <Button size="sm" variant="outline" className="flex-1">
+                                            <Phone className="w-3 h-3 mr-1" />
+                                            Call
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="flex-1">
+                                            <Mail className="w-3 h-3 mr-1" />
+                                            Email
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="flex-1">
+                                            <Calendar className="w-3 h-3 mr-1" />
+                                            Schedule
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {/* Desktop View - Table */}
+                    <div className="hidden lg:block overflow-auto max-h-[60vh]">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -880,20 +1071,26 @@ export default function CampaignsPage() {
                 </DialogContent>
             </Dialog>
 
-            {/* Settings Dialog */}
+            {/* Settings Dialog - Responsive */}
             <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
-                <DialogContent>
+                <DialogContent className="max-w-[95vw] sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Campaign Settings</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-lg sm:text-xl">Campaign Settings</DialogTitle>
+                        <DialogDescription className="text-sm">
                             Configure settings for {selectedCampaign?.name}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
-                        <p className="text-gray-500">Campaign settings configuration will be implemented here.</p>
+                        <p className="text-gray-500 text-sm">
+                            Campaign settings configuration will be implemented here.
+                        </p>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setShowSettingsDialog(false)}
+                            className="w-full sm:w-auto"
+                        >
                             Close
                         </Button>
                     </DialogFooter>
