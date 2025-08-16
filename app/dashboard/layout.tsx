@@ -1,3 +1,4 @@
+// app\dashboard\layout.tsx
 "use client";
 
 import React from 'react';
@@ -16,24 +17,34 @@ export default function DashboardLayout({
         <>
             <Navbar />
             <div className="min-h-screen relative flex">
+                {/* Desktop Sidebar */}
                 <Sidebar />
 
-                <div className="flex-1 relative">
+                {/* Main Content Area - Responsive */}
+                <div className="flex-1 relative lg:ml-0 pb-16 lg:pb-0">
                     {company && !company.address ? (
                         <>
                             <div className="absolute inset-0 bg-gray-900 opacity-50 z-10" />
                             <AlertMessage />
-                            <div className="p-8 opacity-50 pointer-events-none">
+                            <div className="p-4 sm:p-6 lg:p-8 opacity-50 pointer-events-none">
                                 {children}
                             </div>
                         </>
                     ) : (
-                        children
+                        <div className="p-4 sm:p-6 lg:p-8">
+                            {children}
+                        </div>
                     )}
                 </div>
 
-                <ActivityFeed />
+                {/* Activity Feed - Hidden on mobile */}
+                <div className="hidden xl:block">
+                    <ActivityFeed />
+                </div>
             </div>
+
+            {/* Mobile-specific spacing for bottom navigation */}
+            <div className="h-16 lg:hidden" />
         </>
     );
 }

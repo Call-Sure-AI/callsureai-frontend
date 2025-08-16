@@ -1,3 +1,4 @@
+// components\dashboard\sidebar.tsx
 "use client";
 
 import React, { useState, useCallback } from 'react';
@@ -21,7 +22,9 @@ import {
     TicketIcon,
     ShieldAlert,
     Clock1Icon,
-    MessageSquare
+    MessageSquare,
+    CalendarIcon,
+    Target
 } from "lucide-react";
 import Link from 'next/link';
 
@@ -48,7 +51,6 @@ interface SubMenuItem {
 interface OpenSections {
     [key: string]: boolean;
 }
-
 
 const getTimeBasedGreeting = (): string => {
     const hour = new Date().getHours();
@@ -92,7 +94,7 @@ const Navigation: React.FC = () => {
         },
         {
             id: "campaigns",
-            icon: <TicketIcon className="w-4 h-4" />,
+            icon: <Target className="w-4 h-4" />,
             label: "Campaigns",
             link: "/campaigns",
             isDropdown: false,
@@ -100,7 +102,7 @@ const Navigation: React.FC = () => {
         },
         {
             id: "conversation-history",
-            label: "Conversation History",
+            label: "Conversations",
             link: "/dashboard/conversation-history",
             icon: <Clock1Icon className="w-4 h-4" />,
             isDropdown: false,
@@ -109,14 +111,14 @@ const Navigation: React.FC = () => {
         {
             id: "tickets",
             icon: <TicketIcon className="w-4 h-4" />,
-            label: "Tickets & Queries",
+            label: "Tickets",
             link: "/tickets",
             isDropdown: false,
             showMenu: true
         },
         {
             id: "bookings",
-            icon: <TicketIcon className="w-4 h-4" />,
+            icon: <CalendarIcon className="w-4 h-4" />,
             label: "Bookings",
             link: "/bookings",
             isDropdown: false,
@@ -211,7 +213,6 @@ const Navigation: React.FC = () => {
         }
     };
 
-
     const Icon: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => (
         <div className="relative w-8 h-8 flex items-center justify-center">
             <span className="relative z-10">{children}</span>
@@ -285,47 +286,90 @@ const Navigation: React.FC = () => {
         item: MenuItem,
         onItemClick?: () => void
     }> = React.memo(({ item, onItemClick }) => {
+        const isOpen = openSections[item.id];
 
         return (
-            <>
-                {item.items && (
-                    <div className="space-y-2 overflow-hidden">
-                        {item.items.map((subItem) => (
-                            <RegularMenuItem
-                                key={subItem.id}
-                                item={subItem}
-                                onItemClick={onItemClick}
-                            />
-                        ))}
+            <div className="space-y-2">
+                <Button
+                    variant="ghost"
+                    className="w-full justify-between text-gray-800 hover:bg-gray-100"
+                    onClick={() => toggleSection(item.id)}
+                >
+                    <div className="flex items-center">
+                        {item.icon}
+                        <span className="ml-3">{item.label}</span>
                     </div>
-                )}
-            </>
+                    {isOpen ? (
+                        <ChevronUpIcon className="w-4 h-4" />
+                    ) : (
+                        <ChevronDownIcon className="w-4 h-4" />
+                    )}
+                </Button>
+
+                <AnimatePresence>
+                    {isOpen && item.items && (
+                        <motion.div
+                            variants={dropdownVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            className="space-y-1 pl-8"
+                        >
+                            {item.items.map((subItem) => (
+                                <Link
+                                    key={subItem.id}
+                                    href={subItem.link}
+                                    onClick={onItemClick}
+                                >
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start text-gray-600 hover:text-[#0A1E4E] hover:bg-gray-50"
+                                    >
+                                        {subItem.icon}
+                                        <span className="ml-3">{subItem.label}</span>
+                                    </Button>
+                                </Link>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
         );
     });
 
     const RegularMenuItem: React.FC<{
-        item: MenuItem,
+        item: MenuItem | SubMenuItem,
         isMobile?: boolean,
         isCollapsed?: boolean,
         onItemClick?: () => void
     }> = React.memo(({ item, isMobile = false, isCollapsed = false, onItemClick }) => (
         <Link
-            href={item.link || "#"}
+            href={'link' in item ? (item.link || "#") : "#"}
             onClick={onItemClick}
         >
             <Button
                 variant="ghost"
                 className={`w-full justify-start text-gray-800 hover:text-[#0A1E4E] hover:bg-${isMobile ? 'gray-100' : 'gray-200'} ${isCollapsed ? "px-2" : ""}`}
             >
-                <Icon>{item.icon}</Icon>
-                {!isCollapsed && (
-                    <motion.span
-                        variants={contentVariants}
-                        initial="visible"
-                        animate={isCollapsed ? "hidden" : "visible"}
-                    >
-                        {item.label}
-                    </motion.span>
+                {isMobile ? (
+                    <>
+                        {item.icon}
+                        <span className="ml-3">{item.label}</span>
+                    </>
+                ) : (
+                    <>
+                        <Icon>{item.icon}</Icon>
+                        {!isCollapsed && (
+                            <motion.span
+                                className="ml-2"
+                                variants={contentVariants}
+                                initial="visible"
+                                animate={isCollapsed ? "hidden" : "visible"}
+                            >
+                                {item.label}
+                            </motion.span>
+                        )}
+                    </>
                 )}
             </Button>
         </Link>
@@ -336,7 +380,7 @@ const Navigation: React.FC = () => {
             initial="expanded"
             animate={isCollapsed ? "collapsed" : "expanded"}
             variants={sidebarVariants}
-            className="relative z-20 bg-white p-4 space-y-6 border-r h-screen hidden lg:block overflow-visible"
+            className="relative z-20 bg-white p-4 space-y-6 border-r h-screen hidden lg:block overflow-hidden"
         >
             {!isCollapsed && (
                 <motion.div
@@ -353,7 +397,7 @@ const Navigation: React.FC = () => {
             <Button
                 variant="ghost"
                 size="icon"
-                className="absolute -right-3 top-4 w-6 h-6 rounded-full bg-white border shadow-md z-50 flex items-center justify-center"
+                className="absolute -right-3 top-4 w-6 h-6 rounded-full bg-white border shadow-md z-[100] flex items-center justify-center hover:scale-110 transition-transform"
                 onClick={() => setIsCollapsed(!isCollapsed)}
             >
                 {isCollapsed ? (
@@ -363,7 +407,7 @@ const Navigation: React.FC = () => {
                 )}
             </Button>
 
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
                 {menuStructure.map((item) => (
                     <div key={item.id} className="space-y-2">
                         {item.showMenu ?
@@ -404,32 +448,43 @@ const Navigation: React.FC = () => {
         </motion.div>
     );
 
+    // Primary mobile navigation items (for bottom bar)
+    const primaryMobileItems = [
+        menuStructure[0], // Dashboard
+        menuStructure[1], // Campaigns  
+        menuStructure[2], // Conversations
+        menuStructure[3], // Tickets
+    ];
+
     const MobileBottomBar: React.FC = React.memo(() => (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t lg:hidden">
-            <div className="flex justify-between md:justify-evenly items-center px-4 py-2">
-                {menuStructure.slice(0, 4).map((item, index) => (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t lg:hidden safe-area-inset-bottom">
+            <div className="flex justify-around items-center px-2 py-2">
+                {primaryMobileItems.map((item) => (
                     <Link
-                        key={index}
-                        href={item.isDropdown && item.items ? item.items[0].link : (item.link || "#")}
+                        key={item.id}
+                        href={item.link || "#"}
+                        className="flex-1"
                     >
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="flex flex-col items-center p-2"
+                            className="w-full flex flex-col items-center p-1 h-auto"
                         >
                             {item.icon}
-                            <span className="text-xs mt-1">{item.label.split('&')[0]}</span>
+                            <span className="text-[10px] mt-1 truncate max-w-[60px]">
+                                {item.label.split(' ')[0]}
+                            </span>
                         </Button>
                     </Link>
                 ))}
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="flex flex-col items-center p-2"
+                    className="flex-1 flex flex-col items-center p-1 h-auto"
                     onClick={() => setIsMobileMenuOpen(true)}
                 >
                     <MenuIcon className="w-4 h-4" />
-                    <span className="text-xs mt-1">More</span>
+                    <span className="text-[10px] mt-1">More</span>
                 </Button>
             </div>
         </div>
@@ -453,10 +508,10 @@ const Navigation: React.FC = () => {
                     animate={{ x: 0 }}
                     exit={{ x: '100%' }}
                     transition={{ type: 'tween', duration: 0.3 }}
-                    className="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-xl"
+                    className="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-xl overflow-y-auto"
                 >
-                    <div className="p-4 h-full overflow-y-auto">
-                        <div className="flex justify-between items-center mb-8">
+                    <div className="sticky top-0 bg-white z-10 p-4 border-b">
+                        <div className="flex justify-between items-center">
                             <h1 className="text-xl font-bold text-[#0A1E4E]">Menu</h1>
                             <Button
                                 variant="ghost"
@@ -466,11 +521,13 @@ const Navigation: React.FC = () => {
                                 <XIcon className="w-6 h-6" />
                             </Button>
                         </div>
+                    </div>
 
-                        <div className="space-y-4">
+                    <div className="p-4 pb-20">
+                        <div className="space-y-2">
                             {menuStructure.map((item) => (
-                                <div key={item.id} className="space-y-2">
-                                    {item.showMenu ?
+                                <div key={item.id}>
+                                    {item.showMenu && (
                                         item.isDropdown ? (
                                             <MobileDropdownSection
                                                 item={item}
@@ -483,8 +540,7 @@ const Navigation: React.FC = () => {
                                                 onItemClick={() => setIsMobileMenuOpen(false)}
                                             />
                                         )
-                                        : null
-                                    }
+                                    )}
                                 </div>
                             ))}
                         </div>
