@@ -1,90 +1,251 @@
-contexts\campaign-context.tsx"use client"
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import campaignService from '@/services/campaign-service'
-import { useIsAuthenticated } from '@/hooks/use-is-authenticated'
-import { useCompany } from './company-context'
-interface CampaignContextType {
-    campaigns: any[]
-    loading: boolean
-    createCampaign: (data: any) => Promise<void>
-    updateCampaign: (id: string, data: any) => Promise<void>
-    deleteCampaign: (id: string) => Promise<void>
-    startCampaign: (id: string) => Promise<void>
-    pauseCampaign: (id: string) => Promise<void>
-    refreshCampaigns: () => Promise<void>
+// services/campaign-service.ts
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+
+interface Campaign {
+    id: string
+    companyId: string
+    name: string
+    description: string
+    status: 'draft' | 'active' | 'paused' | 'completed'
+    leads: any[]
+    settings: any
+    metrics: any
+    createdAt: string
+    updatedAt: string
 }
-const CampaignContext = createContext<CampaignContextType | undefined>(undefined)
-export function CampaignProvider({ children }: { children: ReactNode }) {
-    const [campaigns, setCampaigns] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
-    const { token } = useIsAuthenticated()
-    const { company } = useCompany()
-    const fetchCampaigns = async () => {
-        if (!token || !company?.id) return
-       
-        try {
-            setLoading(true)
-            const data = await campaignService.getCampaigns(company.id, token)
-            setCampaigns(data)
-        } catch (error) {
-            console.error('Error fetching campaigns:', error)
-        } finally {
-            setLoading(false)
+
+class CampaignService {
+    private getHeaders(token: string) {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
     }
-    useEffect(() => {
-        fetchCampaigns()
-    }, [token, company])
-    const createCampaign = async (data: any) => {
-        if (!token) throw new Error('No authentication token')
-       
-        const campaign = await campaignService.createCampaign(data, token)
-        setCampaigns([...campaigns, campaign])
-        return campaign
+
+    async getCampaigns(companyId: string, token: string): Promise<Campaign[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns?companyId=${companyId}`, {
+                method: 'GET',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch campaigns: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error fetching campaigns:', error)
+            throw error
+        }
     }
-    const updateCampaign = async (id: string, data: any) => {
-        if (!token) throw new Error('No authentication token')
-       
-        const updated = await campaignService.updateCampaign(id, data, token)
-        setCampaigns(campaigns.map(c => c.id === id ? updated : c))
+
+    async getCampaign(id: string, token: string): Promise<Campaign> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${id}`, {
+                method: 'GET',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch campaign: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error fetching campaign:', error)
+            throw error
+        }
     }
-    const deleteCampaign = async (id: string) => {
-        if (!token) throw new Error('No authentication token')
-       
-        await campaignService.deleteCampaign(id, token)
-        setCampaigns(campaigns.filter(c => c.id !== id))
+
+    async createCampaign(data: Partial<Campaign>, token: string): Promise<Campaign> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns`, {
+                method: 'POST',
+                headers: this.getHeaders(token),
+                body: JSON.stringify(data)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to create campaign: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error creating campaign:', error)
+            throw error
+        }
     }
-    const startCampaign = async (id: string) => {
-        if (!token) throw new Error('No authentication token')
-       
-        await campaignService.startCampaign(id, token)
-        await fetchCampaigns()
+
+    async updateCampaign(id: string, data: Partial<Campaign>, token: string): Promise<Campaign> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${id}`, {
+                method: 'PUT',
+                headers: this.getHeaders(token),
+                body: JSON.stringify(data)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to update campaign: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error updating campaign:', error)
+            throw error
+        }
     }
-    const pauseCampaign = async (id: string) => {
-        if (!token) throw new Error('No authentication token')
-       
-        await campaignService.pauseCampaign(id, token)
-        await fetchCampaigns()
+
+    async deleteCampaign(id: string, token: string): Promise<void> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${id}`, {
+                method: 'DELETE',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete campaign: ${response.statusText}`)
+            }
+        } catch (error) {
+            console.error('Error deleting campaign:', error)
+            throw error
+        }
     }
-    return (
-        <CampaignContext.Provider value={{
-            campaigns,
-            loading,
-            createCampaign,
-            updateCampaign,
-            deleteCampaign,
-            startCampaign,
-            pauseCampaign,
-            refreshCampaigns: fetchCampaigns
-        }}>
-            {children}
-        </CampaignContext.Provider>
-    )
+
+    async startCampaign(id: string, token: string): Promise<Campaign> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${id}/start`, {
+                method: 'POST',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to start campaign: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error starting campaign:', error)
+            throw error
+        }
+    }
+
+    async pauseCampaign(id: string, token: string): Promise<Campaign> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${id}/pause`, {
+                method: 'POST',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to pause campaign: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error pausing campaign:', error)
+            throw error
+        }
+    }
+
+    async uploadLeads(campaignId: string, file: File, token: string): Promise<any> {
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('campaignId', campaignId)
+
+            const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/leads/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to upload leads: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error uploading leads:', error)
+            throw error
+        }
+    }
+
+    async getLeads(campaignId: string, token: string): Promise<any[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/leads`, {
+                method: 'GET',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch leads: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error fetching leads:', error)
+            throw error
+        }
+    }
+
+    async updateLead(campaignId: string, leadId: string, data: any, token: string): Promise<any> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/leads/${leadId}`, {
+                method: 'PUT',
+                headers: this.getHeaders(token),
+                body: JSON.stringify(data)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to update lead: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error updating lead:', error)
+            throw error
+        }
+    }
+
+    async deleteLead(campaignId: string, leadId: string, token: string): Promise<void> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/leads/${leadId}`, {
+                method: 'DELETE',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete lead: ${response.statusText}`)
+            }
+        } catch (error) {
+            console.error('Error deleting lead:', error)
+            throw error
+        }
+    }
+
+    async getCampaignMetrics(campaignId: string, token: string): Promise<any> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/metrics`, {
+                method: 'GET',
+                headers: this.getHeaders(token)
+            })
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch campaign metrics: ${response.statusText}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error fetching campaign metrics:', error)
+            throw error
+        }
+    }
 }
-export function useCampaigns() {
-    const context = useContext(CampaignContext)
-    if (!context) {
-        throw new Error('useCampaigns must be used within CampaignProvider')
-    }
-    return context
-}
+
+// Export a singleton instance
+const campaignService = new CampaignService()
+export default campaignService
