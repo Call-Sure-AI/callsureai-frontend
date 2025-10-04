@@ -3,12 +3,10 @@
 
 import { useState, useRef, useEffect } from "react"
 import {
-    Upload,
     Plus,
     Calendar,
     Mail,
     Phone,
-    FileText,
     Settings,
     Play,
     Pause,
@@ -69,287 +67,127 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "@/hooks/use-toast"
+import { useCampaigns } from "@/contexts/campaign-context"
+import { useAgents } from "@/contexts/agent-context"
+import { CampaignFormState, defaultBookingConfig, defaultAutomationConfig, defaultDataMapping, FormValidationErrors } from "@/types/campaign"
+import { FileUploadComponent, DataMappingComponent, BookingConfigComponent, AutomationConfigComponent } from "@/components/campaigns/form-components"
 
-interface Lead {
-    id: string
-    name: string
-    email: string
-    phone?: string
-    company?: string
-    location?: string
-    status: 'new' | 'contacted' | 'qualified' | 'booked' | 'completed' | 'failed'
-    customFields?: Record<string, any>
-}
-
-interface Campaign {
-    id: string
-    name: string
-    description: string
-    status: 'draft' | 'active' | 'paused' | 'completed'
-    leads: Lead[]
-    settings: CampaignSettings
-    metrics: CampaignMetrics
-    createdAt: string
-    updatedAt: string
-}
-
-interface CampaignSettings {
-    dataFields: DataField[]
-    bookingEnabled: boolean
-    bookingSettings?: BookingSettings
-    emailSettings?: EmailSettings
-    callSettings?: CallSettings
-    schedule?: ScheduleSettings
-}
-
-interface DataField {
-    fieldName: string
-    csvColumn: string
-    required: boolean
-    type: 'text' | 'email' | 'phone' | 'number' | 'date'
-}
-
-interface BookingSettings {
-    calendarType: 'google' | 'outlook' | 'calendly'
-    meetingDuration: number
-    bufferTime: number
-    availableSlots: TimeSlot[]
-    sendInviteToLead: boolean
-    sendInviteToTeam: boolean
-    teamEmails: string[]
-    bookingUrl?: string
-}
-
-interface TimeSlot {
-    day: string
-    startTime: string
-    endTime: string
-}
-
-interface EmailSettings {
-    subject: string
-    template: string
-    followUpEnabled: boolean
-    followUpDelay: number
-}
-
-interface CallSettings {
-    agentId: string
-    script: string
-    maxAttempts: number
-    callInterval: number
-}
-
-interface ScheduleSettings {
-    startDate: string
-    endDate: string
-    dailyLimit: number
-    timezone: string
-}
-
-interface CampaignMetrics {
-    totalLeads: number
-    contacted: number
-    qualified: number
-    booked: number
-    completed: number
-    failed: number
-    responseRate: number
-    bookingRate: number
-}
+// Using types from campaign.ts
 
 export default function CampaignsPage() {
-    const fileInputRef = useRef<HTMLInputElement>(null)
-    
-    const [campaigns, setCampaigns] = useState<Campaign[]>([])
-    const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
+    const { campaigns, loading, error, createNewCampaign, updateCampaign, validateForm, refreshCampaigns } = useCampaigns();
+    const { agents } = useAgents();
+
+    const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showSettingsDialog, setShowSettingsDialog] = useState(false)
     const [showLeadsDialog, setShowLeadsDialog] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [csvData, setCsvData] = useState<any[]>([])
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [csvHeaders, setCsvHeaders] = useState<string[]>([])
-    
+    const [csvData, setCsvData] = useState<any[]>([])
+    const [formErrors, setFormErrors] = useState<FormValidationErrors>({})
+
     // New campaign form state
-    const [newCampaign, setNewCampaign] = useState<Partial<Campaign>>({
-        name: '',
+    const [formData, setFormData] = useState<CampaignFormState>({
+        campaign_name: '',
         description: '',
-        status: 'draft',
-        settings: {
-            dataFields: [],
-            bookingEnabled: false,
-            emailSettings: {
-                subject: '',
-                template: '',
-                followUpEnabled: false,
-                followUpDelay: 24
-            },
-            callSettings: {
-                agentId: '',
-                script: '',
-                maxAttempts: 3,
-                callInterval: 24
-            }
-        }
+        agent_id: '',
+        data_mapping: defaultDataMapping,
+        booking_enabled: false,
+        booking_config: defaultBookingConfig,
+        automation_config: defaultAutomationConfig,
+        csv_file: null,
+        csv_headers: [],
+        csv_data: []
     })
 
-    // Mock data for demonstration
-    useEffect(() => {
-        const mockCampaigns: Campaign[] = [
-            {
-                id: '1',
-                name: 'Q1 Sales Outreach',
-                description: 'Targeting enterprise clients for Q1',
-                status: 'active',
-                leads: [],
-                settings: {
-                    dataFields: [
-                        { fieldName: 'Name', csvColumn: 'full_name', required: true, type: 'text' },
-                        { fieldName: 'Email', csvColumn: 'email', required: true, type: 'email' },
-                        { fieldName: 'Phone', csvColumn: 'phone', required: false, type: 'phone' },
-                        { fieldName: 'Company', csvColumn: 'company', required: false, type: 'text' }
-                    ],
-                    bookingEnabled: true,
-                    bookingSettings: {
-                        calendarType: 'google',
-                        meetingDuration: 30,
-                        bufferTime: 15,
-                        availableSlots: [],
-                        sendInviteToLead: true,
-                        sendInviteToTeam: true,
-                        teamEmails: ['team@example.com']
-                    }
-                },
-                metrics: {
-                    totalLeads: 150,
-                    contacted: 120,
-                    qualified: 45,
-                    booked: 30,
-                    completed: 25,
-                    failed: 5,
-                    responseRate: 80,
-                    bookingRate: 25
-                },
-                createdAt: '2025-01-10',
-                updatedAt: '2025-01-15'
-            }
-        ]
-        setCampaigns(mockCampaigns)
-    }, [])
-
-    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
-
-        const reader = new FileReader()
-        reader.onload = async (e) => {
-            const text = e.target?.result as string
-            const rows = text.split('\n').map(row => row.split(','))
-            const headers = rows[0].map(h => h.trim())
+    // Parse CSV file and extract headers
+    const parseCSVFile = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target?.result as string;
+            const rows = text.split('\n').map(row => row.split(','));
+            const headers = rows[0].map(h => h.trim());
             const data = rows.slice(1).map(row => {
-                const obj: any = {}
+                const obj: any = {};
                 headers.forEach((header, index) => {
-                    obj[header] = row[index]?.trim()
-                })
-                return obj
-            }).filter(row => Object.values(row).some(v => v))
+                    obj[header] = row[index]?.trim();
+                });
+                return obj;
+            }).filter(row => Object.values(row).some(v => v));
 
-            setCsvHeaders(headers)
-            setCsvData(data)
-            
-            toast({
-                title: "CSV Uploaded",
-                description: `Loaded ${data.length} leads from file`,
-            })
-        }
-        reader.readAsText(file)
-    }
+            setCsvHeaders(headers);
+            setCsvData(data);
+            setFormData(prev => ({
+                ...prev,
+                csv_headers: headers,
+                csv_data: data
+            }));
+        };
+        reader.readAsText(file);
+    };
+
+    const handleFileSelect = (file: File) => {
+        setFormData(prev => ({ ...prev, csv_file: file }));
+        parseCSVFile(file);
+        toast({
+            title: "CSV Uploaded",
+            description: `Loaded ${file.name}`,
+        });
+    };
 
     const handleCreateCampaign = async () => {
         try {
-            setIsLoading(true)
-            
-            const campaign: Campaign = {
-                id: Date.now().toString(),
-                name: newCampaign.name || 'New Campaign',
-                description: newCampaign.description || '',
-                status: 'draft',
-                leads: csvData.map((row, index) => ({
-                    id: `lead-${index}`,
-                    name: row[newCampaign.settings?.dataFields?.find(f => f.fieldName === 'Name')?.csvColumn || ''] || '',
-                    email: row[newCampaign.settings?.dataFields?.find(f => f.fieldName === 'Email')?.csvColumn || ''] || '',
-                    phone: row[newCampaign.settings?.dataFields?.find(f => f.fieldName === 'Phone')?.csvColumn || ''],
-                    company: row[newCampaign.settings?.dataFields?.find(f => f.fieldName === 'Company')?.csvColumn || ''],
-                    location: row[newCampaign.settings?.dataFields?.find(f => f.fieldName === 'Location')?.csvColumn || ''],
-                    status: 'new',
-                    customFields: row
-                })),
-                settings: newCampaign.settings as CampaignSettings,
-                metrics: {
-                    totalLeads: csvData.length,
-                    contacted: 0,
-                    qualified: 0,
-                    booked: 0,
-                    completed: 0,
-                    failed: 0,
-                    responseRate: 0,
-                    bookingRate: 0
-                },
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+            setIsSubmitting(true);
+            setFormErrors({});
+
+            // Validate form
+            const errors = validateForm(formData);
+            if (Object.keys(errors).length > 0) {
+                setFormErrors(errors);
+                toast({
+                    title: "Validation Error",
+                    description: "Please fix the errors in the form",
+                    variant: "destructive"
+                });
+                return;
             }
 
-            setCampaigns([...campaigns, campaign])
-            setShowCreateDialog(false)
-            setCsvData([])
-            setCsvHeaders([])
-            
-            toast({
-                title: "Campaign Created",
-                description: `${campaign.name} has been created with ${campaign.leads.length} leads`,
-            })
-        } catch {
-            toast({
-                title: "Error",
-                description: "Failed to create campaign",
-                variant: "destructive"
-            })
+            // Create campaign
+            const success = await createNewCampaign(formData);
+
+            if (success) {
+                setShowCreateDialog(false);
+                // Reset form
+                setFormData({
+                    campaign_name: '',
+                    description: '',
+                    agent_id: '',
+                    data_mapping: defaultDataMapping,
+                    booking_enabled: false,
+                    booking_config: defaultBookingConfig,
+                    automation_config: defaultAutomationConfig,
+                    csv_file: null,
+                    csv_headers: [],
+                    csv_data: []
+                });
+                setCsvData([]);
+                setCsvHeaders([]);
+            }
+        } catch (error) {
+            console.error('Error creating campaign:', error);
         } finally {
-            setIsLoading(false)
+            setIsSubmitting(false);
         }
-    }
+    };
 
     const handleStartCampaign = async (campaignId: string) => {
-        const campaign = campaigns.find(c => c.id === campaignId)
-        if (!campaign) return
-
-        setCampaigns(campaigns.map(c => 
-            c.id === campaignId 
-                ? { ...c, status: 'active' }
-                : c
-        ))
-
-        toast({
-            title: "Campaign Started",
-            description: `${campaign.name} is now active`,
-        })
-    }
+        await updateCampaign(campaignId, 'active');
+    };
 
     const handlePauseCampaign = async (campaignId: string) => {
-        const campaign = campaigns.find(c => c.id === campaignId)
-        if (!campaign) return
-
-        setCampaigns(campaigns.map(c => 
-            c.id === campaignId 
-                ? { ...c, status: 'paused' }
-                : c
-        ))
-
-        toast({
-            title: "Campaign Paused",
-            description: `${campaign.name} has been paused`,
-        })
-    }
+        await updateCampaign(campaignId, 'paused');
+    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -382,13 +220,13 @@ export default function CampaignsPage() {
     }
 
     // Mobile Campaign Card Component
-    const CampaignCard = ({ campaign }: { campaign: Campaign }) => (
+    const CampaignCard = ({ campaign }: { campaign: any }) => (
         <Card className="w-full">
             <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                         <h3 className="font-semibold text-base sm:text-lg line-clamp-1">
-                            {campaign.name}
+                            {campaign.campaign_name}
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mt-1">
                             {campaign.description}
@@ -441,32 +279,32 @@ export default function CampaignsPage() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                
+
                 {/* Mobile Stats Grid */}
                 <div className="grid grid-cols-2 gap-3 mt-4">
                     <div>
                         <p className="text-xs text-gray-500">Leads</p>
-                        <p className="text-lg font-semibold">{campaign.metrics.totalLeads}</p>
+                        <p className="text-lg font-semibold">{campaign.metrics?.total_leads || 0}</p>
                     </div>
                     <div>
                         <p className="text-xs text-gray-500">Contacted</p>
-                        <p className="text-lg font-semibold">{campaign.metrics.contacted}</p>
+                        <p className="text-lg font-semibold">{campaign.metrics?.contacted || 0}</p>
                     </div>
                     <div>
                         <p className="text-xs text-gray-500">Booked</p>
-                        <p className="text-lg font-semibold">{campaign.metrics.booked}</p>
+                        <p className="text-lg font-semibold">{campaign.metrics?.booked || 0}</p>
                     </div>
                     <div>
                         <p className="text-xs text-gray-500">Response Rate</p>
-                        <p className="text-lg font-semibold">{campaign.metrics.responseRate}%</p>
+                        <p className="text-lg font-semibold">{campaign.metrics?.response_rate || 0}%</p>
                     </div>
                 </div>
-                
+
                 {/* Mobile Action Buttons */}
                 <div className="flex gap-2 mt-4">
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
+                    <Button
+                        variant="outline"
+                        size="sm"
                         className="flex-1"
                         onClick={() => {
                             setSelectedCampaign(campaign)
@@ -477,8 +315,8 @@ export default function CampaignsPage() {
                         View Details
                     </Button>
                     {campaign.status === 'draft' && (
-                        <Button 
-                            size="sm" 
+                        <Button
+                            size="sm"
                             className="flex-1 bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
                             onClick={() => handleStartCampaign(campaign.id)}
                         >
@@ -487,8 +325,8 @@ export default function CampaignsPage() {
                         </Button>
                     )}
                     {campaign.status === 'active' && (
-                        <Button 
-                            size="sm" 
+                        <Button
+                            size="sm"
                             variant="secondary"
                             className="flex-1"
                             onClick={() => handlePauseCampaign(campaign.id)}
@@ -514,13 +352,24 @@ export default function CampaignsPage() {
                         Automate your outreach and booking processes
                     </p>
                 </div>
-                <Button 
-                    onClick={() => setShowCreateDialog(true)}
-                    className="w-full sm:w-auto bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Campaign
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={refreshCampaigns}
+                        disabled={loading}
+                        className="w-full sm:w-auto"
+                    >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                    <Button
+                        onClick={() => setShowCreateDialog(true)}
+                        className="w-full sm:w-auto bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Campaign
+                    </Button>
+                </div>
             </div>
 
             {/* Stats Overview - Responsive Grid */}
@@ -536,7 +385,7 @@ export default function CampaignsPage() {
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
@@ -550,28 +399,28 @@ export default function CampaignsPage() {
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs sm:text-sm text-gray-500">Total Leads</p>
                                 <p className="text-xl sm:text-2xl font-bold">
-                                    {campaigns.reduce((acc, c) => acc + c.metrics.totalLeads, 0)}
+                                    {campaigns.reduce((acc, c) => acc + (c.metrics?.total_leads || 0), 0)}
                                 </p>
                             </div>
                             <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
                         </div>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs sm:text-sm text-gray-500">Bookings</p>
                                 <p className="text-xl sm:text-2xl font-bold">
-                                    {campaigns.reduce((acc, c) => acc + c.metrics.booked, 0)}
+                                    {campaigns.reduce((acc, c) => acc + (c.metrics?.booked || 0), 0)}
                                 </p>
                             </div>
                             <CalendarCheck className="w-6 h-6 sm:w-8 sm:h-8 text-amber-500" />
@@ -589,103 +438,148 @@ export default function CampaignsPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="px-0 sm:px-6">
-                    {/* Mobile View - Cards */}
-                    <div className="block lg:hidden space-y-4 px-4">
-                        {campaigns.map((campaign) => (
-                            <CampaignCard key={campaign.id} campaign={campaign} />
-                        ))}
-                    </div>
-
-                    {/* Desktop View - Table */}
-                    <div className="hidden lg:block overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Campaign</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Leads</TableHead>
-                                    <TableHead>Contacted</TableHead>
-                                    <TableHead>Booked</TableHead>
-                                    <TableHead>Response Rate</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                    {loading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex flex-col items-center space-y-4">
+                                <RefreshCw className="w-8 h-8 animate-spin text-[#0A1E4E]" />
+                                <p className="text-sm text-gray-500">Loading campaigns...</p>
+                            </div>
+                        </div>
+                    ) : error ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex flex-col items-center space-y-4">
+                                <AlertCircle className="w-8 h-8 text-red-500" />
+                                <p className="text-sm text-red-600">{error}</p>
+                                <Button
+                                    variant="outline"
+                                    onClick={refreshCampaigns}
+                                    className="mt-2"
+                                >
+                                    <RefreshCw className="w-4 h-4 mr-2" />
+                                    Retry
+                                </Button>
+                            </div>
+                        </div>
+                    ) : campaigns.length === 0 ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex flex-col items-center space-y-4">
+                                <Target className="w-12 h-12 text-gray-300" />
+                                <div className="text-center">
+                                    <h3 className="text-lg font-medium text-gray-900">No campaigns yet</h3>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Create your first campaign to start automating your sales outreach
+                                    </p>
+                                </div>
+                                <Button
+                                    onClick={() => setShowCreateDialog(true)}
+                                    className="mt-4 bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Create Campaign
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Mobile View - Cards */}
+                            <div className="block lg:hidden space-y-4 px-4">
                                 {campaigns.map((campaign) => (
-                                    <TableRow key={campaign.id}>
-                                        <TableCell>
-                                            <div>
-                                                <p className="font-medium">{campaign.name}</p>
-                                                <p className="text-sm text-gray-500">{campaign.description}</p>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge className={getStatusColor(campaign.status)}>
-                                                <span className="flex items-center gap-1">
-                                                    {getStatusIcon(campaign.status)}
-                                                    {campaign.status}
-                                                </span>
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{campaign.metrics.totalLeads}</TableCell>
-                                        <TableCell>{campaign.metrics.contacted}</TableCell>
-                                        <TableCell>{campaign.metrics.booked}</TableCell>
-                                        <TableCell>{campaign.metrics.responseRate}%</TableCell>
-                                        <TableCell>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreVertical className="w-4 h-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    {campaign.status === 'draft' && (
-                                                        <DropdownMenuItem 
-                                                            onClick={() => handleStartCampaign(campaign.id)}
-                                                        >
-                                                            <Play className="w-4 h-4 mr-2" />
-                                                            Start Campaign
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                    {campaign.status === 'active' && (
-                                                        <DropdownMenuItem 
-                                                            onClick={() => handlePauseCampaign(campaign.id)}
-                                                        >
-                                                            <Pause className="w-4 h-4 mr-2" />
-                                                            Pause Campaign
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                    <DropdownMenuItem 
-                                                        onClick={() => {
-                                                            setSelectedCampaign(campaign)
-                                                            setShowLeadsDialog(true)
-                                                        }}
-                                                    >
-                                                        <Users className="w-4 h-4 mr-2" />
-                                                        View Leads
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem 
-                                                        onClick={() => {
-                                                            setSelectedCampaign(campaign)
-                                                            setShowSettingsDialog(true)
-                                                        }}
-                                                    >
-                                                        <Settings className="w-4 h-4 mr-2" />
-                                                        Settings
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem className="text-red-600">
-                                                        <Trash2 className="w-4 h-4 mr-2" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
+                                    <CampaignCard key={campaign.id} campaign={campaign} />
                                 ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                            </div>
+
+                            {/* Desktop View - Table */}
+                            <div className="hidden lg:block overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Campaign</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Leads</TableHead>
+                                            <TableHead>Contacted</TableHead>
+                                            <TableHead>Booked</TableHead>
+                                            <TableHead>Response Rate</TableHead>
+                                            <TableHead>Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {campaigns.map((campaign) => (
+                                            <TableRow key={campaign.id}>
+                                                <TableCell>
+                                                    <div>
+                                                        <p className="font-medium">{campaign.campaign_name}</p>
+                                                        <p className="text-sm text-gray-500">{campaign.description}</p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={getStatusColor(campaign.status)}>
+                                                        <span className="flex items-center gap-1">
+                                                            {getStatusIcon(campaign.status)}
+                                                            {campaign.status}
+                                                        </span>
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>{campaign.metrics?.total_leads || 0}</TableCell>
+                                                <TableCell>{campaign.metrics?.contacted || 0}</TableCell>
+                                                <TableCell>{campaign.metrics?.booked || 0}</TableCell>
+                                                <TableCell>{campaign.metrics?.response_rate || 0}%</TableCell>
+                                                <TableCell>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon">
+                                                                <MoreVertical className="w-4 h-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            {campaign.status === 'draft' && (
+                                                                <DropdownMenuItem
+                                                                    onClick={() => handleStartCampaign(campaign.id)}
+                                                                >
+                                                                    <Play className="w-4 h-4 mr-2" />
+                                                                    Start Campaign
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            {campaign.status === 'active' && (
+                                                                <DropdownMenuItem
+                                                                    onClick={() => handlePauseCampaign(campaign.id)}
+                                                                >
+                                                                    <Pause className="w-4 h-4 mr-2" />
+                                                                    Pause Campaign
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setSelectedCampaign(campaign)
+                                                                    setShowLeadsDialog(true)
+                                                                }}
+                                                            >
+                                                                <Users className="w-4 h-4 mr-2" />
+                                                                View Leads
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setSelectedCampaign(campaign)
+                                                                    setShowSettingsDialog(true)
+                                                                }}
+                                                            >
+                                                                <Settings className="w-4 h-4 mr-2" />
+                                                                Settings
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem className="text-red-600">
+                                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
 
@@ -710,243 +604,131 @@ export default function CampaignsPage() {
                         <TabsContent value="basics" className="space-y-4 mt-4">
                             <div>
                                 <Label className="text-sm">Campaign Name</Label>
-                                <Input 
+                                <Input
                                     placeholder="e.g., Q1 Sales Outreach"
-                                    value={newCampaign.name}
-                                    onChange={(e) => setNewCampaign({
-                                        ...newCampaign,
-                                        name: e.target.value
+                                    value={formData.campaign_name}
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        campaign_name: e.target.value
                                     })}
                                     className="mt-1"
                                 />
+                                {formErrors.campaign_name && (
+                                    <p className="text-sm text-red-600 mt-1">{formErrors.campaign_name}</p>
+                                )}
                             </div>
 
                             <div>
                                 <Label className="text-sm">Description</Label>
-                                <Textarea 
+                                <Textarea
                                     placeholder="Describe your campaign goals..."
-                                    value={newCampaign.description}
-                                    onChange={(e) => setNewCampaign({
-                                        ...newCampaign,
+                                    value={formData.description}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({
+                                        ...formData,
                                         description: e.target.value
                                     })}
                                     className="mt-1"
                                     rows={3}
                                 />
+                                {formErrors.description && (
+                                    <p className="text-sm text-red-600 mt-1">{formErrors.description}</p>
+                                )}
                             </div>
 
                             <div>
-                                <Label className="text-sm">Upload Leads CSV</Label>
-                                <div className="mt-2">
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept=".csv"
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="w-full"
-                                    >
-                                        <Upload className="w-4 h-4 mr-2" />
-                                        Choose CSV File
-                                    </Button>
-                                </div>
-                                {csvData.length > 0 && (
-                                    <p className="text-sm text-green-600 mt-2">
-                                        ✓ Loaded {csvData.length} leads
-                                    </p>
+                                <Label className="text-sm">Select Agent</Label>
+                                <Select
+                                    value={formData.agent_id}
+                                    onValueChange={(value) => setFormData({
+                                        ...formData,
+                                        agent_id: value
+                                    })}
+                                >
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue placeholder="Select an agent" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {agents.map((agent) => (
+                                            <SelectItem key={agent.id} value={agent.id || ''}>
+                                                {agent.name || 'Unnamed Agent'}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {formErrors.agent_id && (
+                                    <p className="text-sm text-red-600 mt-1">{formErrors.agent_id}</p>
                                 )}
                             </div>
+
+                            <FileUploadComponent
+                                onFileSelect={handleFileSelect}
+                                selectedFile={formData.csv_file}
+                                error={formErrors.csv_file}
+                            />
                         </TabsContent>
 
                         <TabsContent value="data" className="space-y-4 mt-4">
-                            <div className="space-y-2">
-                                <Label className="text-sm">Map CSV Columns to Data Fields</Label>
-                                <p className="text-xs text-gray-500">
-                                    Select which columns from your CSV correspond to each data field
-                                </p>
-                            </div>
-
-                            {csvHeaders.length > 0 && (
-                                <div className="space-y-3">
-                                    {['Name', 'Email', 'Phone', 'Company', 'Location'].map((field) => (
-                                        <div key={field} className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 items-center">
-                                            <Label className="text-sm">{field}</Label>
-                                            <Select
-                                                onValueChange={(value) => {
-                                                    const fields = newCampaign.settings?.dataFields || []
-                                                    const existingIndex = fields.findIndex(f => f.fieldName === field)
-                                                    
-                                                    if (existingIndex >= 0) {
-                                                        fields[existingIndex].csvColumn = value
-                                                    } else {
-                                                        fields.push({
-                                                            fieldName: field,
-                                                            csvColumn: value,
-                                                            required: field === 'Name' || field === 'Email',
-                                                            type: field === 'Email' ? 'email' : field === 'Phone' ? 'phone' : 'text'
-                                                        })
-                                                    }
-                                                    
-                                                    setNewCampaign({
-                                                        ...newCampaign,
-                                                        settings: {
-                                                            ...newCampaign.settings!,
-                                                            dataFields: fields
-                                                        }
-                                                    })
-                                                }}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select column" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {csvHeaders.map((header) => (
-                                                        <SelectItem key={header} value={header}>
-                                                            {header}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <div className="flex items-center space-x-2">
-                                                <Switch 
-                                                    defaultChecked={field === 'Name' || field === 'Email'}
-                                                    disabled={field === 'Name' || field === 'Email'}
-                                                />
-                                                <Label className="text-sm">Required</Label>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {csvHeaders.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                                    <p className="text-sm">Upload a CSV file first to map columns</p>
-                                </div>
-                            )}
+                            <DataMappingComponent
+                                csvHeaders={formData.csv_headers}
+                                dataMapping={formData.data_mapping}
+                                onMappingChange={(mapping) => setFormData({
+                                    ...formData,
+                                    data_mapping: mapping
+                                })}
+                                error={formErrors.data_mapping}
+                            />
                         </TabsContent>
 
                         <TabsContent value="booking" className="space-y-4 mt-4">
                             <div className="flex items-center justify-between">
                                 <Label className="text-sm">Enable Booking</Label>
-                                <Switch 
-                                    checked={newCampaign.settings?.bookingEnabled}
-                                    onCheckedChange={(checked) => setNewCampaign({
-                                        ...newCampaign,
-                                        settings: {
-                                            ...newCampaign.settings!,
-                                            bookingEnabled: checked
-                                        }
+                                <Switch
+                                    checked={formData.booking_enabled}
+                                    onCheckedChange={(checked: boolean) => setFormData({
+                                        ...formData,
+                                        booking_enabled: checked
                                     })}
                                 />
                             </div>
 
-                            {newCampaign.settings?.bookingEnabled && (
-                                <>
-                                    <div>
-                                        <Label className="text-sm">Calendar Integration</Label>
-                                        <Select defaultValue="google">
-                                            <SelectTrigger className="mt-1">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="google">Google Calendar</SelectItem>
-                                                <SelectItem value="outlook">Outlook Calendar</SelectItem>
-                                                <SelectItem value="calendly">Calendly</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label className="text-sm">Meeting Duration (min)</Label>
-                                            <Input type="number" defaultValue="30" className="mt-1" />
-                                        </div>
-                                        <div>
-                                            <Label className="text-sm">Buffer Time (min)</Label>
-                                            <Input type="number" defaultValue="15" className="mt-1" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center space-x-2">
-                                            <Switch defaultChecked />
-                                            <Label className="text-sm">Send calendar invite to lead</Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Switch defaultChecked />
-                                            <Label className="text-sm">Send calendar invite to team</Label>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label className="text-sm">Team Email Addresses</Label>
-                                        <Textarea 
-                                            placeholder="Enter email addresses (one per line)"
-                                            rows={3}
-                                            className="mt-1"
-                                        />
-                                    </div>
-                                </>
+                            {formData.booking_enabled && (
+                                <BookingConfigComponent
+                                    bookingConfig={formData.booking_config}
+                                    onConfigChange={(config) => setFormData({
+                                        ...formData,
+                                        booking_config: config
+                                    })}
+                                    error={formErrors.booking_config}
+                                />
                             )}
                         </TabsContent>
 
                         <TabsContent value="automation" className="space-y-4 mt-4">
-                            <div>
-                                <Label className="text-sm">Email Template</Label>
-                                <Textarea 
-                                    placeholder="Hi {name}, ..."
-                                    rows={4}
-                                    className="mt-1"
-                                />
-                            </div>
-
-                            <div>
-                                <Label className="text-sm">Call Script</Label>
-                                <Textarea 
-                                    placeholder="Hello {name}, I'm calling from..."
-                                    rows={4}
-                                    className="mt-1"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <Label className="text-sm">Max Call Attempts</Label>
-                                    <Input type="number" defaultValue="3" className="mt-1" />
-                                </div>
-                                <div>
-                                    <Label className="text-sm">Call Interval (hours)</Label>
-                                    <Input type="number" defaultValue="24" className="mt-1" />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                                <Switch />
-                                <Label className="text-sm">Enable follow-up emails</Label>
-                            </div>
+                            <AutomationConfigComponent
+                                automationConfig={formData.automation_config}
+                                onConfigChange={(config) => setFormData({
+                                    ...formData,
+                                    automation_config: config
+                                })}
+                                error={formErrors.automation_config}
+                            />
                         </TabsContent>
                     </Tabs>
 
                     <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => setShowCreateDialog(false)}
                             className="w-full sm:w-auto"
                         >
                             Cancel
                         </Button>
-                        <Button 
+                        <Button
                             onClick={handleCreateCampaign}
-                            disabled={isLoading}
+                            disabled={isSubmitting}
                             className="w-full sm:w-auto bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
                         >
-                            {isLoading ? (
+                            {isSubmitting ? (
                                 <>
                                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                                     Creating...
@@ -968,13 +750,13 @@ export default function CampaignsPage() {
                     <DialogHeader>
                         <DialogTitle className="text-lg sm:text-xl">Campaign Leads</DialogTitle>
                         <DialogDescription className="text-sm">
-                            {selectedCampaign?.name} - {selectedCampaign?.leads?.length || 0} leads
+                            {selectedCampaign?.campaign_name} - {selectedCampaign?.metrics?.total_leads || 0} leads
                         </DialogDescription>
                     </DialogHeader>
 
                     {/* Mobile View - Lead Cards */}
                     <div className="block lg:hidden overflow-auto max-h-[60vh] space-y-3">
-                        {selectedCampaign?.leads?.map((lead) => (
+                        {selectedCampaign?.leads?.map((lead: any) => (
                             <Card key={lead.id}>
                                 <CardContent className="p-4">
                                     <div className="flex justify-between items-start mb-2">
@@ -1029,7 +811,7 @@ export default function CampaignsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {selectedCampaign?.leads?.map((lead) => (
+                                {selectedCampaign?.leads?.map((lead: any) => (
                                     <TableRow key={lead.id}>
                                         <TableCell>{lead.name}</TableCell>
                                         <TableCell>{lead.email}</TableCell>
@@ -1077,7 +859,7 @@ export default function CampaignsPage() {
                     <DialogHeader>
                         <DialogTitle className="text-lg sm:text-xl">Campaign Settings</DialogTitle>
                         <DialogDescription className="text-sm">
-                            Configure settings for {selectedCampaign?.name}
+                            Configure settings for {selectedCampaign?.campaign_name}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
@@ -1086,8 +868,8 @@ export default function CampaignsPage() {
                         </p>
                     </div>
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => setShowSettingsDialog(false)}
                             className="w-full sm:w-auto"
                         >

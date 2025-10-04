@@ -3,6 +3,7 @@
 import { ActivityProvider } from '@/contexts/activity-context';
 import { AgentProvider } from '@/contexts/agent-context';
 import { CompanyProvider } from '@/contexts/company-context';
+import { CampaignProvider } from '@/contexts/campaign-context';
 
 interface AppProvidersProps {
     children: React.ReactNode;
@@ -13,7 +14,9 @@ export function AppProviders({ children }: AppProvidersProps) {
         <ActivityProvider>
             <AgentProvider>
                 <CompanyProvider>
-                    {children}
+                    <CampaignProvider>
+                        {children}
+                    </CampaignProvider>
                 </CompanyProvider>
             </AgentProvider>
         </ActivityProvider>

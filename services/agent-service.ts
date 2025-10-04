@@ -28,7 +28,7 @@ export const createAdminAgent = async (params: AgentFormData, company_id: string
 
         // Get the token from localStorage (or wherever you store it)
         const token = localStorage.getItem('auth_token');
-        
+
         // Log request info for debugging
         console.log('Request URL:', `${process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`);
         console.log('FormData entries:', [...formData.entries()].map(e => e[0]));
@@ -65,12 +65,12 @@ export const createAdminAgent = async (params: AgentFormData, company_id: string
         return result;
     } catch (error: any) {
         console.error('Error creating admin agent:', error);
-        
+
         // Add more specific error messages based on the error type
         if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
             throw new Error('Network error: Could not connect to the server. Please check your connection and try again.');
         }
-        
+
         throw new Error(error?.message || 'Failed to create admin agent');
     }
 };
@@ -112,7 +112,10 @@ export const getAllAgents = async (token: string) => {
             throw new Error(errorData.error || 'Failed to get agents');
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('Agents data:', data);
+
+        return data;
     } catch (error) {
         console.error('Error in getAllAgents:', error);
         throw error;

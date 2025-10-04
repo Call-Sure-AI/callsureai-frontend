@@ -1,120 +1,201 @@
-// contexts\campaign-context.tsx
-"use client"
+// contexts/campaign-context.tsx
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import campaignService from '@/services/campaign-service'
-import { useIsAuthenticated } from '@/hooks/use-is-authenticated'
-import { useCompany } from './company-context'
-
-interface Campaign {
-    id: string
-    companyId: string
-    name: string
-    description: string
-    status: 'draft' | 'active' | 'paused' | 'completed'
-    leads: any[]
-    settings: any
-    metrics: any
-    createdAt: string
-    updatedAt: string
-}
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { CampaignResponse, CampaignFormState, FormValidationErrors } from '@/types/campaign';
+import { createCampaign, getAllCampaigns, updateCampaignStatus } from '@/services/campaign-service';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+import { toast } from '@/hooks/use-toast';
 
 interface CampaignContextType {
-    campaigns: Campaign[]
-    loading: boolean
-    createCampaign: (data: any) => Promise<Campaign>
-    updateCampaign: (id: string, data: any) => Promise<void>
-    deleteCampaign: (id: string) => Promise<void>
-    startCampaign: (id: string) => Promise<void>
-    pauseCampaign: (id: string) => Promise<void>
-    refreshCampaigns: () => Promise<void>
+    campaigns: CampaignResponse[];
+    loading: boolean;
+    error: string | null;
+    refreshCampaigns: () => Promise<void>;
+    createNewCampaign: (formData: CampaignFormState) => Promise<boolean>;
+    updateCampaign: (id: string, status: 'active' | 'paused' | 'stopped') => Promise<boolean>;
+    validateForm: (formData: CampaignFormState) => FormValidationErrors;
 }
 
-const CampaignContext = createContext<CampaignContextType | undefined>(undefined)
+const CampaignContext = createContext<CampaignContextType | undefined>(undefined);
 
-export function CampaignProvider({ children }: { children: ReactNode }) {
-    const [campaigns, setCampaigns] = useState<Campaign[]>([])
-    const [loading, setLoading] = useState(true)
-    const { token } = useIsAuthenticated()
-    const { company } = useCompany()
+export function CampaignProvider({ children }: { children: React.ReactNode }) {
+    const [campaigns, setCampaigns] = useState<CampaignResponse[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { user } = useCurrentUser();
+    const { token } = useIsAuthenticated();
 
     const fetchCampaigns = async () => {
-        if (!token || !company?.id) return
-        
         try {
-            setLoading(true)
-            const data = await campaignService.getCampaigns(company.id, token)
-            setCampaigns(data)
-        } catch (error) {
-            console.error('Error fetching campaigns:', error)
+            if (!token || !user) return;
+            setLoading(true);
+            setError(null);
+            const data = await getAllCampaigns(token);
+            console.log('Fetched campaigns:', data);
+            setCampaigns(data || []);
+        } catch (error: any) {
+            console.error('Failed to fetch campaigns:', error);
+            setError(error.message || 'Failed to fetch campaigns');
+            setCampaigns([]); // Set empty array on error
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
+
+    const createNewCampaign = async (formData: CampaignFormState): Promise<boolean> => {
+        try {
+            if (!token) {
+                toast({
+                    title: "Error",
+                    description: "Please login to create a campaign.",
+                    variant: "destructive"
+                });
+                return false;
+            }
+
+            // Convert form data to API format
+            const apiFormData = {
+                campaign_name: formData.campaign_name,
+                description: formData.description,
+                agent_id: formData.agent_id,
+                data_mapping: formData.data_mapping,
+                booking_config: formData.booking_enabled ? formData.booking_config : undefined,
+                automation_config: formData.automation_config,
+                leads_csv: formData.csv_file || undefined
+            };
+
+            const result = await createCampaign(apiFormData, token);
+
+            // Refresh campaigns list
+            await fetchCampaigns();
+
+            toast({
+                title: "Success",
+                description: `Campaign "${result.campaign_name}" created successfully!`,
+            });
+
+            return true;
+        } catch (error: any) {
+            console.error('Failed to create campaign:', error);
+            toast({
+                title: "Error",
+                description: error.message || "Failed to create campaign. Please try again.",
+                variant: "destructive"
+            });
+            return false;
+        }
+    };
+
+    const updateCampaign = async (id: string, status: 'active' | 'paused' | 'stopped'): Promise<boolean> => {
+        try {
+            if (!token) {
+                toast({
+                    title: "Error",
+                    description: "Please login to update campaign.",
+                    variant: "destructive"
+                });
+                return false;
+            }
+
+            await updateCampaignStatus(id, status, token);
+
+            // Update local state
+            setCampaigns(prev => prev.map(campaign =>
+                campaign.id === id ? { ...campaign, status } : campaign
+            ));
+
+            const statusText = status === 'active' ? 'started' : status === 'paused' ? 'paused' : 'stopped';
+            toast({
+                title: "Success",
+                description: `Campaign ${statusText} successfully!`,
+            });
+
+            return true;
+        } catch (error: any) {
+            console.error('Failed to update campaign:', error);
+            toast({
+                title: "Error",
+                description: error.message || "Failed to update campaign. Please try again.",
+                variant: "destructive"
+            });
+            return false;
+        }
+    };
+
+    const validateForm = (formData: CampaignFormState): FormValidationErrors => {
+        const errors: FormValidationErrors = {};
+
+        if (!formData.campaign_name.trim()) {
+            errors.campaign_name = 'Campaign name is required';
+        }
+
+        if (!formData.description.trim()) {
+            errors.description = 'Description is required';
+        }
+
+        if (!formData.agent_id) {
+            errors.agent_id = 'Please select an agent';
+        }
+
+        if (!formData.csv_file) {
+            errors.csv_file = 'CSV file is required';
+        }
+
+        // Validate data mapping
+        const requiredMappings = formData.data_mapping.filter(m => m.required);
+        const mappedRequired = requiredMappings.filter(m => m.csv_column);
+
+        if (mappedRequired.length !== requiredMappings.length) {
+            errors.data_mapping = 'Please map all required fields';
+        }
+
+        // Validate booking config if enabled
+        if (formData.booking_enabled) {
+            if (formData.booking_config.send_invite_to_team &&
+                formData.booking_config.team_email_addresses.length === 0) {
+                errors.booking_config = 'Team email addresses are required when sending invites to team';
+            }
+        }
+
+        // Validate automation config
+        if (!formData.automation_config.email_template.trim()) {
+            errors.automation_config = 'Email template is required';
+        }
+
+        if (!formData.automation_config.call_script.trim()) {
+            errors.automation_config = 'Call script is required';
+        }
+
+        return errors;
+    };
 
     useEffect(() => {
-        fetchCampaigns()
-    }, [token, company])
-
-    const createCampaign = async (data: any): Promise<Campaign> => {
-        if (!token) throw new Error('No authentication token')
-        
-        const campaign = await campaignService.createCampaign(data, token)
-        setCampaigns([...campaigns, campaign])
-        return campaign
-    }
-
-    const updateCampaign = async (id: string, data: any): Promise<void> => {
-        if (!token) throw new Error('No authentication token')
-        
-        const updated = await campaignService.updateCampaign(id, data, token)
-        setCampaigns(campaigns.map(c => c.id === id ? updated : c))
-    }
-
-    const deleteCampaign = async (id: string): Promise<void> => {
-        if (!token) throw new Error('No authentication token')
-        
-        await campaignService.deleteCampaign(id, token)
-        setCampaigns(campaigns.filter(c => c.id !== id))
-    }
-
-    const startCampaign = async (id: string): Promise<void> => {
-        if (!token) throw new Error('No authentication token')
-        
-        await campaignService.startCampaign(id, token)
-        await fetchCampaigns()
-    }
-
-    const pauseCampaign = async (id: string): Promise<void> => {
-        if (!token) throw new Error('No authentication token')
-        
-        await campaignService.pauseCampaign(id, token)
-        await fetchCampaigns()
-    }
+        if (user && token) {
+            fetchCampaigns();
+        }
+    }, [user, token]);
 
     return (
         <CampaignContext.Provider value={{
             campaigns,
             loading,
-            createCampaign,
+            error,
+            refreshCampaigns: fetchCampaigns,
+            createNewCampaign,
             updateCampaign,
-            deleteCampaign,
-            startCampaign,
-            pauseCampaign,
-            refreshCampaigns: fetchCampaigns
+            validateForm
         }}>
             {children}
         </CampaignContext.Provider>
-    )
+    );
 }
 
-export function useCampaigns() {
-    const context = useContext(CampaignContext)
-    if (!context) {
-        throw new Error('useCampaigns must be used within CampaignProvider')
+export const useCampaigns = () => {
+    const context = useContext(CampaignContext);
+    if (context === undefined) {
+        throw new Error('useCampaigns must be used within a CampaignProvider');
     }
-    return context
-}
-
-// Export the Campaign type for use in other components
-export type { Campaign }
+    return context;
+};
