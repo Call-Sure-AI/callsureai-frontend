@@ -1,7 +1,6 @@
-// app\(settings)\campaigns\page.tsx
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import {
     Plus,
     Calendar,
