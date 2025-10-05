@@ -82,8 +82,6 @@ export default function CampaignsPage() {
     const [showSettingsDialog, setShowSettingsDialog] = useState(false)
     const [showLeadsDialog, setShowLeadsDialog] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [csvHeaders, setCsvHeaders] = useState<string[]>([])
-    const [csvData, setCsvData] = useState<any[]>([])
     const [formErrors, setFormErrors] = useState<FormValidationErrors>({})
 
     // New campaign form state
@@ -115,8 +113,6 @@ export default function CampaignsPage() {
                 return obj;
             }).filter(row => Object.values(row).some(v => v));
 
-            setCsvHeaders(headers);
-            setCsvData(data);
             setFormData(prev => ({
                 ...prev,
                 csv_headers: headers,
@@ -170,8 +166,6 @@ export default function CampaignsPage() {
                     csv_headers: [],
                     csv_data: []
                 });
-                setCsvData([]);
-                setCsvHeaders([]);
             }
         } catch (error) {
             console.error('Error creating campaign:', error);
