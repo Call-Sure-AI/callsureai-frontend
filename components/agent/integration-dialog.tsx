@@ -104,7 +104,6 @@ export const IntegrationDialog: React.FC<IntegrationDialogProps> = ({ open, onOp
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        console.log("AGENT ID", agentId);
 
         if (!currentIntegration) return;
 

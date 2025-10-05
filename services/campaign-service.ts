@@ -88,7 +88,6 @@ export const getAllCampaigns = async (token: string, companyId: string, limit: n
         }
 
         const data = await response.json();
-        console.log('Campaigns data:', data);
         return data;
     } catch (error) {
         console.error('Error fetching campaigns:', error);

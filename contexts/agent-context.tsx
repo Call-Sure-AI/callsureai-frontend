@@ -34,8 +34,6 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    console.log("TOKEN", token);
-
     useEffect(() => {
         if (user && token) {
             fetchAgents();

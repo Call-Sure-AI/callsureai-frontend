@@ -72,8 +72,6 @@ const AuthForm = () => {
                     { withCredentials: true }
                 );
 
-                console.log("RES", res);
-
 
                 toast({
                     title: 'OTP Sent',

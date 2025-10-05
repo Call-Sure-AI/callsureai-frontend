@@ -79,7 +79,6 @@ const AgentCreationCard = memo(() => (
 const DashboardLayout = () => {
     const { agents, loading } = useAgents();
 
-    console.log("Agents", agents);
     const { user, loading: isLoading } = useCurrentUser();
 
     const statsCards = useMemo(() => [

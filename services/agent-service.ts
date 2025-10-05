@@ -44,14 +44,10 @@ export const createAdminAgent = async (params: AgentFormData, company_id: string
             credentials: 'include'
         });
 
-        // Log response status for debugging
-        console.log('Response status:', response.status, response.statusText);
-
         // Try to parse JSON response
         let result;
         try {
             const textResponse = await response.text();
-            console.log('Raw response:', textResponse);
             result = textResponse ? JSON.parse(textResponse) : {};
         } catch (parseError) {
             console.error('Error parsing response:', parseError);
@@ -100,6 +96,7 @@ export const createAgent = async (formData: AgentFormData, token: string) => {
 
 export const getAllAgents = async (token: string) => {
     try {
+        console.log('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
             method: 'GET',
             headers: {
