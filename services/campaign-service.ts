@@ -54,7 +54,6 @@ export const createCampaign = async (formData: CampaignFormData, token: string):
         }
 
         const result = await response.json();
-        console.log('Campaign created successfully:', result);
 
         return result;
     } catch (error: any) {
