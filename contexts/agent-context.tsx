@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AgentFormData } from '@/types';
-import { getAllAgents } from '@/services/agent-service';
+import { getAgentsAction } from '@/lib/actions/agent-actions';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 
@@ -25,10 +25,18 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
     const fetchAgents = async () => {
         try {
             if (!token || !user) return;
-            const data = await getAllAgents(token);
-            setAgents(data);
-        } catch (error) {
-            console.error('Failed to fetch agents:', error);
+            setLoading(true);
+            const result = await getAgentsAction(token);
+
+            if (result.success && result.data) {
+                setAgents(result.data);
+            } else {
+                console.error('Failed to fetch agents:', result.error);
+                setAgents([]);
+            }
+        } catch (error: any) {
+            console.error('Failed to fetch agents:', error.message);
+            setAgents([]);
         } finally {
             setLoading(false);
         }

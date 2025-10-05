@@ -25,7 +25,7 @@ import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { AgentFormData } from '@/types';
-import { createAdminAgent } from '@/services/agent-service';
+import { createAgentAction } from '@/lib/actions/agent-actions';
 import { useActivities } from '@/contexts/activity-context';
 import { useAgents } from '@/contexts/agent-context';
 import { useCompany } from '@/contexts/company-context';
@@ -398,16 +398,20 @@ const AgentCreationForm = () => {
         files: fileUrls || [],
       };
 
-      await createAdminAgent(agentData, company?.id as string, user.id);
+      const result = await createAgentAction(agentData, company?.id as string, user.id);
 
-      await Promise.all([refreshAgents(), refreshActivities()]);
+      if (result.success) {
+        await Promise.all([refreshAgents(), refreshActivities()]);
 
-      toast({
-        title: "Success",
-        description: "Agent created successfully!",
-      });
+        toast({
+          title: "Success",
+          description: "Agent created successfully!",
+        });
 
-      router.push('/dashboard');
+        router.push('/dashboard');
+      } else {
+        throw new Error(result.error || 'Failed to create agent');
+      }
     } catch (error: any) {
       toast({
         title: "Error",

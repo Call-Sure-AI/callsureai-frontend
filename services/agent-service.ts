@@ -96,9 +96,9 @@ export const createAgent = async (formData: AgentFormData, token: string) => {
 
 export const getAllAgents = async (token: string) => {
     try {
-        // const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
-        // console.log('Using public API URL:', apiUrl);
-        const response = await fetch(`https://beta.callsure.ai/api/agent`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        console.log('Using public API URL:', apiUrl);
+        const response = await fetch(`${apiUrl}/api/agent/all`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -108,6 +108,7 @@ export const getAllAgents = async (token: string) => {
 
         if (!response.ok) {
             const errorData = await response.json();
+            console.log('Error data:', errorData);
             throw new Error(errorData.error || 'Failed to get agents');
         }
 
