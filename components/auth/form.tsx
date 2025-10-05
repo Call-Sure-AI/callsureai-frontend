@@ -66,7 +66,7 @@ const AuthForm = () => {
         try {
             if (showOtpOption) {
                 // OTP login flow
-                const res = await axios.post(
+                await axios.post(
                     `${process.env.NEXT_PUBLIC_API_URL}/api/auth/generate-otp`,
                     { email },
                     { withCredentials: true }
