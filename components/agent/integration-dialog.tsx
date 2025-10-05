@@ -50,7 +50,7 @@ interface IntegrationDialogProps {
     agentId: string;
 }
 
-export const IntegrationDialog: React.FC<IntegrationDialogProps> = ({ open, onOpenChange, agentId }) => {
+export const IntegrationDialog: React.FC<IntegrationDialogProps> = ({ open, onOpenChange }) => {
     const [activeIntegrations, setActiveIntegrations] = useState<ActiveIntegrations>({});
     const [currentIntegration, setCurrentIntegration] = useState<Integration | null>(null);
     const [configDialogOpen, setConfigDialogOpen] = useState<boolean>(false);
