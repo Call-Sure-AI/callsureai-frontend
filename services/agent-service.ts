@@ -96,11 +96,13 @@ export const createAgent = async (formData: AgentFormData, token: string) => {
 
 export const getAllAgents = async (token: string) => {
     try {
-        console.log('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        console.log('Using public API URL:', apiUrl);
+        const response = await fetch(`${apiUrl}/api/agent`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
@@ -121,10 +123,12 @@ export const getAllAgents = async (token: string) => {
 
 export const getAgentsByUserId = async (userId: string, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/user?user_id=${userId}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        const response = await fetch(`${apiUrl}/api/agent/user?user_id=${userId}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
@@ -142,10 +146,12 @@ export const getAgentsByUserId = async (userId: string, token: string) => {
 
 export const getAgentById = async (id: string, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent?id=${id}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        const response = await fetch(`${apiUrl}/api/agent?id=${id}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
@@ -163,7 +169,8 @@ export const getAgentById = async (id: string, token: string) => {
 
 export const updateAgent = async (id: string, formData: any, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/${id}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        const response = await fetch(`${apiUrl}/api/agent/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -189,10 +196,12 @@ export const updateAgent = async (id: string, formData: any, token: string) => {
 
 export const deleteAgent = async (id: string, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent/${id}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        const response = await fetch(`${apiUrl}/api/agent/${id}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
