@@ -69,12 +69,12 @@ export const createCampaign = async (formData: CampaignFormData, token: string):
 };
 
 /**
- * Gets all campaigns for the user
+ * Gets all campaigns for the company
  */
-export const getAllCampaigns = async (token: string): Promise<CampaignResponse[]> => {
+export const getAllCampaigns = async (token: string, companyId: string, limit: number = 50, offset: number = 0): Promise<CampaignResponse[]> => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
-        const response = await fetch(`${apiUrl}/api/campaigns`, {
+        const response = await fetch(`${apiUrl}/api/campaigns/company/${companyId}?limit=${limit}&offset=${offset}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,

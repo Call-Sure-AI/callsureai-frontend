@@ -6,6 +6,7 @@ import { CampaignResponse, CampaignFormState, FormValidationErrors } from '@/typ
 import { createCampaign, getAllCampaigns, updateCampaignStatus } from '@/services/campaign-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
+import { useCompany } from '@/contexts/company-context';
 import { toast } from '@/hooks/use-toast';
 
 interface CampaignContextType {
@@ -26,13 +27,14 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
     const [error, setError] = useState<string | null>(null);
     const { user } = useCurrentUser();
     const { token } = useIsAuthenticated();
+    const { company } = useCompany();
 
     const fetchCampaigns = async () => {
         try {
-            if (!token || !user) return;
+            if (!token || !user || !company?.id) return;
             setLoading(true);
             setError(null);
-            const data = await getAllCampaigns(token);
+            const data = await getAllCampaigns(token, company.id);
             console.log('Fetched campaigns:', data);
             setCampaigns(data || []);
         } catch (error: any) {
@@ -172,10 +174,10 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
-        if (user && token) {
+        if (user && token && company?.id) {
             fetchCampaigns();
         }
-    }, [user, token]);
+    }, [user, token, company?.id]);
 
     return (
         <CampaignContext.Provider value={{
