@@ -73,7 +73,6 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     const [isMounted, setIsMounted] = useState(false);
     const [selectedLanguageOption, setSelectedLanguageOption] = useState<{ accent: string, language: string } | null>(null);
 
-    const audioRef = useRef<HTMLAudioElement>(null);
     const { token } = useIsAuthenticated();
     const { refreshAgents } = useAgents();
     const { refreshActivities } = useActivities();
