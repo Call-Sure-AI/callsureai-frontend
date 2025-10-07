@@ -65,8 +65,8 @@ const formatPhoneNumber = (phoneNumber: string): string => {
  * @param url The URL to format
  * @returns Formatted URL
  */
-const formatWebsiteUrl = (url: string): string => {
-    if (!url) return '';
+const formatWebsiteUrl = (url: string): string | undefined => {
+    if (!url || !url.trim()) return undefined;  // Return undefined for empty values
     
     let formatted = url.trim();
     
@@ -92,7 +92,7 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
         const formattedPhone = formData.phone_number ? formatPhoneNumber(formData.phone_number) : '';
         
         // Format website URL if provided
-        const formattedWebsite = formData.website ? formatWebsiteUrl(formData.website) : '';
+        const formattedWebsite = formData.website ? formatWebsiteUrl(formData.website) : undefined;
 
         // Log attempt (with sensitive data redacted)
         console.log('Attempting to create/update company with data:', {
@@ -124,7 +124,7 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
                 user_id: formData.userId,
                 logo: formData.logo,
                 // Add properly formatted website (if provided)
-                website: formattedWebsite || undefined,
+                website: formattedWebsite,
                 // Add required settings object with default values to match schema
                 settings: {
                     notification_preferences: {
