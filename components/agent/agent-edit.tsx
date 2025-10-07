@@ -27,6 +27,7 @@ import { updateAgent } from '@/services/agent-service';
 import { useAgents } from '@/contexts/agent-context';
 import { useActivities } from '@/contexts/activity-context';
 import { AgentFormData } from "@/types";
+import { languageOptions, toneOptions } from '@/constants';
 
 interface EditAgentData {
     name: string;
@@ -70,7 +71,9 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     const [audioError, setAudioError] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const [selectedLanguageOption, setSelectedLanguageOption] = useState<{ accent: string, language: string } | null>(null);
 
+    const audioRef = useRef<HTMLAudioElement>(null);
     const { token } = useIsAuthenticated();
     const { refreshAgents } = useAgents();
     const { refreshActivities } = useActivities();
@@ -127,17 +130,14 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         }
     };
 
-    const loadAudio = useCallback(async (gender: string, tone: string, language: string) => {
-        const getAudioPath = (gender: string, tone: string, language: string) => {
-            if (!gender || !tone || !language) return null;
-            return `/voices/${gender}-${tone}-${language}.mp3`;
-        };
-
+    // Fixed loadAudio function - without tone in path
+    const loadAudio = useCallback(async (gender: string, languageCode: string) => {
         setIsAudioLoading(true);
         setAudioError(false);
 
-        const audioPath = getAudioPath(gender, tone, language);
-        if (!audioPath) return;
+        // Build path without tone (e.g., /voices/male-american-en.mp3)
+        const audioPath = `/voices/${gender}-${languageCode}.mp3`;
+        console.log(`Loading audio: ${audioPath}`);
 
         const newAudio = new Audio(audioPath);
 
@@ -156,26 +156,51 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
             setAudioError(false);
         } catch (e: any) {
             setAudioError(true);
+            console.error('Error loading audio:', e);
             toast({
                 title: "Audio Load Error",
-                description: e && e.message ? e.message : "Could not load the voice sample. Please try again.",
+                description: "Could not load the voice sample. Please check if the file exists.",
                 variant: "destructive",
             });
         } finally {
             setIsAudioLoading(false);
         }
-    }, [setIsPlaying, setAudio, setAudioError, setIsAudioLoading]);
+    }, []);
 
     const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
         setFormData(prev => {
             const newData = { ...prev, [type]: value };
 
-            if (newData.gender && newData.tone && newData.language) {
-                loadAudio(newData.gender, newData.tone, newData.language);
+            // Load audio when we have both gender and language
+            if (newData.gender && newData.language && selectedLanguageOption) {
+                const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
+                loadAudio(newData.gender, languageCode);
             }
 
             return newData;
         });
+    };
+
+    const handleLanguageChange = (value: string) => {
+        const langOption = languageOptions.find(opt => opt.value === value);
+        
+        if (langOption) {
+            setSelectedLanguageOption({
+                accent: langOption.accent,
+                language: langOption.language
+            });
+            
+            setFormData(prev => {
+                const newData = { ...prev, language: value };
+                
+                if (newData.gender && langOption) {
+                    const languageCode = `${langOption.accent}-${langOption.language}`;
+                    loadAudio(newData.gender, languageCode);
+                }
+                
+                return newData;
+            });
+        }
     };
 
     const handlePlayAudio = () => {
@@ -298,8 +323,21 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     useEffect(() => {
         setIsMounted(true);
 
-        if (formData.gender && formData.tone && formData.language) {
-            loadAudio(formData.gender, formData.tone, formData.language);
+        // Initialize language option from existing data
+        if (formData.language) {
+            const langOption = languageOptions.find(opt => opt.value === formData.language);
+            if (langOption) {
+                setSelectedLanguageOption({
+                    accent: langOption.accent,
+                    language: langOption.language
+                });
+                
+                // Load audio with the correct format
+                if (formData.gender) {
+                    const languageCode = `${langOption.accent}-${langOption.language}`;
+                    loadAudio(formData.gender, languageCode);
+                }
+            }
         }
 
         return () => {
@@ -308,7 +346,14 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                 audio.src = '';
             }
         };
-    }, [formData.gender, formData.tone, formData.language, loadAudio, audio]); // Added missing dependency
+    }, []); // Run only once on mount
+
+    useEffect(() => {
+        if (formData.gender && selectedLanguageOption) {
+            const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
+            loadAudio(formData.gender, languageCode);
+        }
+    }, [formData.gender, selectedLanguageOption, loadAudio]);
 
     if (!isMounted) {
         return null;
@@ -454,8 +499,11 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                                                     <SelectValue placeholder="Select tone" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="american">American</SelectItem>
-                                                    <SelectItem value="indian">Indian</SelectItem>
+                                                    {toneOptions.map(option => (
+                                                        <SelectItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -464,13 +512,16 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                                             <label className="text-sm font-medium text-gray-600 ml-1">
                                                 Language*
                                             </label>
-                                            <Select value={formData.language} onValueChange={(value) => handleSelectionChange('language', value)}>
+                                            <Select value={formData.language} onValueChange={handleLanguageChange}>
                                                 <SelectTrigger className="w-36">
                                                     <SelectValue placeholder="Select language" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="en">English</SelectItem>
-                                                    <SelectItem value="hn">Hindi</SelectItem>
+                                                    {languageOptions.map(option => (
+                                                        <SelectItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
