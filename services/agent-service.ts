@@ -2,7 +2,7 @@
 import { AgentFormData } from "@/types";
 
 /**
- * Creates an agent via the admin API
+ * Creates an agent via the API
  * IMPORTANT: When calling from server actions, you MUST pass the token parameter
  * The localStorage access only works in client-side code
  */
@@ -20,9 +20,10 @@ export const createAdminAgent = async (
         });
 
         // Only try to get token from localStorage if we're on the client AND no token was provided
-        let authToken = token;
+        let authToken = token || undefined;
         if (!authToken && typeof window !== 'undefined') {
-            authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
+            const storedToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
+            authToken = storedToken || undefined;
         }
 
         if (!authToken) {
@@ -33,6 +34,7 @@ export const createAdminAgent = async (
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
         
         // Create the agent data matching your backend schema (AgentCreate model)
+        // The backend expects additional fields that aren't in AgentFormData
         const agentData = {
             name: params.name,
             type: params.type,
@@ -41,16 +43,17 @@ export const createAdminAgent = async (
             is_active: params.is_active !== undefined ? params.is_active : true,
             additional_context: params.additional_context || {},
             advanced_settings: params.advanced_settings || {},
-            confidence_threshold: params.confidence_threshold || 0.7,
             files: params.files || [],
-            template_id: params.template_id || null,
-            knowledge_base_ids: params.knowledge_base_ids || [],
-            database_integration_ids: params.database_integration_ids || [],
-            search_config: params.search_config || null,
-            max_response_tokens: params.max_response_tokens || null,
-            temperature: params.temperature || null,
-            image_processing_enabled: params.image_processing_enabled || null,
-            image_processing_config: params.image_processing_config || null
+            // Add default values for backend-required fields not in AgentFormData
+            confidence_threshold: 0.7,
+            template_id: null,
+            knowledge_base_ids: [],
+            database_integration_ids: [],
+            search_config: null,
+            max_response_tokens: null,
+            temperature: null,
+            image_processing_enabled: null,
+            image_processing_config: null
         };
 
         // Use the correct endpoint: /api/agent/create
@@ -114,10 +117,9 @@ export const createAgent = async (formData: AgentFormData, token: string) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
         
-        // Ensure company_id is included if not already present
+        // Build the agent data
         const agentData = {
-            ...formData,
-            company_id: formData.company_id // Ensure this is included
+            ...formData
         };
         
         const response = await fetch(`${apiUrl}/api/agent`, {
@@ -267,17 +269,18 @@ export const deleteAgent = async (id: string, token: string) => {
 
 /**
  * Helper function to get authentication token (client-side only)
- * Returns null if called on server-side
+ * Returns undefined if called on server-side
  */
-export const getAuthToken = (): string | null => {
+export const getAuthToken = (): string | undefined => {
     if (typeof window === 'undefined') {
-        console.warn('getAuthToken called on server-side, returning null');
-        return null;
+        console.warn('getAuthToken called on server-side, returning undefined');
+        return undefined;
     }
     // Try both possible token keys
     const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
     if (!token) {
         console.warn('No authentication token found in localStorage');
+        return undefined;
     }
     return token;
 };
