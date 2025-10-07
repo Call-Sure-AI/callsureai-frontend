@@ -3,83 +3,130 @@ import { AgentFormData } from "@/types";
 
 /**
  * Creates an agent via the admin API
+ * IMPORTANT: When calling from server actions, you MUST pass the token parameter
+ * The localStorage access only works in client-side code
  */
-export const createAdminAgent = async (params: AgentFormData, company_id: string, user_id: string) => {
+export const createAdminAgent = async (
+    params: AgentFormData, 
+    company_id: string, 
+    user_id: string,
+    token?: string
+) => {
     try {
-        console.log('Creating admin agent with data:', {
+        console.log('Creating agent with data:', {
             name: params.name,
             type: params.type,
             company_id: company_id
         });
 
-        const formData = new FormData();
-        formData.append('name', params.name);
-        formData.append('user_id', user_id);
-        formData.append('type', params.type);
-        formData.append('prompt', params.prompt);
-        formData.append('company_id', company_id);
-        formData.append('additional_context', JSON.stringify(params.additional_context));
-        formData.append('advanced_settings', JSON.stringify(params.advanced_settings));
-        formData.append('is_active', JSON.stringify(params.is_active));
-
-        if (params.files && params.files.length > 0) {
-            formData.append('file_urls', JSON.stringify(params.files));
+        // Only try to get token from localStorage if we're on the client AND no token was provided
+        let authToken = token;
+        if (!authToken && typeof window !== 'undefined') {
+            authToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
         }
 
-        // Get the token from localStorage (or wherever you store it)
-        const token = localStorage.getItem('auth_token');
+        if (!authToken) {
+            throw new Error('Authentication token not found. Please log in again.');
+        }
 
-        // Log request info for debugging
-        console.log('Request URL:', `${process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`);
-        console.log('FormData entries:', [...formData.entries()].map(e => e[0]));
+        // Use the correct API endpoint from your routes/agent.py
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        
+        // Create the agent data matching your backend schema (AgentCreate model)
+        const agentData = {
+            name: params.name,
+            type: params.type,
+            prompt: params.prompt,
+            company_id: company_id,
+            is_active: params.is_active !== undefined ? params.is_active : true,
+            additional_context: params.additional_context || {},
+            advanced_settings: params.advanced_settings || {},
+            confidence_threshold: params.confidence_threshold || 0.7,
+            files: params.files || [],
+            template_id: params.template_id || null,
+            knowledge_base_ids: params.knowledge_base_ids || [],
+            database_integration_ids: params.database_integration_ids || [],
+            search_config: params.search_config || null,
+            max_response_tokens: params.max_response_tokens || null,
+            temperature: params.temperature || null,
+            image_processing_enabled: params.image_processing_enabled || null,
+            image_processing_config: params.image_processing_config || null
+        };
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API_URL || 'https://stage.callsure.ai'}/api/v1/admin/agents`, {
+        // Use the correct endpoint: /api/agent/create
+        console.log('Request URL:', `${apiUrl}/api/agent/create`);
+        console.log('Agent data to send:', agentData);
+        console.log('Has auth token:', !!authToken);
+
+        const response = await fetch(`${apiUrl}/api/agent/create`, {
             method: 'POST',
-            body: formData,
-            // headers: {
-            //     // Don't set Content-Type with FormData, browser will set it with boundary
-            //     'Authorization': token ? `Bearer ${token}` : '' 
-            // },
-            // Important for cross-origin requests with credentials
-            credentials: 'include'
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(agentData),
+            credentials: 'include' // Include cookies if needed
         });
 
         // Try to parse JSON response
         let result;
-        try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+        } else {
             const textResponse = await response.text();
-            result = textResponse ? JSON.parse(textResponse) : {};
-        } catch (parseError) {
-            console.error('Error parsing response:', parseError);
-            throw new Error('Invalid response format from server');
+            try {
+                result = textResponse ? JSON.parse(textResponse) : {};
+            } catch (parseError) {
+                console.error('Error parsing response:', parseError);
+                throw new Error('Invalid response format from server');
+            }
         }
 
         if (!response.ok) {
-            throw new Error(result.error || result.message || `Failed to create admin agent (${response.status})`);
+            console.error('API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                result: result
+            });
+            throw new Error(result.error || result.message || result.detail || `Failed to create agent (${response.status})`);
         }
 
+        console.log('Agent created successfully:', result);
         return result;
     } catch (error: any) {
-        console.error('Error creating admin agent:', error);
+        console.error('Error creating agent:', error);
 
         // Add more specific error messages based on the error type
         if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
             throw new Error('Network error: Could not connect to the server. Please check your connection and try again.');
         }
 
-        throw new Error(error?.message || 'Failed to create admin agent');
+        throw new Error(error?.message || 'Failed to create agent');
     }
 };
 
+/**
+ * Creates an agent via the regular API
+ * This uses the standard API endpoint and requires a token
+ */
 export const createAgent = async (formData: AgentFormData, token: string) => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agent`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        
+        // Ensure company_id is included if not already present
+        const agentData = {
+            ...formData,
+            company_id: formData.company_id // Ensure this is included
+        };
+        
+        const response = await fetch(`${apiUrl}/api/agent`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(agentData)
         });
 
         if (!response.ok) {
@@ -216,4 +263,21 @@ export const deleteAgent = async (id: string, token: string) => {
         console.error('Error in deleteAgent:', error);
         throw error;
     }
+};
+
+/**
+ * Helper function to get authentication token (client-side only)
+ * Returns null if called on server-side
+ */
+export const getAuthToken = (): string | null => {
+    if (typeof window === 'undefined') {
+        console.warn('getAuthToken called on server-side, returning null');
+        return null;
+    }
+    // Try both possible token keys
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+    if (!token) {
+        console.warn('No authentication token found in localStorage');
+    }
+    return token;
 };

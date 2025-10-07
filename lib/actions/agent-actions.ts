@@ -8,10 +8,10 @@ export async function getAgentsAction(token: string) {
         if (!token) {
             throw new Error('Authentication token is required');
         }
-        console.log('Getting agents with token:', token);
+        console.log('Getting agents with token:', token.substring(0, 10) + '...');
 
         const agents = await getAllAgents(token);
-        console.log('Agents:', agents);
+        console.log('Agents fetched successfully:', agents?.length || 0);
         return {
             success: true,
             data: agents,
@@ -30,14 +30,19 @@ export async function getAgentsAction(token: string) {
 export async function createAgentAction(
     formData: AgentFormData,
     companyId: string,
-    userId: string
+    userId: string,
+    token: string // ADD TOKEN PARAMETER HERE
 ) {
     try {
-        if (!formData || !companyId || !userId) {
+        if (!formData || !companyId || !userId || !token) {
             throw new Error('Missing required parameters');
         }
 
-        const result = await createAdminAgent(formData, companyId, userId);
+        console.log('Creating agent via server action with token:', token.substring(0, 10) + '...');
+        
+        // NOW PASS THE TOKEN TO createAdminAgent
+        const result = await createAdminAgent(formData, companyId, userId, token);
+        
         return {
             success: true,
             data: result,
