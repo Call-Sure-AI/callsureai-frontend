@@ -133,9 +133,25 @@ const ActivityFeed = () => {
     };
 
     const formatTimestamp = (timestamp: string | Date) => {
+        // Parse the UTC timestamp from backend
         const date = new Date(timestamp);
         const now = new Date();
+        
+        // Debug logging to see what's happening
+        console.log('Raw timestamp from backend:', timestamp);
+        console.log('Parsed date:', date.toISOString());
+        console.log('Current time:', now.toISOString());
+        console.log('Date timezone offset:', date.getTimezoneOffset());
+        
+        // Calculate the actual difference
         const diff = now.getTime() - date.getTime();
+        
+        // If the difference is negative, it means the timestamp is in the future
+        // This could happen if there's a timezone issue
+        if (diff < 0) {
+            console.warn('Timestamp appears to be in the future:', timestamp);
+            return 'Just now';
+        }
 
         const minutes = Math.floor(diff / 60000);
         const hours = Math.floor(minutes / 60);
