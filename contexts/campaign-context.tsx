@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CampaignResponse, CampaignFormState, FormValidationErrors } from '@/types/campaign';
 import { createCampaign, getAllCampaigns, updateCampaignStatus } from '@/services/campaign-service';
+import { triggerCampaign } from '@/services/webhook-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { useCompany } from '@/contexts/company-context';
@@ -70,12 +71,32 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 
             const result = await createCampaign(apiFormData, token);
 
+            // Trigger campaign webhook to start running
+            try {
+                await triggerCampaign({
+                    campaign_id: result.id,
+                    agent_id: result.agent_id,
+                    service: "elevenlabs",
+                    delay_between_calls: result.automation_config.delay_between_calls,
+                    max_concurrent_calls: result.automation_config.max_concurrent_calls
+                });
+                console.log('Campaign webhook triggered successfully');
+            } catch (webhookError: any) {
+                console.error('Failed to trigger campaign webhook:', webhookError);
+                // Don't fail the entire campaign creation if webhook fails
+                toast({
+                    title: "Warning",
+                    description: "Campaign created but failed to start automatically. You can start it manually from the campaigns list.",
+                    variant: "destructive"
+                });
+            }
+
             // Refresh campaigns list
             await fetchCampaigns();
 
             toast({
                 title: "Success",
-                description: `Campaign "${result.campaign_name}" created successfully!`,
+                description: `Campaign "${result.campaign_name}" created and started successfully!`,
             });
 
             return true;

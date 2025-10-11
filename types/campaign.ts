@@ -21,6 +21,8 @@ export interface AutomationConfig {
     max_call_attempts: number;
     call_interval_hours: number;
     enable_followup_emails: boolean;
+    delay_between_calls: number;
+    max_concurrent_calls: number;
 }
 
 export interface CampaignFormData {
@@ -109,7 +111,9 @@ export const defaultAutomationConfig: AutomationConfig = {
     call_script: 'Hello {{first_name}}, I\'m calling from {{company_name}}...',
     max_call_attempts: 3,
     call_interval_hours: 24,
-    enable_followup_emails: true
+    enable_followup_emails: true,
+    delay_between_calls: 1,
+    max_concurrent_calls: 3
 };
 
 export const defaultDataMapping: DataMapping[] = [

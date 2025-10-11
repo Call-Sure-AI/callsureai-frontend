@@ -335,6 +335,37 @@ export const AutomationConfigComponent: React.FC<AutomationConfigComponentProps>
                 </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <Label className="text-sm font-medium">Delay Between Calls (seconds)</Label>
+                    <Input
+                        type="number"
+                        value={automationConfig.delay_between_calls}
+                        onChange={(e) => updateConfig('delay_between_calls', parseInt(e.target.value))}
+                        className="mt-1"
+                        min="1"
+                        max="300"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Time to wait between making calls
+                    </p>
+                </div>
+                <div>
+                    <Label className="text-sm font-medium">Max Concurrent Calls</Label>
+                    <Input
+                        type="number"
+                        value={automationConfig.max_concurrent_calls}
+                        onChange={(e) => updateConfig('max_concurrent_calls', parseInt(e.target.value))}
+                        className="mt-1"
+                        min="1"
+                        max="10"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Maximum number of calls to run simultaneously
+                    </p>
+                </div>
+            </div>
+
             <div className="flex items-center space-x-2">
                 <Switch
                     checked={automationConfig.enable_followup_emails}
