@@ -44,6 +44,7 @@ export interface CampaignResponse {
     data_mapping: DataMapping[];
     booking_config?: BookingConfig;
     automation_config: AutomationConfig;
+    file_url?: string;
     metrics: {
         total_leads: number;
         contacted: number;
@@ -120,6 +121,7 @@ export const defaultDataMapping: DataMapping[] = [
     { csv_column: '', mapped_to: 'first_name', required: true },
     { csv_column: '', mapped_to: 'email', required: true },
     { csv_column: '', mapped_to: 'phone', required: false },
+    { csv_column: '', mapped_to: 'country_code', required: false },
     { csv_column: '', mapped_to: 'company', required: false },
     { csv_column: '', mapped_to: 'location', required: false }
 ];
@@ -129,6 +131,7 @@ export const fieldMappingOptions = [
     { value: 'last_name', label: 'Last Name', type: 'text' },
     { value: 'email', label: 'Email', type: 'email' },
     { value: 'phone', label: 'Phone', type: 'phone' },
+    { value: 'country_code', label: 'Country Code', type: 'text' },
     { value: 'company', label: 'Company', type: 'text' },
     { value: 'location', label: 'Location', type: 'text' },
     { value: 'job_title', label: 'Job Title', type: 'text' },

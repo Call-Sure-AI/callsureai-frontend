@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CampaignResponse, CampaignFormState, FormValidationErrors } from '@/types/campaign';
 import { createCampaign, getAllCampaigns, updateCampaignStatus } from '@/services/campaign-service';
-import { triggerCampaign } from '@/services/webhook-service';
+import { triggerCampaign, createCampaignTriggerPayload } from '@/services/webhook-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { useCompany } from '@/contexts/company-context';
@@ -73,13 +73,19 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 
             // Trigger campaign webhook to start running
             try {
-                await triggerCampaign({
-                    campaign_id: result.id,
-                    agent_id: result.agent_id,
-                    service: "elevenlabs",
-                    delay_between_calls: result.automation_config.delay_between_calls,
-                    max_concurrent_calls: result.automation_config.max_concurrent_calls
-                });
+                if (!result.file_url) {
+                    throw new Error('Campaign file URL not available');
+                }
+
+                const payload = createCampaignTriggerPayload(
+                    result.id,
+                    result.agent_id,
+                    result.automation_config,
+                    result.file_url,
+                    result.data_mapping
+                );
+
+                await triggerCampaign(payload);
                 console.log('Campaign webhook triggered successfully');
             } catch (webhookError: any) {
                 console.error('Failed to trigger campaign webhook:', webhookError);

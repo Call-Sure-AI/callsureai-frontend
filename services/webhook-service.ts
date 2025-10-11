@@ -1,4 +1,5 @@
 // services/webhook-service.ts
+import { DataMapping } from '@/types/campaign';
 
 export interface CampaignTriggerPayload {
     campaign_id: string;
@@ -6,7 +7,48 @@ export interface CampaignTriggerPayload {
     service: string;
     delay_between_calls: number;
     max_concurrent_calls: number;
+    file_url: string;
+    data_mapping: {
+        phone_number_column: string;
+        country_code_column: string;
+    };
 }
+
+/**
+ * Extracts phone number and country code columns from data mapping
+ */
+const extractPhoneMapping = (dataMapping: DataMapping[]): { phone_number_column: string; country_code_column: string } => {
+    const phoneMapping = dataMapping.find(mapping => mapping.mapped_to === 'phone');
+    const countryCodeMapping = dataMapping.find(mapping => mapping.mapped_to === 'country_code');
+
+    return {
+        phone_number_column: phoneMapping?.csv_column || '',
+        country_code_column: countryCodeMapping?.csv_column || ''
+    };
+};
+
+/**
+ * Creates a campaign trigger payload from campaign data
+ */
+export const createCampaignTriggerPayload = (
+    campaignId: string,
+    agentId: string,
+    automationConfig: any,
+    fileUrl: string,
+    dataMapping: DataMapping[]
+): CampaignTriggerPayload => {
+    const phoneMapping = extractPhoneMapping(dataMapping);
+
+    return {
+        campaign_id: campaignId,
+        agent_id: agentId,
+        service: "elevenlabs",
+        delay_between_calls: automationConfig.delay_between_calls,
+        max_concurrent_calls: automationConfig.max_concurrent_calls,
+        file_url: fileUrl,
+        data_mapping: phoneMapping
+    };
+};
 
 /**
  * Triggers a campaign to start running via webhook
