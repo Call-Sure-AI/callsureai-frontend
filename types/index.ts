@@ -67,12 +67,13 @@ export interface HistoryEntry {
 }
 
 export interface AgentFormData {
-    id?: string;  // Added this line to fix the TypeScript errors
+    id?: string;
     user_id: string;
     name: string;
     type: string;
     prompt: string;
     is_active: boolean;
+    confidence_threshold?: number;
     additional_context: {
         gender: string;
         tone: string;
