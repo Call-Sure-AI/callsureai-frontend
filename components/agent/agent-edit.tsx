@@ -37,6 +37,7 @@ interface EditAgentData {
     roleDescription: string;
     businessContext: string;
     is_active: boolean;
+    confidence_threshold: number;
     advanced_settings: {
         authUrl: string;
         clientId: string;
@@ -55,6 +56,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         roleDescription: additional_context?.roleDescription ?? '',
         businessContext: additional_context?.businessContext ?? '',
         is_active: is_active ?? false,
+        confidence_threshold: 0.7, // Add this line with a default value
         advanced_settings: {
             authUrl: advanced_settings?.authUrl || '',
             clientId: advanced_settings?.clientId || '',
@@ -182,21 +184,21 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
     const handleLanguageChange = (value: string) => {
         const langOption = languageOptions.find(opt => opt.value === value);
-        
+
         if (langOption) {
             setSelectedLanguageOption({
                 accent: langOption.accent,
                 language: langOption.language
             });
-            
+
             setFormData(prev => {
                 const newData = { ...prev, language: value };
-                
+
                 if (newData.gender && langOption) {
                     const languageCode = `${langOption.accent}-${langOption.language}`;
                     loadAudio(newData.gender, languageCode);
                 }
-                
+
                 return newData;
             });
         }
@@ -287,6 +289,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
             const data = {
                 name: formData.name,
+                prompt: formData.roleDescription,
                 additional_context: {
                     gender: formData.gender,
                     tone: formData.tone,
@@ -296,7 +299,8 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                 },
                 advanced_settings: formData.advanced_settings,
                 is_active: formData.is_active,
-                files: updatedFiles
+                files: updatedFiles,
+                confidence_threshold: 0.7
             };
 
             await updateAgent(id, data, token);
@@ -330,7 +334,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                     accent: langOption.accent,
                     language: langOption.language
                 });
-                
+
                 // Load audio with the correct format
                 if (formData.gender) {
                     const languageCode = `${langOption.accent}-${langOption.language}`;
@@ -446,14 +450,14 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
                             <div className="bg-gray-50 p-6 rounded-xl space-y-6">
                                 <div className="flex items-center gap-4">
-                                <button
-                                    onClick={handlePlayAudio}
-                                    className={`w-12 h-12 rounded-full ${audioError ? "bg-red-500" : "bg-black"} shadow-sm flex items-center justify-center transition-colors 
+                                    <button
+                                        onClick={handlePlayAudio}
+                                        className={`w-12 h-12 rounded-full ${audioError ? "bg-red-500" : "bg-black"} shadow-sm flex items-center justify-center transition-colors 
                                     ${isAudioLoading ? 'cursor-wait' : ''} 
                                     ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/80'}`
-                                    }
-                                    disabled={!audio || isAudioLoading}
-                                >
+                                        }
+                                        disabled={!audio || isAudioLoading}
+                                    >
                                         {isAudioLoading ? (
                                             <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                                         ) : (
