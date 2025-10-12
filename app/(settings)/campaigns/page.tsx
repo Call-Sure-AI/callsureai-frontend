@@ -21,6 +21,7 @@ import {
     RefreshCw,
     CalendarCheck,
     Eye,
+    Edit,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -70,6 +71,7 @@ import { useCampaigns } from "@/contexts/campaign-context"
 import { useAgents } from "@/contexts/agent-context"
 import { CampaignFormState, defaultBookingConfig, defaultAutomationConfig, defaultDataMapping, FormValidationErrors } from "@/types/campaign"
 import { FileUploadComponent, DataMappingComponent, BookingConfigComponent, AutomationConfigComponent } from "@/components/campaigns/form-components"
+import { CampaignEdit } from "@/components/campaigns/campaign-edit"
 
 // Using types from campaign.ts
 
@@ -257,6 +259,15 @@ export default function CampaignsPage() {
                                 <Users className="w-4 h-4 mr-2" />
                                 View Leads
                             </DropdownMenuItem>
+                            <CampaignEdit
+                                campaign={campaign}
+                                trigger={
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <Edit className="w-4 h-4 mr-2" />
+                                        Edit Campaign
+                                    </DropdownMenuItem>
+                                }
+                            />
                             <DropdownMenuItem onClick={() => {
                                 setSelectedCampaign(campaign)
                                 setShowSettingsDialog(true)
@@ -549,6 +560,15 @@ export default function CampaignsPage() {
                                                                 <Users className="w-4 h-4 mr-2" />
                                                                 View Leads
                                                             </DropdownMenuItem>
+                                                            <CampaignEdit
+                                                                campaign={campaign}
+                                                                trigger={
+                                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                        <Edit className="w-4 h-4 mr-2" />
+                                                                        Edit Campaign
+                                                                    </DropdownMenuItem>
+                                                                }
+                                                            />
                                                             <DropdownMenuItem
                                                                 onClick={() => {
                                                                     setSelectedCampaign(campaign)

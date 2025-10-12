@@ -121,6 +121,33 @@ export const getCampaignById = async (id: string, token: string): Promise<Campai
 };
 
 /**
+ * Updates campaign details (name, description, etc.)
+ */
+export const updateCampaignDetails = async (id: string, formData: { campaign_name?: string; description?: string }, token: string): Promise<CampaignResponse> => {
+    try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+        const response = await fetch(`${apiUrl}/api/campaigns/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Failed to update campaign' }));
+            throw new Error(errorData.error || 'Failed to update campaign');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating campaign:', error);
+        throw error;
+    }
+};
+
+/**
  * Updates campaign status (start, pause, stop)
  */
 export const updateCampaignStatus = async (id: string, status: 'active' | 'paused' | 'stopped', token: string): Promise<CampaignResponse> => {

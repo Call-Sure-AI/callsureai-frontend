@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CampaignResponse, CampaignFormState, FormValidationErrors } from '@/types/campaign';
-import { createCampaign, getAllCampaigns, updateCampaignStatus } from '@/services/campaign-service';
+import { createCampaign, getAllCampaigns, updateCampaignStatus, updateCampaignDetails as updateCampaignDetailsService } from '@/services/campaign-service';
 import { triggerCampaign, createCampaignTriggerPayload } from '@/services/webhook-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
@@ -17,6 +17,7 @@ interface CampaignContextType {
     refreshCampaigns: () => Promise<void>;
     createNewCampaign: (formData: CampaignFormState) => Promise<boolean>;
     updateCampaign: (id: string, status: 'active' | 'paused' | 'stopped') => Promise<boolean>;
+    updateCampaignDetails: (id: string, formData: { campaign_name?: string; description?: string }) => Promise<boolean>;
     validateForm: (formData: CampaignFormState) => FormValidationErrors;
 }
 
@@ -153,6 +154,41 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const updateCampaignDetails = async (id: string, formData: { campaign_name?: string; description?: string }): Promise<boolean> => {
+        try {
+            if (!token) {
+                toast({
+                    title: "Error",
+                    description: "Please login to update campaign.",
+                    variant: "destructive"
+                });
+                return false;
+            }
+
+            await updateCampaignDetailsService(id, formData, token);
+
+            // Update local state
+            setCampaigns(prev => prev.map(campaign =>
+                campaign.id === id ? { ...campaign, ...formData } : campaign
+            ));
+
+            toast({
+                title: "Success",
+                description: "Campaign updated successfully!",
+            });
+
+            return true;
+        } catch (error: any) {
+            console.error('Failed to update campaign details:', error);
+            toast({
+                title: "Error",
+                description: error.message || "Failed to update campaign. Please try again.",
+                variant: "destructive"
+            });
+            return false;
+        }
+    };
+
     const validateForm = (formData: CampaignFormState): FormValidationErrors => {
         const errors: FormValidationErrors = {};
 
@@ -214,6 +250,7 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
             refreshCampaigns: fetchCampaigns,
             createNewCampaign,
             updateCampaign,
+            updateCampaignDetails,
             validateForm
         }}>
             {children}
