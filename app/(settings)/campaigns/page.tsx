@@ -70,6 +70,7 @@ import { toast } from "@/hooks/use-toast"
 import { useCampaigns } from "@/contexts/campaign-context"
 import { useAgents } from "@/contexts/agent-context"
 import { CampaignFormState, defaultBookingConfig, defaultAutomationConfig, defaultDataMapping, FormValidationErrors } from "@/types/campaign"
+import { triggerCampaign, createCampaignTriggerPayload } from '@/services/webhook-service'
 import { FileUploadComponent, DataMappingComponent, BookingConfigComponent, AutomationConfigComponent } from "@/components/campaigns/form-components"
 import { CampaignEdit } from "@/components/campaigns/campaign-edit"
 
@@ -177,7 +178,58 @@ export default function CampaignsPage() {
     };
 
     const handleStartCampaign = async (campaignId: string) => {
-        await updateCampaign(campaignId, 'active');
+        try {
+            // Find the campaign to get its details
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) {
+                toast({
+                    title: "Error",
+                    description: "Campaign not found",
+                    variant: "destructive"
+                });
+                return;
+            }
+
+            // Update campaign status to active
+            await updateCampaign(campaignId, 'active');
+
+            // Trigger campaign webhook to start running
+            try {
+                if (!campaign.file_url) {
+                    throw new Error('Campaign file URL not available');
+                }
+
+                const payload = createCampaignTriggerPayload(
+                    campaign.id,
+                    campaign.agent_id,
+                    campaign.automation_config,
+                    campaign.file_url,
+                    campaign.data_mapping
+                );
+
+                await triggerCampaign(payload);
+                console.log('Campaign webhook triggered successfully');
+
+                toast({
+                    title: "Success",
+                    description: "Campaign started successfully!",
+                });
+            } catch (webhookError: any) {
+                console.error('Failed to trigger campaign webhook:', webhookError);
+                toast({
+                    title: "Warning",
+                    description: "Campaign status updated but failed to start automatically. Please try again.",
+                    variant: "destructive"
+                });
+            }
+        } catch (error: any) {
+            console.error('Failed to start campaign:', error);
+            toast({
+                title: "Error",
+                description: error.message || "Failed to start campaign. Please try again.",
+                variant: "destructive"
+            });
+        }
     };
 
     const handlePauseCampaign = async (campaignId: string) => {
@@ -528,63 +580,67 @@ export default function CampaignsPage() {
                                                 <TableCell>{campaign.metrics?.booked || 0}</TableCell>
                                                 <TableCell>{campaign.metrics?.response_rate || 0}%</TableCell>
                                                 <TableCell>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon">
-                                                                <MoreVertical className="w-4 h-4" />
+                                                    <div className="flex items-center gap-2">
+                                                        {campaign.status === 'draft' && (
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => handleStartCampaign(campaign.id)}
+                                                                className="bg-green-600 hover:bg-green-700"
+                                                            >
+                                                                <Play className="w-4 h-4 mr-1" />
+                                                                Start
                                                             </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            {campaign.status === 'draft' && (
-                                                                <DropdownMenuItem
-                                                                    onClick={() => handleStartCampaign(campaign.id)}
-                                                                >
-                                                                    <Play className="w-4 h-4 mr-2" />
-                                                                    Start Campaign
-                                                                </DropdownMenuItem>
-                                                            )}
-                                                            {campaign.status === 'active' && (
-                                                                <DropdownMenuItem
-                                                                    onClick={() => handlePauseCampaign(campaign.id)}
-                                                                >
-                                                                    <Pause className="w-4 h-4 mr-2" />
-                                                                    Pause Campaign
-                                                                </DropdownMenuItem>
-                                                            )}
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setSelectedCampaign(campaign)
-                                                                    setShowLeadsDialog(true)
-                                                                }}
-                                                            >
-                                                                <Users className="w-4 h-4 mr-2" />
-                                                                View Leads
-                                                            </DropdownMenuItem>
-                                                            <CampaignEdit
-                                                                campaign={campaign}
-                                                                trigger={
-                                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                                        <Edit className="w-4 h-4 mr-2" />
-                                                                        Edit Campaign
+                                                        )}
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon">
+                                                                    <MoreVertical className="w-4 h-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                {campaign.status === 'active' && (
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handlePauseCampaign(campaign.id)}
+                                                                    >
+                                                                        <Pause className="w-4 h-4 mr-2" />
+                                                                        Pause Campaign
                                                                     </DropdownMenuItem>
-                                                                }
-                                                            />
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setSelectedCampaign(campaign)
-                                                                    setShowSettingsDialog(true)
-                                                                }}
-                                                            >
-                                                                <Settings className="w-4 h-4 mr-2" />
-                                                                Settings
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem className="text-red-600">
-                                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                                Delete
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                                                )}
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setSelectedCampaign(campaign)
+                                                                        setShowLeadsDialog(true)
+                                                                    }}
+                                                                >
+                                                                    <Users className="w-4 h-4 mr-2" />
+                                                                    View Leads
+                                                                </DropdownMenuItem>
+                                                                <CampaignEdit
+                                                                    campaign={campaign}
+                                                                    trigger={
+                                                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                            <Edit className="w-4 h-4 mr-2" />
+                                                                            Edit Campaign
+                                                                        </DropdownMenuItem>
+                                                                    }
+                                                                />
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setSelectedCampaign(campaign)
+                                                                        setShowSettingsDialog(true)
+                                                                    }}
+                                                                >
+                                                                    <Settings className="w-4 h-4 mr-2" />
+                                                                    Settings
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem className="text-red-600">
+                                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                                    Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         ))}

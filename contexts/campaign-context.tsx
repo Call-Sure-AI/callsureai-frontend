@@ -72,38 +72,12 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 
             const result = await createCampaign(apiFormData, token);
 
-            // Trigger campaign webhook to start running
-            try {
-                if (!result.file_url) {
-                    throw new Error('Campaign file URL not available');
-                }
-
-                const payload = createCampaignTriggerPayload(
-                    result.id,
-                    result.agent_id,
-                    result.automation_config,
-                    result.file_url,
-                    result.data_mapping
-                );
-
-                await triggerCampaign(payload);
-                console.log('Campaign webhook triggered successfully');
-            } catch (webhookError: any) {
-                console.error('Failed to trigger campaign webhook:', webhookError);
-                // Don't fail the entire campaign creation if webhook fails
-                toast({
-                    title: "Warning",
-                    description: "Campaign created but failed to start automatically. You can start it manually from the campaigns list.",
-                    variant: "destructive"
-                });
-            }
-
             // Refresh campaigns list
             await fetchCampaigns();
 
             toast({
                 title: "Success",
-                description: `Campaign "${result.campaign_name}" created and started successfully!`,
+                description: `Campaign "${result.campaign_name}" created successfully! You can start it manually from the campaigns list.`,
             });
 
             return true;
