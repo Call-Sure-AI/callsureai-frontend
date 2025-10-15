@@ -18,6 +18,7 @@ export const createCampaign = async (formData: CampaignFormData, token: string):
         apiFormData.append('campaign_name', formData.campaign_name);
         apiFormData.append('description', formData.description);
         apiFormData.append('agent_id', formData.agent_id);
+        apiFormData.append('status', 'queued');
 
         // Add data mapping
         apiFormData.append('data_mapping', JSON.stringify(formData.data_mapping));

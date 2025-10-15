@@ -39,7 +39,7 @@ export interface CampaignResponse {
     id: string;
     campaign_name: string;
     description: string;
-    status: 'draft' | 'active' | 'paused' | 'completed' | 'stopped';
+    status: 'draft' | 'queued' | 'active' | 'paused' | 'completed' | 'stopped';
     agent_id: string;
     data_mapping: DataMapping[];
     booking_config?: BookingConfig;

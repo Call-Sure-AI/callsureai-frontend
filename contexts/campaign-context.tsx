@@ -77,7 +77,7 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
 
             toast({
                 title: "Success",
-                description: `Campaign "${result.campaign_name}" created successfully! You can start it manually from the campaigns list.`,
+                description: `Campaign "${result.campaign_name}" created and queued successfully! You can start it manually from the campaigns list.`,
             });
 
             return true;

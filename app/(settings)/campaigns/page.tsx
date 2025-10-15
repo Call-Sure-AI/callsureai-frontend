@@ -244,6 +244,8 @@ export default function CampaignsPage() {
                 return <AlertCircle className="w-4 h-4 text-yellow-500" />
             case 'completed':
                 return <CheckCircle className="w-4 h-4 text-blue-500" />
+            case 'queued':
+                return <Clock className="w-4 h-4 text-orange-500" />
             case 'draft':
                 return <Clock className="w-4 h-4 text-gray-500" />
             default:
@@ -259,6 +261,8 @@ export default function CampaignsPage() {
                 return 'bg-yellow-100 text-yellow-800'
             case 'completed':
                 return 'bg-blue-100 text-blue-800'
+            case 'queued':
+                return 'bg-orange-100 text-orange-800'
             case 'draft':
                 return 'bg-gray-100 text-gray-800'
             default:
@@ -292,7 +296,7 @@ export default function CampaignsPage() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            {campaign.status === 'draft' && (
+                            {campaign.status === 'queued' && (
                                 <DropdownMenuItem onClick={() => handleStartCampaign(campaign.id)}>
                                     <Play className="w-4 h-4 mr-2" />
                                     Start Campaign
@@ -370,7 +374,7 @@ export default function CampaignsPage() {
                         <Eye className="w-4 h-4 mr-1" />
                         View Details
                     </Button>
-                    {campaign.status === 'draft' && (
+                    {campaign.status === 'queued' && (
                         <Button
                             size="sm"
                             className="flex-1 bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
@@ -581,7 +585,7 @@ export default function CampaignsPage() {
                                                 <TableCell>{campaign.metrics?.response_rate || 0}%</TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
-                                                        {campaign.status === 'draft' && (
+                                                        {campaign.status === 'queued' && (
                                                             <Button
                                                                 size="sm"
                                                                 onClick={() => handleStartCampaign(campaign.id)}
