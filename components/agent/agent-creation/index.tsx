@@ -126,76 +126,76 @@ const AgentCreationForm = () => {
   //   return `/voices/${gender}-${tone}-${language}.mp3`;
   // }, []);
 
-const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
+  const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
     setFormData(prev => {
-        const newData = { ...prev, [type]: value };
+      const newData = { ...prev, [type]: value };
 
-        // Load audio when we have both gender and language (tone not needed)
-        if (newData.gender && newData.language && selectedLanguageOption) {
-            // Build the language code from the selected language option
-            const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
-            loadAudio(newData.gender, languageCode);
-        }
+      // Load audio when we have both gender and language (tone not needed)
+      if (newData.gender && newData.language && selectedLanguageOption) {
+        // Build the language code from the selected language option
+        const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
+        loadAudio(newData.gender, languageCode);
+      }
 
-        return newData;return newData;
+      return newData; return newData;
     });
-};
+  };
 
   const handleLanguageChange = (value: string) => {
     const langOption = languageOptions.find(opt => opt.value === value);
 
     if (langOption) {
-        setSelectedLanguageOption({
-            accent: langOption.accent,
-            language: langOption.language
-        });
+      setSelectedLanguageOption({
+        accent: langOption.accent,
+        language: langOption.language
+      });
 
-        setFormData(prev => {
-            const newData = { ...prev, language: value };
+      setFormData(prev => {
+        const newData = { ...prev, language: value };
 
-            if (newData.gender && langOption) {
-                // Build the language code (e.g., "american-en")
-                const languageCode = `${langOption.accent}-${langOption.language}`;
-                if (checkIfVoiceExists(newData.gender, languageCode)) {
-                    loadAudio(newData.gender, languageCode);
-                } else {
-                    setAudioError(true);
-                    toast({
-                        title: "Voice Unavailable",
-                        description: "This voice combination is not available. Please try a different selection.",
-                        variant: "destructive",
-                    });
-                }
-            }
+        if (newData.gender && langOption) {
+          // Build the language code (e.g., "american-en")
+          const languageCode = `${langOption.accent}-${langOption.language}`;
+          if (checkIfVoiceExists(newData.gender, languageCode)) {
+            loadAudio(newData.gender, languageCode);
+          } else {
+            setAudioError(true);
+            toast({
+              title: "Voice Unavailable",
+              description: "This voice combination is not available. Please try a different selection.",
+              variant: "destructive",
+            });
+          }
+        }
 
-            return newData;
-        });
+        return newData;
+      });
     }
-};
+  };
 
   // Update the checkIfVoiceExists function - remove tone/accent from the check
   const checkIfVoiceExists = useCallback((gender: string, language: string) => {
-      // Check for files like "male-american-en" without tone
-      const fileName = `${gender}-${language}`;
-      return availableVoiceFiles.includes(fileName);
+    // Check for files like "male-american-en" without tone
+    const fileName = `${gender}-${language}`;
+    return availableVoiceFiles.includes(fileName);
   }, []);
 
-const loadAudio = useCallback(async (gender: string, language: string): Promise<(() => void) | undefined> => {
+  const loadAudio = useCallback(async (gender: string, language: string): Promise<(() => void) | undefined> => {
     setIsAudioLoading(true);
     setAudioError(false);
 
     console.log(`Attempting to load voice: ${gender}-${language}`);
 
     if (!checkIfVoiceExists(gender, language)) {
-        console.log(`Voice not found: ${gender}-${language}`);
-        setAudioError(true);
-        setIsAudioLoading(false);
-        toast({
-            title: "Voice Unavailable",
-            description: "This voice combination is not available. Please try a different selection.",
-            variant: "destructive",
-        });
-        return;
+      console.log(`Voice not found: ${gender}-${language}`);
+      setAudioError(true);
+      setIsAudioLoading(false);
+      toast({
+        title: "Voice Unavailable",
+        description: "This voice combination is not available. Please try a different selection.",
+        variant: "destructive",
+      });
+      return;
     }
 
     // Build the path without tone
@@ -203,103 +203,103 @@ const loadAudio = useCallback(async (gender: string, language: string): Promise<
     console.log('Full audio URL:', audioPath);
 
     try {
-        if (!audioRef.current) {
-            console.error('Audio element reference not available');
-            throw new Error('Audio element not available');
-        }
+      if (!audioRef.current) {
+        console.error('Audio element reference not available');
+        throw new Error('Audio element not available');
+      }
 
-        let isCanceled = false;
+      let isCanceled = false;
 
-        const currentAudioRef = audioRef.current;
+      const currentAudioRef = audioRef.current;
 
-        // Set up event listeners for tracking loading state
-        const onCanPlay = () => {
-            if (isCanceled) return;
+      // Set up event listeners for tracking loading state
+      const onCanPlay = () => {
+        if (isCanceled) return;
 
-            console.log('Audio can play now');
-            setIsAudioLoading(false);
-            setAudioError(false);
-            setAudio(currentAudioRef);
+        console.log('Audio can play now');
+        setIsAudioLoading(false);
+        setAudioError(false);
+        setAudio(currentAudioRef);
 
-            // Remove event listeners
-            currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
-            currentAudioRef.removeEventListener('error', onError);
-        };
+        // Remove event listeners
+        currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+        currentAudioRef.removeEventListener('error', onError);
+      };
 
-        const onError = (e: Event) => {
-            if (isCanceled) return;
+      const onError = (e: Event) => {
+        if (isCanceled) return;
 
-            console.error('Audio error details:', {
-                src: currentAudioRef.src,
-                error: e,
-                networkState: currentAudioRef.networkState,
-                readyState: currentAudioRef.readyState
-            });
+        console.error('Audio error details:', {
+          src: currentAudioRef.src,
+          error: e,
+          networkState: currentAudioRef.networkState,
+          readyState: currentAudioRef.readyState
+        });
 
-            setAudioError(true);
-            setIsAudioLoading(false);
+        setAudioError(true);
+        setIsAudioLoading(false);
 
-            // Remove event listeners
-            currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
-            currentAudioRef.removeEventListener('error', onError);
-
-            toast({
-                title: "Audio Load Error",
-                description: "Could not load the voice sample. Please try a different selection.",
-                variant: "destructive",
-            });
-        };
-
-        // Clear previous event listeners if any
+        // Remove event listeners
         currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
         currentAudioRef.removeEventListener('error', onError);
 
-        // Add new event listeners
-        currentAudioRef.addEventListener('canplaythrough', onCanPlay);
-        currentAudioRef.addEventListener('error', onError);
+        toast({
+          title: "Audio Load Error",
+          description: "Could not load the voice sample. Please try a different selection.",
+          variant: "destructive",
+        });
+      };
 
-        // Set source and load audio
-        currentAudioRef.src = audioPath;
-        currentAudioRef.load(); // Important!
+      // Clear previous event listeners if any
+      currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+      currentAudioRef.removeEventListener('error', onError);
 
-        // Set a safety timeout
-        const timeoutId = setTimeout(() => {
-            if (isAudioLoading && !isCanceled) {
-                isCanceled = true;
-                setIsAudioLoading(false);
-                setAudioError(true);
+      // Add new event listeners
+      currentAudioRef.addEventListener('canplaythrough', onCanPlay);
+      currentAudioRef.addEventListener('error', onError);
 
-                // Remove event listeners
-                currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
-                currentAudioRef.removeEventListener('error', onError);
+      // Set source and load audio
+      currentAudioRef.src = audioPath;
+      currentAudioRef.load(); // Important!
 
-                toast({
-                    title: "Loading Error",
-                    description: "Audio is taking too long to load. Please try again.",
-                    variant: "destructive",
-                });
-            }
-        }, 7000);
+      // Set a safety timeout
+      const timeoutId = setTimeout(() => {
+        if (isAudioLoading && !isCanceled) {
+          isCanceled = true;
+          setIsAudioLoading(false);
+          setAudioError(true);
 
-        // Return a cleanup function to handle component unmount or re-renders
-        return () => {
-            isCanceled = true;
-            clearTimeout(timeoutId);
-            currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
-            currentAudioRef.removeEventListener('error', onError);
-        };
+          // Remove event listeners
+          currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+          currentAudioRef.removeEventListener('error', onError);
+
+          toast({
+            title: "Loading Error",
+            description: "Audio is taking too long to load. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }, 7000);
+
+      // Return a cleanup function to handle component unmount or re-renders
+      return () => {
+        isCanceled = true;
+        clearTimeout(timeoutId);
+        currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
+        currentAudioRef.removeEventListener('error', onError);
+      };
 
     } catch (e: any) {
-        console.error('Error loading audio:', e);
-        setAudioError(true);
-        setIsAudioLoading(false);
-        toast({
-            title: "Audio Load Error",
-            description: e?.message || "Could not load the voice sample. Please try again.",
-            variant: "destructive",
-        });
+      console.error('Error loading audio:', e);
+      setAudioError(true);
+      setIsAudioLoading(false);
+      toast({
+        title: "Audio Load Error",
+        description: e?.message || "Could not load the voice sample. Please try again.",
+        variant: "destructive",
+      });
     }
-}, [checkIfVoiceExists]);
+  }, [checkIfVoiceExists]);
 
   const handlePlayAudio = () => {
     if (!audio || !audioRef.current) return;
@@ -324,120 +324,123 @@ const loadAudio = useCallback(async (gender: string, language: string): Promise<
 
   const uploadFiles = async (files: File[]) => {
     try {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('files', file);
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('enable_public_read_access', 'true');
+        formData.append('custom_key', `agent-files/${Date.now()}-${file.name}`);
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/s3/upload`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+
+        const result = await response.json();
+        return result.url || result.file_url;
       });
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/files/upload-multiple`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to upload files');
-      }
-
-      const newFiles = result.files.map((file: any) => file.url) as string[];
+      const uploadedUrls = await Promise.all(uploadPromises);
 
       setFormData(prev => ({
         ...prev,
-        files: [...prev.files, ...newFiles]
+        files: [...prev.files, ...uploadedUrls]
       }));
 
-      return newFiles;
+      return uploadedUrls;
     } catch (error) {
       throw error;
     }
   };
 
   // In components/agent/agent-creation/index.tsx
-// Update the handleSubmit function:
+  // Update the handleSubmit function:
 
-const handleSubmit = async () => {
+  const handleSubmit = async () => {
     try {
-        const validationChecks = [
-            { condition: !user, message: "You must be logged in to create an agent." },
-            { condition: !token, message: "Please login to create an agent." },
-            { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
-            { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
-        ];
+      const validationChecks = [
+        { condition: !user, message: "You must be logged in to create an agent." },
+        { condition: !token, message: "Please login to create an agent." },
+        { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
+        { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
+      ];
 
-        for (const check of validationChecks) {
-            if (check.condition) {
-                toast({
-                    title: "Error",
-                    description: check.message,
-                    variant: "destructive"
-                });
-                return;
-            }
-        }
-
-        let fileUrls: string[] = [];
-
-        if (files && files.length > 0) {
-            fileUrls = await uploadFiles(files);
-        }
-
-        if (!user?.id) {
-            throw new Error("User ID is required");
-        }
-
-        if (!company || !company.id) {
-            throw new Error("Company ID is required");
-        }
-
-        const agentData: AgentFormData = {
-            user_id: user.id,
-            name: formData.name,
-            type: totalAgents === 0 ? 'base' : 'custom',
-            prompt: formData.roleDescription,
-            is_active: true,
-            additional_context: {
-                gender: formData.gender,
-                tone: formData.tone,
-                language: formData.language,
-                roleDescription: formData.roleDescription,
-                businessContext: formData.businessContext,
-            },
-            advanced_settings: formData.advanced_settings,
-            files: fileUrls || [],
-        };
-
-        // PASS THE TOKEN TO THE SERVER ACTION
-        const result = await createAgentAction(
-            agentData, 
-            company?.id as string, 
-            user.id,
-            token // ADD TOKEN HERE
-        );
-
-        if (result.success) {
-            await Promise.all([refreshAgents(), refreshActivities()]);
-
-            toast({
-                title: "Success",
-                description: "Agent created successfully!",
-            });
-
-            router.push('/dashboard');
-        } else {
-            throw new Error(result.error || 'Failed to create agent');
-        }
-    } catch (error: any) {
-        toast({
+      for (const check of validationChecks) {
+        if (check.condition) {
+          toast({
             title: "Error",
-            description: error && error.message ? error.message : "Failed to create agent. Please try again.",
-            variant: "destructive",
+            description: check.message,
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      let fileUrls: string[] = [];
+
+      if (files && files.length > 0) {
+        fileUrls = await uploadFiles(files);
+      }
+
+      if (!user?.id) {
+        throw new Error("User ID is required");
+      }
+
+      if (!company || !company.id) {
+        throw new Error("Company ID is required");
+      }
+
+      const agentData: AgentFormData = {
+        user_id: user.id,
+        name: formData.name,
+        type: totalAgents === 0 ? 'base' : 'custom',
+        prompt: formData.roleDescription,
+        is_active: true,
+        additional_context: {
+          gender: formData.gender,
+          tone: formData.tone,
+          language: formData.language,
+          roleDescription: formData.roleDescription,
+          businessContext: formData.businessContext,
+        },
+        advanced_settings: formData.advanced_settings,
+        files: fileUrls || [],
+      };
+
+      // PASS THE TOKEN TO THE SERVER ACTION
+      const result = await createAgentAction(
+        agentData,
+        company?.id as string,
+        user.id,
+        token // ADD TOKEN HERE
+      );
+
+      if (result.success) {
+        await Promise.all([refreshAgents(), refreshActivities()]);
+
+        toast({
+          title: "Success",
+          description: "Agent created successfully!",
         });
+
+        router.push('/dashboard');
+      } else {
+        throw new Error(result.error || 'Failed to create agent');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error && error.message ? error.message : "Failed to create agent. Please try again.",
+        variant: "destructive",
+      });
     }
-};
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -475,53 +478,53 @@ const handleSubmit = async () => {
     }
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     setIsMounted(true);
 
     try {
-        const savedData = window.sessionStorage.getItem('agentSetupData');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            setFormData(prev => ({
-                ...prev,
-                name: data.name || '',
-                gender: data.gender || '',
-                tone: data.tone || '',
-                language: data.language || ''
-            }));
+      const savedData = window.sessionStorage.getItem('agentSetupData');
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        setFormData(prev => ({
+          ...prev,
+          name: data.name || '',
+          gender: data.gender || '',
+          tone: data.tone || '',
+          language: data.language || ''
+        }));
 
-            if (data.language) {
-                const langOption = languageOptions.find(opt => opt.value === data.language);
-                if (langOption && data.gender) {
-                    setSelectedLanguageOption({
-                        accent: langOption.accent,
-                        language: langOption.language
-                    });
-                    // Build language code without tone
-                    const languageCode = `${langOption.accent}-${langOption.language}`;
-                    loadAudio(data.gender, languageCode);
-                }
-            }
+        if (data.language) {
+          const langOption = languageOptions.find(opt => opt.value === data.language);
+          if (langOption && data.gender) {
+            setSelectedLanguageOption({
+              accent: langOption.accent,
+              language: langOption.language
+            });
+            // Build language code without tone
+            const languageCode = `${langOption.accent}-${langOption.language}`;
+            loadAudio(data.gender, languageCode);
+          }
         }
+      }
     } catch (error) {
-        console.error('Error loading saved data:', error);
+      console.error('Error loading saved data:', error);
     }
-}, []); // Remove loadAudio from dependencies
+  }, []); // Remove loadAudio from dependencies
 
-useEffect(() => {
+  useEffect(() => {
     if (formData.gender && selectedLanguageOption) {
-        // Build language code without tone
-        const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
-        loadAudio(formData.gender, languageCode);
+      // Build language code without tone
+      const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
+      loadAudio(formData.gender, languageCode);
     }
 
     return () => {
-        if (audio) {
-            audio.pause();
-            audio.src = '';
-        }
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+      }
     };
-}, [formData.gender, selectedLanguageOption]); // Remove loadAudio and audio from dependencies
+  }, [formData.gender, selectedLanguageOption]); // Remove loadAudio and audio from dependencies
 
   if (!isMounted) {
     return null;

@@ -223,30 +223,33 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
     const uploadFiles = async (files: File[]) => {
         try {
-            const formData = new FormData();
-            files.forEach(file => {
-                formData.append('files', file);
+            const uploadPromises = files.map(async (file) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('enable_public_read_access', 'true');
+                formData.append('custom_key', `agent-files/${Date.now()}-${file.name}`);
+
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/s3/upload`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to upload ${file.name}`);
+                }
+
+                const result = await response.json();
+                return result.url || result.file_url;
             });
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/files/upload-multiple`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-            });
-
-            const result = await response.json();
-
-            if (!result.success) {
-                throw new Error(result.error || 'Failed to upload files');
-            }
-
-            const newFiles = result.files.map((file: any) => file.url) as string[];
+            const uploadedUrls = await Promise.all(uploadPromises);
 
             setFormData(prev => ({
                 ...prev,
-                files: [...prev.files, ...newFiles]
+                files: [...prev.files, ...uploadedUrls]
             }));
 
             toast({
@@ -254,7 +257,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                 description: "Files uploaded successfully!",
             });
 
-            return newFiles;
+            return uploadedUrls;
         } catch (error) {
             throw error;
         }
