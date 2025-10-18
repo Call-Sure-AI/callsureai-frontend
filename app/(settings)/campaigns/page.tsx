@@ -181,6 +181,7 @@ export default function CampaignsPage() {
         try {
             // Find the campaign to get its details
             const campaign = campaigns.find(c => c.id === campaignId);
+            console.log('Campaign details found:', campaign);
             if (!campaign) {
                 toast({
                     title: "Error",
@@ -190,25 +191,35 @@ export default function CampaignsPage() {
                 return;
             }
 
-            // Update campaign status to active
-            await updateCampaign(campaignId, 'active');
+            console.log('Campaign details:', campaign);
 
-            // Trigger campaign webhook to start running
+            // Check if campaign has file URL before attempting to start
+            if (!campaign.leads_file_url) {
+                toast({
+                    title: "Error",
+                    description: "Campaign file URL not available. Cannot start campaign without a CSV file.",
+                    variant: "destructive"
+                });
+                return;
+            }
+
+            // Trigger campaign webhook first
             try {
-                if (!campaign.file_url) {
-                    throw new Error('Campaign file URL not available');
-                }
-
                 const payload = createCampaignTriggerPayload(
                     campaign.id,
                     campaign.agent_id,
                     campaign.automation_config,
-                    campaign.file_url,
+                    campaign.leads_file_url,
                     campaign.data_mapping
                 );
 
+                console.log('Payload:', payload);
+
                 await triggerCampaign(payload);
                 console.log('Campaign webhook triggered successfully');
+
+                // Only update status to active if webhook trigger is successful
+                await updateCampaign(campaignId, 'active');
 
                 toast({
                     title: "Success",
@@ -217,8 +228,8 @@ export default function CampaignsPage() {
             } catch (webhookError: any) {
                 console.error('Failed to trigger campaign webhook:', webhookError);
                 toast({
-                    title: "Warning",
-                    description: "Campaign status updated but failed to start automatically. Please try again.",
+                    title: "Error",
+                    description: "Failed to start campaign. Please check your configuration and try again.",
                     variant: "destructive"
                 });
             }

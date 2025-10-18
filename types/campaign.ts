@@ -44,7 +44,7 @@ export interface CampaignResponse {
     data_mapping: DataMapping[];
     booking_config?: BookingConfig;
     automation_config: AutomationConfig;
-    file_url?: string;
+    leads_file_url?: string;
     metrics: {
         total_leads: number;
         contacted: number;

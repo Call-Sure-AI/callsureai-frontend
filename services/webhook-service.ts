@@ -43,8 +43,8 @@ export const createCampaignTriggerPayload = (
         campaign_id: campaignId,
         agent_id: agentId,
         service: "elevenlabs",
-        delay_between_calls: automationConfig.delay_between_calls,
-        max_concurrent_calls: automationConfig.max_concurrent_calls,
+        delay_between_calls: 5,
+        max_concurrent_calls: 3,
         file_url: fileUrl,
         data_mapping: phoneMapping
     };
