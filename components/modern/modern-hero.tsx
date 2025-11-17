@@ -1,13 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Sparkles, Zap, Shield, Play, Rocket } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Shield, Play, Rocket, X } from "lucide-react";
 import { BackgroundBeams } from "../aceternity/background-beams";
 import { SparklesCore } from "../aceternity/sparkles";
 import Link from "next/link";
 
 export const ModernHero = () => {
-  const [showCalendly, setShowCalendly] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const { scrollY } = useScroll();
   
   // Much less aggressive parallax - stays visible much longer
@@ -139,7 +139,7 @@ export const ModernHero = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
           >
-            {/* Primary CTA */}
+            {/* Primary CTA - Sign Up */}
             <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -159,8 +159,7 @@ export const ModernHero = () => {
               />
               
               <Link
-                href="https://waitlist.callsure.ai/"
-                target="_blank"
+                href="/auth"
                 className="relative px-7 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-2xl font-bold text-base flex items-center gap-2 shadow-xl overflow-hidden"
                 style={{
                   boxShadow: `
@@ -186,11 +185,11 @@ export const ModernHero = () => {
               </Link>
             </motion.div>
 
-            {/* Secondary CTA */}
+            {/* Secondary CTA - Video Modal */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowCalendly(true)}
+              onClick={() => setShowVideoModal(true)}
               className="px-7 py-3.5 bg-white dark:bg-slate-900/80 border-2 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-2xl font-bold text-base flex items-center gap-2 backdrop-blur-sm hover:border-cyan-500 dark:hover:border-cyan-500 transition-all shadow-lg"
               style={{
                 boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
@@ -281,51 +280,40 @@ export const ModernHero = () => {
         </div>
       </motion.div>
 
-      {/* Calendly Modal */}
-      {showCalendly && (
+      {/* Video Modal */}
+      {showVideoModal && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowCalendly(false)}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowVideoModal(false)}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 20 }}
-            className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-6xl h-[85vh] relative shadow-2xl overflow-hidden"
+            transition={{ type: "spring", damping: 25 }}
+            className="relative w-full max-w-6xl"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close button */}
             <button
-              onClick={() => setShowCalendly(false)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors"
+              onClick={() => setShowVideoModal(false)}
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors group z-10"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-700 dark:text-gray-300"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X className="w-5 h-5 text-white group-hover:rotate-90 transition-transform duration-300" />
             </button>
 
-            <iframe
-              src="https://calendly.com/callsureai/meet-with-callsure-ai-team"
-              width="100%"
-              height="100%"
-              frameBorder="0"
-              className="rounded-3xl"
-            />
+            {/* Video Container */}
+            <div className="relative bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+              <video
+                src="https://lndingpageassets.s3.ap-south-1.amazonaws.com/hero.mp4"
+                controls
+                autoPlay
+                className="w-full aspect-video"
+              />
+            </div>
           </motion.div>
         </motion.div>
       )}

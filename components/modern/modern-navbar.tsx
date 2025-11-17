@@ -12,9 +12,16 @@ export const ModernNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { scrollY } = useScroll();
+  const [showCalendly, setShowCalendly] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
+  }, []);
+
+  useEffect(() => {
+    const handleOpenCalendly = () => setShowCalendly(true);
+    window.addEventListener('openCalendly', handleOpenCalendly);
+    return () => window.removeEventListener('openCalendly', handleOpenCalendly);
   }, []);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -55,7 +62,7 @@ export const ModernNavbar = () => {
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="relative group"
         >
-        {/* Clean outer shadow - only visible when scrolled */}
+          {/* Clean outer shadow - only visible when scrolled */}
           <div 
             className={cn(
               "absolute inset-0 rounded-[28px] -z-10 transition-opacity duration-500",
@@ -139,14 +146,15 @@ export const ModernNavbar = () => {
                   : 'none',
               }}
             >
-            {/* Inner top highlight - only visible when scrolled */}
+              {/* Inner top highlight - only visible when scrolled */}
               <div 
                 className={cn(
                   "absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 dark:via-slate-400/20 to-transparent transition-opacity duration-500",
                   isScrolled ? "opacity-100" : "opacity-0"
                 )}
               />              
-            {/* Soft inner glow - only visible when scrolled */}
+              
+              {/* Soft inner glow - only visible when scrolled */}
               <div 
                 className={cn(
                   "absolute inset-0 bg-gradient-to-br from-blue-500/5 dark:from-slate-700/10 via-transparent to-transparent dark:to-slate-950/20 pointer-events-none rounded-[28px] transition-opacity duration-500",
@@ -154,7 +162,7 @@ export const ModernNavbar = () => {
                 )}
               />
 
-            {/* Noise texture - only visible when scrolled */}
+              {/* Noise texture - only visible when scrolled */}
               <div 
                 className={cn(
                   "absolute inset-0 rounded-[28px] transition-opacity duration-500",
@@ -215,7 +223,7 @@ export const ModernNavbar = () => {
                         <div className="relative w-full h-full flex items-center justify-center">
                           <Image
                             src="/images/csai_logos/logo_without_text/fulllogo_nobuffer.png"
-                            alt="CallsureAI"
+                            alt="CallSureAI"
                             fill
                             className="object-contain p-2.5 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"
                           />
@@ -366,8 +374,8 @@ export const ModernNavbar = () => {
                         className="absolute -inset-[3px] bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 rounded-[18px] blur-xl opacity-60"
                       />
 
-                      <Link
-                        href="/auth"
+                      <button
+                        onClick={() => window.dispatchEvent(new CustomEvent('openCalendly'))}
                         className="relative px-7 py-3 rounded-[18px] flex items-center space-x-2 overflow-hidden"
                         style={{
                           background: 'linear-gradient(145deg, #06b6d4 0%, #2563eb 50%, #3b82f6 100%)',
@@ -401,7 +409,7 @@ export const ModernNavbar = () => {
                           Get Started
                         </span>
                         <Zap className="w-4 h-4 relative z-10 text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]" />
-                      </Link>
+                      </button>
                     </motion.div>
                   </div>
 
@@ -519,6 +527,55 @@ export const ModernNavbar = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Calendly Modal */}
+      {showCalendly && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+          onClick={() => setShowCalendly(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-6xl h-[85vh] relative shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowCalendly(false)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-gray-700 dark:text-gray-300"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <iframe
+              src="https://calendly.com/callsureai/meet-with-callsure-ai-team"
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              className="rounded-3xl"
+            />
+          </motion.div>
+        </motion.div>
+      )}
     </motion.nav>
   );
-};  
+};
