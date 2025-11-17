@@ -133,3 +133,29 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, and Opera */
 }
+
+/* Dark mode background patterns */
+.bg-dot-thick-neutral-300 {
+  background-image: radial-gradient(circle, #d4d4d4 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .bg-dot-thick-neutral-800 {
+  background-image: radial-gradient(circle, #262626 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-dot-thick-indigo-500 {
+  background-image: radial-gradient(circle, #6366f1 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .bg-dot-thick-indigo-500 {
+  background-image: radial-gradient(circle, #6366f1 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Smooth dark mode transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}

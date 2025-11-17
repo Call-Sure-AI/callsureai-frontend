@@ -1,11 +1,6 @@
 import type { Config } from "tailwindcss";
-import type { PluginAPI } from "tailwindcss/types/config";
-import animatePlugin from "tailwindcss-animate";
-const {
-  default: flattenColorPalette,
-} = require("tailwindcss/lib/util/flattenColorPalette");
 
-const config: Config = {
+export default {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -13,49 +8,7 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    screens: {
-      // Default Tailwind Breakpoints
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
-
-      // Extra Small Devices (Older/Compact Phones)
-      'xxs': { 'max': '320px' },     // iPhone 4, iPhone 5/SE (1st gen)
-      'xs': { 'min': '321px', 'max': '375px' },  // iPhone SE
-
-      // Small Devices (Smaller Smartphones)
-      'sm-mobile': { 'min': '376px', 'max': '390px' },  // iPhone 12/13 Mini
-
-      // Medium Devices (Average Smartphones)
-      'mobile': { 'min': '391px', 'max': '414px' },     // iPhone XR, 11, etc.
-
-      // Large Devices (Larger Smartphones)
-      'lg-mobile': { 'min': '415px', 'max': '428px' },  // iPhone Pro Max
-
-      // Extra Large Devices (Phablets)
-      'xl-mobile': { 'min': '429px', 'max': '480px' },  // Larger Android devices
-
-      // Small Tablets & Landscape Phones
-      'sm-tablet': { 'min': '481px', 'max': '640px' },  // Small tablets
-
-      // Medium Tablets
-      'tablet': { 'min': '641px', 'max': '768px' },     // iPads
-
-      // Large Tablets
-      'lg-tablet': { 'min': '769px', 'max': '1024px' }, // iPad Pro
-
-      // Special Cases
-      'landscape': { 'raw': '(orientation: landscape)' },
-      'tall': { 'raw': '(min-height: 800px)' },
-      'fold': { 'min': '280px', 'max': '320px' },       // Galaxy Fold closed
-      'unfold': { 'min': '717px', 'max': '721px' },     // Galaxy Fold open
-    },
     extend: {
-      fontFamily: {
-        sans: ['Montserrat', 'Arial', 'Helvetica', 'sans-serif'],
-      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -97,54 +50,113 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))'
         },
-        primaryBlue: 'hsl(var(--primary-blue))'
+        // Modern Blue & Silver theme
+        'cyber-blue': {
+          50: '#e6f1ff',
+          100: '#b3d9ff',
+          200: '#80c1ff',
+          300: '#4da9ff',
+          400: '#1a91ff',
+          500: '#0070f3',
+          600: '#005ac1',
+          700: '#00458f',
+          800: '#002f5d',
+          900: '#001a2b',
+        },
+        'silver': {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)'
       },
-      keyframes: {
-        gradient: {
-          '0%': {
-            'background-position': '0% 50%'
-          },
-          '50%': {
-            'background-position': '100% 50%'
-          },
-          '100%': {
-            'background-position': '0% 50%'
-          }
-        },
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' }
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' }
-        }
-      },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        gradient: 'gradient 8s linear infinite'
-      }
+        aurora: "aurora 60s linear infinite",
+        spotlight: "spotlight 2s ease .75s 1 forwards",
+        shimmer: "shimmer 2s linear infinite",
+        gradient: "gradient 8s linear infinite",
+        "meteor-effect": "meteor 5s linear infinite",
+        scroll: "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
+        "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+      },
+      keyframes: {
+        aurora: {
+          from: {
+            backgroundPosition: "50% 50%, 50% 50%",
+          },
+          to: {
+            backgroundPosition: "350% 50%, 350% 50%",
+          },
+        },
+        spotlight: {
+          "0%": {
+            opacity: "0",
+            transform: "translate(-72%, -62%) scale(0.5)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translate(-50%,-40%) scale(1)",
+          },
+        },
+        shimmer: {
+          from: {
+            backgroundPosition: "0 0",
+          },
+          to: {
+            backgroundPosition: "-200% 0",
+          },
+        },
+        gradient: {
+          to: {
+            backgroundPosition: "var(--bg-size) 0",
+          },
+        },
+        meteor: {
+          "0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
+          "70%": { opacity: "1" },
+          "100%": {
+            transform: "rotate(215deg) translateX(-500px)",
+            opacity: "0",
+          },
+        },
+        scroll: {
+          to: {
+            transform: "translate(calc(-50% - 0.5rem))",
+          },
+        },
+        "border-beam": {
+          "100%": {
+            "offset-distance": "100%",
+          },
+        },
+      },
     }
   },
   plugins: [
-    animatePlugin,
-    function addVariablesForColors({ addBase, theme }: PluginAPI) {
-      const allColors = flattenColorPalette(theme("colors"));
-      const newVars = Object.fromEntries(
-        Object.entries(allColors).map(([key, val]) => [`--${key}`, String(val)])
-      );
-
-      addBase({
-        ":root": newVars as Record<string, string>
-      });
-    },
+    require("tailwindcss-animate"),
+    addVariablesForColors,
   ],
-};
+} satisfies Config;
 
-export default config;
+function addVariablesForColors({ addBase, theme }: any) {
+  const flattenColorPalette = require("tailwindcss/lib/util/flattenColorPalette").default;
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+
+  addBase({
+    ":root": newVars,
+  });
+}
