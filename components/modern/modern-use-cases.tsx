@@ -185,8 +185,15 @@ export const ModernUseCases = () => {
                 <div className="relative z-10">
                   {/* Icon container */}
                   <motion.div
-                    whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{ rotate: 0 }}
+                    whileHover={{ 
+                      rotate: [0, -10, 10, -10, 0],
+                      scale: [1, 1.1, 1.1, 1.1, 1.1]
+                    }}
+                    transition={{ 
+                      rotate: { duration: 0.6, ease: "easeInOut" },
+                      scale: { duration: 0.2 }
+                    }}
                     className="relative mb-4"
                   >
                     <div
