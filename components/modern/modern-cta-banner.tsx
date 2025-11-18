@@ -20,8 +20,8 @@ export const ModernCTABanner = () => {
       >
         {/* Badge */}
         <div className="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-6">
-          <Sparkles className="w-4 h-4 text-blue-400" />
-          <span className="text-sm font-medium text-blue-400">
+          <Sparkles className="w-4 h-4 text-white-400" />
+          <span className="text-sm font-medium text-white-400">
             Limited Time Offer
           </span>
         </div>
@@ -39,16 +39,52 @@ export const ModernCTABanner = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Link href="/auth">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-shadow"
+<motion.div
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            className="relative group"
+          >
+            {/* Button glow */}
+            <motion.div
+              animate={{
+                opacity: [0.5, 1, 0.5],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 rounded-2xl blur-lg opacity-70"
+            />
+
+            <Link
+              href="/auth"
+              className="relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-2xl font-bold flex items-center gap-2 shadow-xl overflow-hidden"
+              style={{
+                boxShadow: `
+                  0 8px 32px rgba(6, 182, 212, 0.4),
+                  inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                  inset 0 -2px 4px rgba(0, 0, 0, 0.2)
+                `,
+              }}
             >
-              <span>Start Free Trial</span>
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
-          </Link>
+              {/* Shimmer effect */}
+              <motion.div
+                animate={{ x: ["-200%", "200%"] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear",
+                  repeatDelay: 1,
+                }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+              />
+
+              <span className="relative z-10">Start Free Trial</span>
+              <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
 
           <Link href="/pricing">
             <motion.button
@@ -62,7 +98,7 @@ export const ModernCTABanner = () => {
         </div>
 
         {/* Trust Indicators */}
-        <div className="flex items-center justify-center space-x-8 mt-12 text-sm text-gray-400">
+        <div className="flex items-center justify-center space-x-8 mt-8 text-sm text-gray-400">
           <div className="flex items-center space-x-2">
             <svg
               className="w-5 h-5 text-green-500"
