@@ -1,3 +1,4 @@
+// app\auth\page.tsx
 import AuthForm from "@/components/auth/form";
 
 const AuthPage = () => {

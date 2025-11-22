@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, startTransition } from 'react';
 
 interface User {
     id: string;
@@ -12,32 +12,50 @@ export const useCurrentUser = () => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const loadUser = useCallback(() => {
-        try {
-            const userData = localStorage.getItem('user');
-            const parsedUser = userData ? JSON.parse(userData) : null;
-            setUser(parsedUser);
-            return parsedUser;
-        } catch (error) {
-            console.error('Error loading user:', error);
-            setUser(null);
-            return null;
-        }
-    }, []);
-
     useEffect(() => {
+        const loadUser = () => {
+            console.log('🔵 loadUser called');
+            try {
+                const userData = localStorage.getItem('user');
+                const parsedUser = userData ? JSON.parse(userData) : null;
+                console.log('🔵 loadUser result:', parsedUser);
+                
+                // ✅ Use startTransition for non-urgent updates
+                startTransition(() => {
+                    setUser(parsedUser);
+                    setLoading(false);
+                });
+            } catch (error) {
+                console.error('Error loading user:', error);
+                startTransition(() => {
+                    setUser(null);
+                    setLoading(false);
+                });
+            }
+        };
+
         loadUser();
-        setLoading(false);
+
+        const handleAuthChange = () => {
+            console.log('🟢 AUTH-CHANGE EVENT FIRED!');
+            loadUser();
+        };
 
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'user') {
+                console.log('🔵 Storage event detected');
                 loadUser();
             }
         };
 
+        window.addEventListener('auth-change', handleAuthChange);
         window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, [loadUser]);
+
+        return () => {
+            window.removeEventListener('auth-change', handleAuthChange);
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
 
     const updateUser = useCallback((newUser: User | null) => {
         try {
@@ -46,7 +64,10 @@ export const useCurrentUser = () => {
             } else {
                 localStorage.removeItem('user');
             }
-            setUser(newUser);
+            startTransition(() => {
+                setUser(newUser);
+            });
+            window.dispatchEvent(new Event('auth-change'));
         } catch (error) {
             console.error('Error updating user:', error);
         }
