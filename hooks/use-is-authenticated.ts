@@ -1,3 +1,4 @@
+// hooks\use-is-authenticated.ts
 import { useState, useEffect } from 'react';
 
 export const useIsAuthenticated = () => {

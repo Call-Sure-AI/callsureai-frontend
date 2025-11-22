@@ -1,3 +1,4 @@
+// components\auth\form.tsx
 "use client";
 
 import React, { useState } from 'react';
@@ -90,14 +91,28 @@ const AuthForm = () => {
 
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                window.dispatchEvent(new Event('storage'));
 
-                toast({
-                    title: 'Success',
-                    description: 'You have successfully logged in',
+                // ✅ Verify it was written
+                console.log('🟡 Saved to localStorage:', {
+                    token: localStorage.getItem('token'),
+                    user: localStorage.getItem('user')
                 });
 
-                router.push('/dashboard');
+                console.log('🟡 Dispatching auth-change event');
+                window.dispatchEvent(new Event('auth-change'));
+
+                toast({
+                    title: "Success",
+                    description: "Successfully logged in",
+                });
+
+                setTimeout(() => {
+                    if (data.newUser) {
+                        router.push('/profile-section');
+                    } else {
+                        router.push('/dashboard');
+                    }
+                }, 100);
             }
         } catch (err: any) {
             console.error('Login error:', err);
@@ -115,46 +130,40 @@ const AuthForm = () => {
         }
     };
 
-    // const handleSignUp = async (e: React.FormEvent) => {
-    //     e.preventDefault();
+// const handleSignUp = async (e: React.FormEvent) => {
+//     e.preventDefault();
 
-    //     if (!validateForm()) return;
+//     if (!validateForm()) return;
 
-    //     setIsLoading(true);
+//     setIsLoading(true);
 
-    //     try {
-    //         const { data } = await axios.post(
-    //             `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`,
-    //             { email, password, name },
-    //             { withCredentials: true }
-    //         );
+//     try {
+//         const { data } = await axios.post(
+//             `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`,
+//             { email, password, name },
+//             { withCredentials: true }
+//         );
 
-    //         localStorage.setItem('token', data.token);
-    //         localStorage.setItem('user', JSON.stringify(data.user));
-    //         window.dispatchEvent(new Event('storage'));
+//         localStorage.setItem('token', data.token);
+//         localStorage.setItem('user', JSON.stringify(data.user));
 
-    //         toast({
-    //             title: 'Success',
-    //             description: 'Your account has been created successfully',
-    //         });
+//         // ✅ Verify it was written
+//         console.log('🟡 Saved to localStorage (Signup):', {
+//             token: localStorage.getItem('token'),
+//             user: localStorage.getItem('user')
+//         });
 
-    //         router.push('/dashboard');
+//         console.log('🟡 Dispatching auth-change event (Signup)');
+//         window.dispatchEvent(new Event('auth-change'));  // ✅ CORRECT!
 
-    //     } catch (err: any) {
-    //         console.error('Signup error:', err);
-    //         setErrors({
-    //             general: err.response?.data?.error || 'Failed to create account'
-    //         });
+//         toast({
+//             title: 'Success',
+//             description: 'Your account has been created successfully',
+//         });
 
-    //         toast({
-    //             title: 'Error',
-    //             description: err.response?.data?.error || 'Failed to create account',
-    //             variant: 'destructive'
-    //         });
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
+//         setTimeout(() => {
+//             router.push('/dashboard');
+//         }, 100);
     const toggleOtpOption = () => {
         setShowOtpOption(!showOtpOption);
         setErrors({});

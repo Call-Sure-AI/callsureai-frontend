@@ -1,3 +1,4 @@
+// components\auth\social-login.tsx
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -83,18 +84,29 @@ export const SocialLogin = ({ isSignup = false }) => {
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            window.dispatchEvent(new Event('storage'));
+
+            // ✅ Verify it was written
+            console.log('🟡 Saved to localStorage (Google):', {
+                token: localStorage.getItem('token'),
+                user: localStorage.getItem('user')
+            });
+
+            console.log('🟡 Dispatching auth-change event (Google)');
+            window.dispatchEvent(new Event('auth-change'));
 
             toast({
                 title: "Success",
                 description: "Successfully logged in with Google",
             });
 
-            if (data.newUser) {
-                router.push('/profile-section');
-                return;
-            }
-            router.push('/dashboard');
+            // Wait for React to process state updates
+            setTimeout(() => {
+                if (data.newUser) {
+                    router.push('/profile-section');
+                } else {
+                    router.push('/dashboard');
+                }
+            }, 100);
         } catch (error: any) {
             console.error('Google login error:', error);
             
