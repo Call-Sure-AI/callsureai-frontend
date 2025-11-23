@@ -238,6 +238,9 @@ const VideoSection = () => {
                     src="/images/hero.png"
                     alt="Video Thumbnail"
                     className="absolute inset-0 w-full h-full object-contain z-10"
+                    width={1920}
+                    height={1080}
+                    priority
                   />
                 )}
                 
