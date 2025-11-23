@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "@/hooks/use-toast";
-import { useIsAuthenticated } from "@/hooks/use-is-authenticated";
 
 import { ProfileFormData } from "@/types";
 import { ProtectedRoute } from "@/components/protected-route";

@@ -24,7 +24,6 @@ import {
 
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { AgentFormData } from '@/types';
 import { createAgentAction } from '@/lib/actions/agent-actions';
 import { useActivities } from '@/contexts/activity-context';
@@ -70,7 +69,6 @@ const initialFormData: FormData = {
 const AgentCreationForm = () => {
   const router = useRouter();
   const { user } = useCurrentUser();
-  const { token } = useIsAuthenticated();
   const { company } = useCompany();
   const { refreshActivities } = useActivities();
   const { refreshAgents, totalAgents } = useAgents();
@@ -301,6 +299,7 @@ const AgentCreationForm = () => {
         variant: "destructive",
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkIfVoiceExists]);
 
   const handlePlayAudio = () => {
@@ -533,7 +532,7 @@ const handleSubmit = async () => {
     }
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     setIsMounted(true);
 
     try {
@@ -564,9 +563,10 @@ const handleSubmit = async () => {
     } catch (error) {
       console.error('Error loading saved data:', error);
     }
-  }, []); // Remove loadAudio from dependencies
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty - only run on mount
 
-  useEffect(() => {
+useEffect(() => {
     if (formData.gender && selectedLanguageOption) {
       // Build language code without tone
       const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
@@ -579,7 +579,8 @@ const handleSubmit = async () => {
         audio.src = '';
       }
     };
-  }, [formData.gender, selectedLanguageOption]); // Remove loadAudio and audio from dependencies
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.gender, selectedLanguageOption]); // loadAudio is stable, audio cleanup handled
 
   if (!isMounted) {
     return null;

@@ -2,6 +2,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import { useScroll, useTransform, motion } from "framer-motion";
+import Image from 'next/image';
 
 // A simple utility to format time from seconds to MM:SS
 const formatTime = (time: number) => {
@@ -101,6 +102,7 @@ const VideoSection = () => {
       }
     });
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rotate, hasPlaybackBeenTriggered]);
 
   // --- Video Event Handlers ---
@@ -203,6 +205,7 @@ const VideoSection = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSeeking, duration]);
 
   // Cleanup timeout on unmount
@@ -231,8 +234,8 @@ const VideoSection = () => {
           >
             <div className="absolute inset-0 w-full h-full" onClick={handleVideoClick}>
                 {!isPlaying && (
-                  <img 
-                    src="/images/hero.png" 
+                  <Image
+                    src="/images/hero.png"
                     alt="Video Thumbnail"
                     className="absolute inset-0 w-full h-full object-contain z-10"
                   />
