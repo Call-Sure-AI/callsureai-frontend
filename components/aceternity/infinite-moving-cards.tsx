@@ -1,3 +1,4 @@
+// components\aceternity\infinite-moving-cards.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export const InfiniteMovingCards = ({
 
   useEffect(() => {
     addAnimation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [start, setStart] = useState(false);

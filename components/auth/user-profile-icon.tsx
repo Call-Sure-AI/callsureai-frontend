@@ -1,3 +1,4 @@
+// components\auth\user-profile-icon.tsx
 'use client';
 
 import Image from "next/image"

@@ -2,7 +2,7 @@
 import React from "react";
 import { InfiniteMovingCards } from "../aceternity/infinite-moving-cards";
 import { motion } from "framer-motion";
-import { Star, Quote, Sparkles, TrendingUp, Users, Phone, Zap } from "lucide-react";
+import { Star, Quote, Users, Phone, Zap } from "lucide-react";
 
 export const ModernTestimonials = () => {
   const testimonials = [

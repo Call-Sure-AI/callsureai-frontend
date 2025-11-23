@@ -1,3 +1,4 @@
+// components\aceternity\sparkles.tsx
 "use client";
 import React, { useId, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -45,6 +46,12 @@ export const SparklesCore: React.FC<SparklesProps> = (props) => {
   return (
     <div className={className}>
       <svg className="h-full w-full" style={{ background }}>
+        <defs>
+          <linearGradient id={sparklesId}>
+            <stop offset="0%" stopColor={particleColor} />
+            <stop offset="100%" stopColor={particleColor} />
+          </linearGradient>
+        </defs>
         {particles.map((particle) => (
           <motion.circle
             key={particle.id}

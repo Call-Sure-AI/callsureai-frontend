@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail } from 'lucide-react';
 import axios from 'axios';
 import { toast } from '@/hooks/use-toast';
 
@@ -16,7 +16,6 @@ const VerifyOTP = () => {
     const [canResend, setCanResend] = useState(false);
 
     useEffect(() => {
-        // Get email from localStorage
         const storedEmail = localStorage.getItem('pendingEmail');
         if (!storedEmail) {
             router.push('/auth');
@@ -24,7 +23,6 @@ const VerifyOTP = () => {
         }
         setEmail(storedEmail);
 
-        // Start countdown timer
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -40,13 +38,12 @@ const VerifyOTP = () => {
     }, [router]);
 
     const handleOtpChange = (index: number, value: string) => {
-        if (value.length > 1) return; // Prevent multiple characters
+        if (value.length > 1) return;
 
         const newOtp = [...otp];
         newOtp[index] = value;
         setOtp(newOtp);
 
-        // Auto-focus next input
         if (value && index < 5) {
             const nextInput = document.querySelector(`input[name=otp-${index + 1}]`) as HTMLInputElement;
             if (nextInput) nextInput.focus();
@@ -133,68 +130,115 @@ const VerifyOTP = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+        <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-black dark:via-slate-950 dark:to-black px-4 pt-24 pb-16 overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 dark:bg-cyan-500/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/5 rounded-full blur-3xl" />
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8"
+                className="relative w-full max-w-md"
             >
-                <div className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
-                    <p className="text-gray-600">
-                        We&apos;ve sent a 6-digit code to {email}
-                    </p>
-                </div>
+                {/* Back button */}
+                <button
+                    onClick={() => router.push('/auth')}
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 mb-6 transition-colors"
+                >
+                    <ArrowLeft size={20} />
+                    <span>Back to sign in</span>
+                </button>
 
-                <form onSubmit={handleVerifyOTP} className="space-y-6">
-                    <div className="flex justify-center space-x-2">
-                        {otp.map((digit, index) => (
-                            <input
-                                key={index}
-                                type="text"
-                                name={`otp-${index}`}
-                                maxLength={1}
-                                value={digit}
-                                onChange={(e) => handleOtpChange(index, e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                                className="w-12 h-12 text-center text-xl font-semibold border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                disabled={isLoading}
-                            />
-                        ))}
+                {/* Glow effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 rounded-3xl blur-xl" />
+                
+                <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 dark:border-slate-800/50 p-8">
+                    <div className="text-center mb-8">
+                        {/* Email icon */}
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", duration: 0.6 }}
+                            className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-4"
+                        >
+                            <Mail className="w-8 h-8 text-white" />
+                        </motion.div>
+
+                        <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent mb-2">
+                            Verify Your Email
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            We&apos;ve sent a 6-digit code to
+                        </p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{email}</p>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47] text-white py-3 rounded-lg hover:opacity-90 transition-colors flex justify-center items-center"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Verifying...
-                            </>
-                        ) : (
-                            'Verify OTP'
-                        )}
-                    </button>
+                    <form onSubmit={handleVerifyOTP} className="space-y-6">
+                        <div className="flex justify-center gap-2">
+                            {otp.map((digit, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                >
+                                    <input
+                                        type="text"
+                                        name={`otp-${index}`}
+                                        maxLength={1}
+                                        value={digit}
+                                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                                        onKeyDown={(e) => handleKeyDown(index, e)}
+                                        className="w-12 h-14 text-center text-xl font-bold border-2 border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:focus:ring-cyan-900 transition-all text-gray-900 dark:text-white"
+                                        disabled={isLoading}
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
 
-                    <div className="text-center">
-                        {timeLeft > 0 ? (
-                            <p className="text-sm text-gray-600">
-                                Resend code in {timeLeft} seconds
-                            </p>
-                        ) : (
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="relative group"
+                        >
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur opacity-30 group-hover:opacity-70 transition-opacity" />
                             <button
-                                type="button"
-                                onClick={handleResendOTP}
-                                disabled={isLoading || !canResend}
-                                className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                type="submit"
+                                disabled={isLoading}
+                                className="relative w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-4 rounded-xl transition-all flex justify-center items-center font-semibold shadow-lg disabled:opacity-50"
                             >
-                                Resend OTP
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                        Verifying...
+                                    </>
+                                ) : (
+                                    'Verify OTP'
+                                )}
                             </button>
-                        )}
-                    </div>
-                </form>
+                        </motion.div>
+
+                        <div className="text-center">
+                            {timeLeft > 0 ? (
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Resend code in{' '}
+                                    <span className="font-semibold text-cyan-600 dark:text-cyan-400">
+                                        {timeLeft}s
+                                    </span>
+                                </p>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleResendOTP}
+                                    disabled={isLoading || !canResend}
+                                    className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed font-medium hover:underline transition-colors"
+                                >
+                                    Resend OTP
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </div>
             </motion.div>
         </div>
     );

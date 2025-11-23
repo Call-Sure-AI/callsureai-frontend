@@ -1,3 +1,4 @@
+// components\modern\modern-use-cases.tsx
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
@@ -259,10 +260,10 @@ export const ModernUseCases = () => {
             {/* Content */}
             <div className="relative border border-gray-200/50 dark:border-slate-800/50 rounded-3xl p-12 text-center">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                Don't see your industry?
+                Don&apos;t see your industry?
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                We can customize AI solutions for your specific needs. Let's discuss
+                We can customize AI solutions for your specific needs. Let&apos;s discuss
                 how we can help transform your business.
               </p>
 

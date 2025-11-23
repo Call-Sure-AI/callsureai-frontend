@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Volume2, Sparkles, ArrowRight, Waveform } from "lucide-react";
+import { Play, Pause, Volume2, Sparkles, ArrowRight } from "lucide-react";
 
 export const ModernVoiceShowcase = () => {
   const [playingId, setPlayingId] = useState<string | null>(null);

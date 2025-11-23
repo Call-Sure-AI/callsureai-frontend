@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Twitter, Linkedin, Github, Youtube } from "lucide-react";
+import { Twitter, Linkedin, Github, Youtube } from "lucide-react";
 
 export function ModernFooter() {
   const year = new Date().getFullYear();
