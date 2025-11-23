@@ -1,3 +1,4 @@
+// components\agent\agent-creation\index.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -82,6 +83,7 @@ const AgentCreationForm = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedLanguageOption, setSelectedLanguageOption] = useState<{ accent: string, language: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Add this line
 
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -322,125 +324,178 @@ const AgentCreationForm = () => {
     }
   };
 
-  const uploadFiles = async (files: File[]) => {
-    try {
-      const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('enable_public_read_access', 'true');
-        formData.append('custom_key', `agent-files/${Date.now()}-${file.name}`);
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/s3/upload`, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}`);
-        }
-
-        const result = await response.json();
-        return result.url || result.file_url;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-
-      setFormData(prev => ({
-        ...prev,
-        files: [...prev.files, ...uploadedUrls]
-      }));
-
-      return uploadedUrls;
-    } catch (error) {
-      throw error;
+const uploadFiles = async (files: File[], companyId: string, agentId: string) => {
+  try {
+    // ✅ Get token directly from localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication token not found');
     }
-  };
+
+    const formData = new FormData();
+    
+    // Add all files
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    
+    // Add metadata
+    formData.append('company_id', companyId);
+    formData.append('agent_id', agentId);
+    formData.append('document_type', 'custom');
+
+    const response = await fetch(
+      `https://processor.callsure.ai/api/v1/documents/upload-pdfs`,
+      {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Failed to upload documents`);
+    }
+
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Upload failed');
+    }
+
+    // Extract S3 URLs from results
+    const uploadedUrls = result.results
+      .filter((r: any) => r.success)
+      .map((r: any) => r.s3_url);
+
+    setFormData(prev => ({
+      ...prev,
+      files: [...prev.files, ...uploadedUrls]
+    }));
+
+    return uploadedUrls;
+    
+  } catch (error: any) {
+    console.error('Upload error:', error);
+    throw error;
+  }
+};
 
   // In components/agent/agent-creation/index.tsx
   // Update the handleSubmit function:
 
-  const handleSubmit = async () => {
-    try {
-      const validationChecks = [
-        { condition: !user, message: "You must be logged in to create an agent." },
-        { condition: !token, message: "Please login to create an agent." },
-        { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
-        { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
-      ];
+const handleSubmit = async () => {
+  // ✅ Prevent multiple submissions
+  if (isSubmitting) return;
+  
+  try {
+    setIsSubmitting(true); // ✅ Set loading state
+    
+    // ✅ Get token directly from localStorage
+    const token = localStorage.getItem('token');
 
-      for (const check of validationChecks) {
-        if (check.condition) {
-          toast({
-            title: "Error",
-            description: check.message,
-            variant: "destructive"
-          });
-          return;
+    const validationChecks = [
+      { condition: !user, message: "You must be logged in to create an agent." },
+      { condition: !token, message: "Please login to create an agent." },
+      { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
+      { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
+    ];
+
+    for (const check of validationChecks) {
+      if (check.condition) {
+        toast({
+          title: "Error",
+          description: check.message,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    if (!user?.id) {
+      throw new Error("User ID is required");
+    }
+
+    if (!company || !company.id) {
+      throw new Error("Company ID is required");
+    }
+
+    // ✅ STEP 1: Create agent first (without files)
+    const agentData: AgentFormData = {
+      user_id: user.id,
+      name: formData.name,
+      type: totalAgents === 0 ? 'base' : 'custom',
+      prompt: formData.roleDescription,
+      is_active: true,
+      additional_context: {
+        gender: formData.gender,
+        tone: formData.tone,
+        language: formData.language,
+        roleDescription: formData.roleDescription,
+        businessContext: formData.businessContext,
+      },
+      advanced_settings: formData.advanced_settings,
+      files: [], // ✅ Empty initially
+    };
+
+    // Create agent
+    const result = await createAgentAction(
+      agentData,
+      company?.id as string,
+      user.id,
+      token
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create agent');
+    }
+
+    // ✅ STEP 2: Upload files if any (after agent is created)
+    if (files && files.length > 0) {
+      try {
+        const agentId = result.data?.id; // Get the created agent ID
+        if (!agentId) {
+          throw new Error('Agent ID not returned from creation');
         }
-      }
 
-      let fileUrls: string[] = [];
-
-      if (files && files.length > 0) {
-        fileUrls = await uploadFiles(files);
-      }
-
-      if (!user?.id) {
-        throw new Error("User ID is required");
-      }
-
-      if (!company || !company.id) {
-        throw new Error("Company ID is required");
-      }
-
-      const agentData: AgentFormData = {
-        user_id: user.id,
-        name: formData.name,
-        type: totalAgents === 0 ? 'base' : 'custom',
-        prompt: formData.roleDescription,
-        is_active: true,
-        additional_context: {
-          gender: formData.gender,
-          tone: formData.tone,
-          language: formData.language,
-          roleDescription: formData.roleDescription,
-          businessContext: formData.businessContext,
-        },
-        advanced_settings: formData.advanced_settings,
-        files: fileUrls || [],
-      };
-
-      // PASS THE TOKEN TO THE SERVER ACTION
-      const result = await createAgentAction(
-        agentData,
-        company?.id as string,
-        user.id,
-        token // ADD TOKEN HERE
-      );
-
-      if (result.success) {
-        await Promise.all([refreshAgents(), refreshActivities()]);
-
+        await uploadFiles(files, company.id, agentId);
+        
         toast({
           title: "Success",
-          description: "Agent created successfully!",
+          description: `Agent created with ${files.length} document(s) uploaded successfully!`,
         });
-
-        router.push('/dashboard');
-      } else {
-        throw new Error(result.error || 'Failed to create agent');
+      } catch (uploadError: any) {
+        // Agent created but files failed
+        toast({
+          title: "Partial Success",
+          description: `Agent created but some documents failed to upload: ${uploadError.message}`,
+          variant: "destructive"
+        });
       }
-    } catch (error: any) {
+    } else {
       toast({
-        title: "Error",
-        description: error && error.message ? error.message : "Failed to create agent. Please try again.",
-        variant: "destructive",
+        title: "Success",
+        description: "Agent created successfully!",
       });
     }
-  };
+
+    // Refresh and redirect
+    await Promise.all([refreshAgents(), refreshActivities()]);
+    router.push('/dashboard');
+
+} catch (error: any) {
+    toast({
+      title: "Error",
+      description: error && error.message ? error.message : "Failed to create agent. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false); // ✅ Reset loading state
+  }
+};
 
   useEffect(() => {
     if (audioRef.current) {
@@ -886,15 +941,24 @@ const AgentCreationForm = () => {
         <div className="border-t border-gray-100 p-6 sticky bottom-0 bg-white flex justify-between">
           <Button
             onClick={() => router.push('/dashboard')}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-2 h-auto text-lg font-medium rounded-xl"
+            disabled={isSubmitting} // ✅ Disable cancel button too
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-2 h-auto text-lg font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl"
+            disabled={isSubmitting} // ✅ Disable while submitting
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Agent
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Creating Agent...</span>
+              </div>
+            ) : (
+              "Create Agent"
+            )}
           </Button>
         </div>
       </Card>

@@ -79,7 +79,7 @@ interface CompanyProviderProps {
 
 export const CompanyProvider = ({ children }: CompanyProviderProps) => {
     const { user } = useCurrentUser();
-    const { token } = useIsAuthenticated();
+    // const { token } = useIsAuthenticated();
     const [company, setCompany] = useState<ProcessedCompanyData | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -126,6 +126,9 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
     };
 
     const fetchCompanyData = async (): Promise<void> => {
+        // ✅ Get token directly from localStorage
+        const token = localStorage.getItem('token');
+        
         if (!token || !user) {
             setIsLoading(false);
             return;
@@ -223,6 +226,9 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
     };
 
     const updateCompanyData = async (data: ProcessedCompanyData): Promise<boolean> => {
+        // ✅ Get token directly from localStorage
+        const token = localStorage.getItem('token');
+        
         if (!token) {
             toast({
                 title: "Error",
@@ -333,13 +339,13 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
     }, []);
 
     useEffect(() => {
-        if (user && token) {
+        if (user) {
             fetchCompanyData();
         } else {
             setCompany(null);
             setIsLoading(false);
         }
-    }, [user, token]);
+    }, [user]); // ✅ Only depend on user
 
     const value = {
         company,

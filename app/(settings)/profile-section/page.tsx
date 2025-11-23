@@ -1,3 +1,4 @@
+// app\(settings)\profile-section\page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -21,7 +22,7 @@ import { useRouter } from "next/navigation";
 const ProfileSection = () => {
   const router = useRouter();
   const { user } = useCurrentUser();
-  const { token } = useIsAuthenticated();
+  // const { token } = useIsAuthenticated();
   const { refreshActivities } = useActivities();
   const { company, isLoading, updateCompanyData, refreshCompanyData } =
     useCompany();
@@ -89,10 +90,13 @@ const ProfileSection = () => {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
+const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (!validateForm()) return;
+    
+    // ✅ Get token directly from localStorage
+    const token = localStorage.getItem('token');
     if (!token) {
       toast({
         title: "Error",
@@ -162,7 +166,7 @@ const ProfileSection = () => {
                       onImageUpdate={(imageUrl) =>
                         setFormData((prev) => ({ ...prev, logo: imageUrl }))
                       }
-                      token={token as string}
+                      token={localStorage.getItem('token') || ''}
                     />
                   </div>
                 </div>
