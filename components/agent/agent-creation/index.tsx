@@ -422,6 +422,11 @@ const handleSubmit = async () => {
       throw new Error("Company ID is required");
     }
 
+    // ✅ TypeScript guard - token is guaranteed to be string here
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
     // ✅ STEP 1: Create agent first (without files)
     const agentData: AgentFormData = {
       user_id: user.id,
@@ -440,12 +445,12 @@ const handleSubmit = async () => {
       files: [], // ✅ Empty initially
     };
 
-    // Create agent
+    // Create agent - token is guaranteed to be string now
     const result = await createAgentAction(
       agentData,
-      company?.id as string,
+      company.id as string,
       user.id,
-      token
+      token // ✅ Now TypeScript knows token is string
     );
 
     if (!result.success) {
