@@ -19,9 +19,9 @@ export const ModernCTABanner = () => {
         className="mt-8 text-center"
       >
         {/* Badge */}
-        <div className="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-6">
-          <Sparkles className="w-4 h-4 text-white-400" />
-          <span className="text-sm font-medium text-white-400">
+        <div className="inline-flex items-center space-x-2 bg-cyan-500/100 border border-cyan-500/30 rounded-full px-4 py-2 mb-6">
+          <Sparkles className="w-4 h-4 text-cyan-400" />
+          <span className="text-sm font-medium text-cyan-100">
             Limited Time Offer
           </span>
         </div>
