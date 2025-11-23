@@ -359,6 +359,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
             const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
             loadAudio(formData.gender, languageCode);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formData.gender, selectedLanguageOption, loadAudio]);
 
     if (!isMounted) {
