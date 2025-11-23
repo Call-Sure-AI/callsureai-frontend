@@ -14,11 +14,22 @@ import {
     ActivityIcon
 } from "lucide-react";
 import { useActivities } from '@/contexts/activity-context';
+import { getRelativeTime } from '@/utils/time-utils'; // ✅ Add this import
 
 const ActivityFeed = () => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const { activities, loading } = useActivities();
+    const { activities, loading, refreshActivities } = useActivities(); // ✅ Add refreshActivities
+
+    // ✅ Add auto-refresh every minute to update relative times
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            // Force a re-render to update relative times
+            refreshActivities();
+        }, 60000); // Refresh every 60 seconds
+
+        return () => clearInterval(interval);
+    }, [refreshActivities]);
 
     const sidebarVariants = {
         expanded: {
@@ -132,36 +143,6 @@ const ActivityFeed = () => {
         }
     };
 
-    const formatTimestamp = (timestamp: string | Date) => {
-        // Parse the UTC timestamp from backend
-        const date = new Date(timestamp);
-        const now = new Date();
-        
-        // Debug logging to see what's happening
-        console.log('Raw timestamp from backend:', timestamp);
-        console.log('Parsed date:', date.toISOString());
-        console.log('Current time:', now.toISOString());
-        console.log('Date timezone offset:', date.getTimezoneOffset());
-        
-        // Calculate the actual difference
-        const diff = now.getTime() - date.getTime();
-        
-        // If the difference is negative, it means the timestamp is in the future
-        // This could happen if there's a timezone issue
-        if (diff < 0) {
-            console.warn('Timestamp appears to be in the future:', timestamp);
-            return 'Just now';
-        }
-
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-        if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-        return 'Just now';
-    };
 
     const ActivityList = ({ isCollapsed }: { isCollapsed: boolean }) => (
         <div className="space-y-2 h-[80vh] overflow-y-scroll 
@@ -208,7 +189,7 @@ const ActivityFeed = () => {
                                         </span>
                                         <span className="flex-shrink-0">•</span>
                                         <span className="truncate flex-shrink-0">
-                                            {formatTimestamp(activity.created_at!)}
+                                            {getRelativeTime(activity.created_at!)}
                                         </span>
                                     </div>
                                 </motion.div>
