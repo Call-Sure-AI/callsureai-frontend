@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { X, Check } from "lucide-react"
+import { X, Check, Sparkles, Zap, Crown, Rocket, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
@@ -9,6 +9,7 @@ import { motion } from "framer-motion"
 import ContactModal from "@/components/contact-us-modal"
 
 type AdditionalRevenueProps = { onClick: () => void };
+
 interface PricingCardProps {
     title: string;
     subtitle: string;
@@ -20,6 +21,9 @@ interface PricingCardProps {
     ctaText: string;
     ctaVariant?: "default" | "hero" | "outline";
     onClick?: () => void;
+    icon: React.ReactNode;
+    color: string;
+    index: number;
 }
 
 interface Feature {
@@ -33,93 +37,86 @@ const fadeIn = {
     visible: { opacity: 1, y: 0 }
 }
 
+const AllPlansInclude: React.FC<AdditionalRevenueProps> = ({ onClick }) => {
+    const features = [
+        "1 week Free-Trial",
+        "99.9% uptime SLA",
+        "GDPR compliant",
+        "Cancel anytime",
+        "Regular feature updates",
+        "API access"
+    ];
 
-
-const AllPlansInclude: React.FC<AdditionalRevenueProps> = ({ onClick }) => (
-    <motion.div
-        className="mt-16 max-w-5xl mx-auto"
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        transition={{ delay: 0.5 }}
-    >
-        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg border border-gray-100">
-            <div className="text-center mb-8">
-                <div className="inline-flex items-center text-black font-bold text-xl mb-4">
-                    <div className="w-6 h-6 mr-3">
-                        <svg className="w-full h-full text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+    return (
+        <motion.div
+            className="mt-20 max-w-5xl mx-auto"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            transition={{ delay: 0.3 }}
+        >
+            {/* All plans include card */}
+            <div className="relative">
+                {/* Card glow */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 rounded-3xl blur-xl opacity-50" />
+                
+                <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-gray-200/50 dark:border-slate-800/50">
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+                                <Star className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-xl font-bold text-gray-900 dark:text-white">
+                                All plans include
+                            </span>
+                        </div>
                     </div>
-                    All plans include
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {features.map((feature, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 * index }}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/50 dark:border-green-800/30"
+                            >
+                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                                    <Check className="w-3.5 h-3.5 text-white" />
+                                </div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">
+                                    {feature}
+                                </span>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start">
-                    <div className="w-5 h-5 mr-3 flex-shrink-0">
-                        <svg className="w-full h-full text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <span className="text-gray-700 font-medium">1 week Free-Trial</span>
-                </div>
-
-                <div className="flex items-center justify-center md:justify-start">
-                    <div className="w-5 h-5 mr-3 flex-shrink-0">
-                        <svg className="w-full h-full text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <span className="text-gray-700 font-medium">99.9% uptime SLA</span>
-                </div>
-
-                <div className="flex items-center justify-center md:justify-start">
-                    <div className="w-5 h-5 mr-3 flex-shrink-0">
-                        <svg className="w-full h-full text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <span className="text-gray-700 font-medium">GDPR compliant</span>
-                </div>
-
-                <div className="flex items-center justify-center md:justify-start">
-                    <div className="w-5 h-5 mr-3 flex-shrink-0">
-                        <svg className="w-full h-full text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <span className="text-gray-700 font-medium">Cancel anytime</span>
-                </div>
-
-                <div className="flex items-center justify-center md:justify-start">
-                    <div className="w-5 h-5 mr-3 flex-shrink-0">
-                        <svg className="w-full h-full text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <span className="text-gray-700 font-medium">Regular feature updates</span>
-                </div>
-
-                <div className="flex items-center justify-center md:justify-start">
-                    <div className="w-5 h-5 mr-3 flex-shrink-0">
-                        <svg className="w-full h-full text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <span className="text-gray-700 font-medium">API access</span>
-                </div>
-            </div>
-        </div>
-
-        {/* Contact Sales Section */}
-        <div className="text-center mt-12">
-            <p className="text-gray-600 text-lg">
-                Need a custom solution? <button onClick={onClick} className="text-blue-600 font-semibold hover:text-blue-700 underline">Contact our sales team</button> for a personalized quote.
-            </p>
-        </div>
-    </motion.div>
-)
+            {/* Contact Sales Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="text-center mt-12"
+            >
+                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                    Need a custom solution?{" "}
+                    <button 
+                        onClick={onClick} 
+                        className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent font-semibold hover:underline"
+                    >
+                        Contact our sales team
+                    </button>{" "}
+                    for a personalized quote.
+                </p>
+            </motion.div>
+        </motion.div>
+    );
+};
 
 const PricingCard = ({
     title,
@@ -131,97 +128,243 @@ const PricingCard = ({
     popular = false,
     ctaText,
     onClick,
+    icon,
+    color,
+    index,
 }: PricingCardProps) => {
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            transition={{ delay: popular ? 0.2 : 0.1 }}
-            className="w-full max-w-sm mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ y: -8 }}
+            className="w-full max-w-sm mx-auto group"
         >
-            <Card className={cn(
-                'relative h-full flex flex-col transition-all duration-300 hover:shadow-lg border-2',
-                popular ? 'border-[#1e3a8a] shadow-lg' : 'border-gray-200',
-                'bg-white'
-            )}>
+            <div className="relative h-full">
+                {/* Popular badge */}
                 {popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                        <span className="bg-[#1e3a8a] text-white px-4 py-1 rounded-full text-sm font-semibold">
-                            MOST POPULAR
-                        </span>
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", delay: 0.3 }}
+                            className="relative"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full blur-md opacity-70" />
+                            <span className="relative bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wider shadow-lg flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                MOST POPULAR
+                            </span>
+                        </motion.div>
                     </div>
                 )}
 
-                <CardHeader className="text-center pb-6 pt-8">
-                    <h3 className="text-2xl font-bold text-[#1e3a8a] mb-2">{title}</h3>
-                    <p className="text-gray-600 text-sm mb-2">{subtitle}</p>
-                    <p className="text-gray-500 text-sm mb-6">Setup: {setupRange}</p>
+                {/* Card glow on hover */}
+                <div className={cn(
+                    "absolute -inset-0.5 rounded-3xl blur transition-opacity duration-500",
+                    popular 
+                        ? "bg-gradient-to-br from-cyan-500 to-blue-600 opacity-30 group-hover:opacity-50" 
+                        : `bg-gradient-to-br ${color} opacity-0 group-hover:opacity-30`
+                )} />
 
-                    <div className="mb-6">
-                        <span className="text-4xl font-bold text-[#1e3a8a]">{price}</span>
-                        <span className="text-gray-600 text-lg">{period}</span>
-                    </div>
-                </CardHeader>
+                {/* Main card */}
+                <Card className={cn(
+                    "relative h-full flex flex-col transition-all duration-300 rounded-3xl overflow-hidden",
+                    "bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl",
+                    popular 
+                        ? "border-2 border-cyan-500/50 dark:border-cyan-500/30" 
+                        : "border border-gray-200/50 dark:border-slate-800/50"
+                )}>
+                    {/* Background gradient */}
+                    <div className={cn(
+                        "absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+                        `bg-gradient-to-br ${color}`
+                    )} style={{ opacity: 0.1 }} />
 
-                <CardContent className="flex-1 px-6">
-                    <div className="space-y-3">
-                        {features.map((feature, index) => (
-                            <div key={index} className="flex items-start gap-3">
-                                {feature.included ? (
-                                    <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                ) : (
-                                    <X className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                                )}
-                                <span className={cn(
-                                    'text-sm leading-relaxed',
-                                    feature.included ? 'text-gray-700' : 'text-gray-400',
-                                    feature.highlight && 'font-semibold text-[#1e3a8a]'
-                                )}>
-                                    {feature.name}
-                                </span>
+                    <CardHeader className="text-center pb-6 pt-8 relative z-10">
+                        {/* Icon */}
+                        <motion.div
+                            initial={{ rotate: 0 }}
+                            whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+                            transition={{ duration: 0.5 }}
+                            className="mx-auto mb-4 relative"
+                        >
+                            <div className={cn(
+                                "w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg",
+                                `bg-gradient-to-br ${color}`
+                            )}>
+                                {icon}
                             </div>
-                        ))}
-                    </div>
-                </CardContent>
+                            <div className={cn(
+                                "absolute inset-0 rounded-2xl blur-xl opacity-50",
+                                `bg-gradient-to-br ${color}`
+                            )} />
+                        </motion.div>
 
-                <CardFooter className="pt-6 pb-8 px-6">
-                    <Button
-                        className={cn(
-                            "w-full py-3 font-semibold rounded-md transition-all duration-200",
-                            popular
-                                ? "bg-[#1e3a8a] hover:bg-[#1e40af] text-white"
-                                : "bg-white hover:bg-gray-50 text-[#1e3a8a] border-2 border-[#1e3a8a]"
-                        )}
-                        size="lg"
-                        onClick={onClick}
-                    >
-                        {ctaText}
-                    </Button>
-                </CardFooter>
-            </Card>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                            {title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                            {subtitle}
+                        </p>
+                        <p className="text-gray-500 dark:text-gray-500 text-xs mb-6">
+                            Setup: {setupRange}
+                        </p>
+
+                        <div className="mb-2">
+                            <span className={cn(
+                                "text-4xl font-bold bg-clip-text text-transparent",
+                                popular 
+                                    ? "bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400"
+                                    : "bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300"
+                            )}>
+                                {price}
+                            </span>
+                            <span className="text-gray-600 dark:text-gray-400 text-lg">
+                                {period}
+                            </span>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="flex-1 px-6 relative z-10">
+                        <div className="space-y-3">
+                            {features.map((feature, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.05 * idx }}
+                                    className="flex items-start gap-3"
+                                >
+                                    {feature.included ? (
+                                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <Check className="w-3 h-3 text-white" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <X className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+                                        </div>
+                                    )}
+                                    <span className={cn(
+                                        "text-sm leading-relaxed",
+                                        feature.included 
+                                            ? "text-gray-700 dark:text-gray-300" 
+                                            : "text-gray-400 dark:text-gray-600",
+                                        feature.highlight && "font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent"
+                                    )}>
+                                        {feature.name}
+                                    </span>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="pt-6 pb-8 px-6 relative z-10">
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full relative group/btn"
+                        >
+                            {popular && (
+                                <motion.div
+                                    animate={{
+                                        opacity: [0.5, 1, 0.5],
+                                        scale: [1, 1.05, 1],
+                                    }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                    }}
+                                    className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur opacity-70"
+                                />
+                            )}
+                            <Button
+                                className={cn(
+                                    "relative w-full py-6 font-semibold rounded-xl transition-all duration-200",
+                                    popular
+                                        ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg"
+                                        : "bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-slate-700 hover:border-cyan-500 dark:hover:border-cyan-500"
+                                )}
+                                size="lg"
+                                onClick={onClick}
+                            >
+                                {ctaText}
+                            </Button>
+                        </motion.div>
+                    </CardFooter>
+                </Card>
+            </div>
         </motion.div>
     )
 }
-
 
 const PricingHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
     <motion.section
         className="text-center max-w-4xl mx-auto px-4"
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+        viewport={{ once: true }}
         variants={fadeIn}
     >
-        <div className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <div className="w-5 h-5 mr-2 flex items-center justify-center">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                </svg>
+        {/* Badge */}
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 mb-6"
+        >
+            <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-md" />
+                <div className="relative bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 backdrop-blur-sm border border-cyan-200/50 dark:border-cyan-800/30 px-4 py-1.5 rounded-full flex items-center gap-2">
+                    <Zap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="text-xs font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent tracking-wider">
+                        SMART PRICING FOR SMART BUSINESSES
+                    </span>
+                </div>
             </div>
-            Smart pricing for smart businesses
-        </div>
-        <h2 className="text-4xl md:text-5xl font-bold text-[#1e3a8a] mb-4">{title}</h2>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
+        </motion.div>
+
+        {/* Heading */}
+        <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4"
+        >
+            <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                Simple{" "}
+            </span>
+            <motion.span
+                initial={{ backgroundPosition: "0% 50%" }}
+                animate={{ backgroundPosition: "100% 50%" }}
+                transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                }}
+                className="inline-block bg-gradient-to-r from-cyan-600 via-blue-500 to-cyan-600 dark:from-cyan-400 dark:via-blue-400 dark:to-cyan-400 bg-clip-text text-transparent"
+                style={{ backgroundSize: "200% auto" }}
+            >
+                Transparent
+            </motion.span>
+            <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                {" "}Pricing
+            </span>
+        </motion.h2>
+
+        <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+        >
+            {subtitle}
+        </motion.p>
     </motion.section>
 )
 
@@ -244,6 +387,8 @@ export default function Page() {
             setupRange: "₹49,999 - ₹1,49,999",
             price: "₹14,999",
             period: "/mo",
+            icon: <Rocket className="w-8 h-8 text-white" />,
+            color: "from-cyan-500 to-blue-500",
             features: [
                 { name: "500-1,000 free call minutes included", included: true },
                 { name: "5 professional voices (3F, 2M)", included: true },
@@ -266,6 +411,8 @@ export default function Page() {
             setupRange: "₹1,49,999 - ₹4,99,999",
             price: "₹99,999",
             period: "/mo",
+            icon: <Zap className="w-8 h-8 text-white" />,
+            color: "from-cyan-500 to-blue-600",
             features: [
                 { name: "1,500-3,000 free call minutes included", included: true },
                 { name: "15+ voices + 1 custom clone", included: true },
@@ -290,6 +437,8 @@ export default function Page() {
             setupRange: "₹4,99,999 - ₹15,99,999",
             price: "₹2,49,999",
             period: "/mo",
+            icon: <Crown className="w-8 h-8 text-white" />,
+            color: "from-purple-500 to-indigo-600",
             features: [
                 { name: "5,000-10,000+ free call minutes", included: true },
                 { name: "Unlimited custom voice clones", included: true },
@@ -311,33 +460,46 @@ export default function Page() {
 
     return (
         <>
-            <div className="py-16 px-4 md:py-20 bg-white">
-                <PricingHeader
-                    title="Simple transparent pricing"
-                    subtitle="Choose the perfect plan for your business needs with no hidden fees or surprises."
-                />
+            <div className="relative py-24 overflow-hidden bg-gradient-to-b from-white via-gray-50 to-white dark:from-black dark:via-slate-950 dark:to-black">
+                {/* Background decoration */}
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 dark:bg-cyan-500/5 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-cyan-500/3 to-blue-500/3 rounded-full blur-3xl" />
 
-                <section className="flex flex-col lg:flex-row justify-center items-center lg:items-stretch gap-8 mt-12 max-w-7xl mx-auto">
-                    {plans.map((plan, index) => (
-                        <PricingCard
-                            key={`pricing-card-${index}-${plan.title}`}
-                            {...plan}
-                            onClick={openCalendly}
-                        />
-                    ))}
-                </section>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <PricingHeader
+                        title="Simple transparent pricing"
+                        subtitle="Choose the perfect plan for your business needs with no hidden fees or surprises."
+                    />
 
-                <AllPlansInclude onClick={() => setIsContactModalOpen(true)} />
+                    <section className="flex flex-col lg:flex-row justify-center items-center lg:items-stretch gap-8 mt-16">
+                        {plans.map((plan, index) => (
+                            <PricingCard
+                                key={`pricing-card-${index}-${plan.title}`}
+                                {...plan}
+                                index={index}
+                                onClick={openCalendly}
+                            />
+                        ))}
+                    </section>
+
+                    <AllPlansInclude onClick={() => setIsContactModalOpen(true)} />
+                </div>
 
                 {/* Calendly Modal */}
                 {showCalendly && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                        <div className="bg-white rounded-lg w-full max-w-6xl h-5/6 relative">
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="relative bg-white dark:bg-slate-900 rounded-2xl w-full max-w-6xl h-[85vh] shadow-2xl overflow-hidden"
+                        >
                             <button
                                 onClick={closeCalendly}
-                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 z-10"
+                                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white z-10 transition-colors"
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                             <div className="h-full">
                                 <iframe
@@ -345,9 +507,10 @@ export default function Page() {
                                     width="100%"
                                     height="100%"
                                     frameBorder="0"
+                                    className="rounded-2xl"
                                 ></iframe>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 )}
             </div>

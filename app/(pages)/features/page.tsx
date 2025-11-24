@@ -1,746 +1,779 @@
-// app/features/page.tsx
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Clock, LineChart, BarChart4, PieChart, Shield, Brain, FileUp, Database, CheckCircle, Award, MessageCircle, Search, LayoutPanelLeft, UserCircle, FileText, BarChart2, Plus } from "lucide-react";
+import { 
+  Users, Clock, LineChart, BarChart4, PieChart, Shield, Brain, 
+  FileUp, Database, CheckCircle, Award, MessageCircle, Search, 
+  LayoutPanelLeft, UserCircle, Sparkles,
+  ArrowRight, Zap, Globe, Headphones, Bot, Languages, Lock,
+  TrendingUp, Star, Play, ChevronRight, Phone 
+} from "lucide-react";
 
-interface GradientTextProps {
-  children: React.ReactNode;
-}
+// Floating particles component
+const FloatingParticles = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {[...Array(20)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-2 h-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full opacity-20"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+        }}
+        animate={{
+          y: [0, -100, 0],
+          x: [0, Math.random() * 50 - 25, 0],
+          scale: [1, 1.5, 1],
+          opacity: [0.2, 0.5, 0.2],
+        }}
+        transition={{
+          duration: 10 + Math.random() * 10,
+          repeat: Infinity,
+          delay: Math.random() * 5,
+          ease: "easeInOut",
+        }}
+      />
+    ))}
+  </div>
+);
 
-const GradientText = memo(({ children }: GradientTextProps) => (
-  <span
-    className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy font-extrabold"
-    style={{ lineHeight: 1.2 }}
-  >
-    {children}
-  </span>
-));
+// Animated counter component
+const AnimatedCounter = ({ value, suffix = "" }: { value: string; suffix?: string }) => {
+  return (
+    <motion.span
+      initial={{ opacity: 0, scale: 0.5 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ type: "spring", stiffness: 100 }}
+      className="font-bold"
+    >
+      {value}{suffix}
+    </motion.span>
+  );
+};
 
-GradientText.displayName = "GradientText";
+// Premium feature card component
+const PremiumFeatureCard = memo(({ 
+  feature, 
+  index,
+  isHovered,
+  onHover
+}: { 
+  feature: any;
+  index: number;
+  isHovered: boolean;
+  onHover: (index: number | null) => void;
+}) => {
+  const IconComponent = feature.icon;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      onMouseEnter={() => onHover(index)}
+      onMouseLeave={() => onHover(null)}
+      className="group relative"
+    >
+      {/* Outer glow effect */}
+      <motion.div
+        animate={{
+          opacity: isHovered ? 0.6 : 0,
+          scale: isHovered ? 1.02 : 1,
+        }}
+        transition={{ duration: 0.3 }}
+        className={`absolute -inset-1 bg-gradient-to-r ${feature.gradient} rounded-[2rem] blur-xl`}
+      />
+      
+      {/* Card container */}
+      <motion.div
+        animate={{
+          y: isHovered ? -12 : 0,
+          rotateX: isHovered ? 5 : 0,
+        }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="relative h-full"
+        style={{ transformStyle: "preserve-3d", perspective: 1000 }}
+      >
+        {/* Main card */}
+        <div className="relative h-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/50 dark:border-slate-700/50 rounded-[1.5rem] overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-cyan-500/5">
+          
+          {/* Animated gradient border */}
+          <div className="absolute inset-0 rounded-[1.5rem] p-[1px] bg-gradient-to-br from-transparent via-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          {/* Top gradient section with 3D effect */}
+          <div className={`relative h-52 md:h-60 bg-gradient-to-br ${feature.gradient} overflow-hidden`}>
+            {/* Mesh gradient overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.15),transparent_50%)]" />
+            
+            {/* Animated circles */}
+            <motion.div
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.1, 0.2, 0.1],
+                rotate: [0, 180, 360],
+              }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute -top-20 -left-20 w-60 h-60 border border-white/20 rounded-full"
+            />
+            <motion.div
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.1, 0.15, 0.1],
+                rotate: [360, 180, 0],
+              }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+              className="absolute -bottom-10 -right-10 w-40 h-40 border border-white/20 rounded-full"
+            />
 
-// Your Features Page with normal scrolling
-export default function FeaturesPage() {
-  // All 15 features from the original
-  const allFeatures = [
-    {
-      title: "Human Touch When You Need It",
-      description:
-        "Live agent handoff ensures customers get personal attention when AI assistance isn't enough. The AI can seamlessly transfer the conversation to a human agent.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Users color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Human Support, Always Available</h4>
-              <p className="text-xs md:text-sm text-white/80">Get instant access to real human agents for personalized attention</p>
-            </div>
-            <div className="grid grid-cols-3 gap-1.5 md:gap-2 w-full mt-1 md:mt-2">
-              {[
-                { value: "24/7", label: "Availability" },
-                { value: "300ms", label: "Avg. Response" },
-                { value: "98%", label: "Resolution" }
-              ].map((item, i) => (
-                <div key={i} className="bg-white/10 p-1.5 md:p-2 rounded-lg text-center">
-                  <div className="font-bold text-sm md:text-base">{item.value}</div>
-                  <div className="text-xs text-white/70">{item.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Real-Time Human Intervention",
-      description:
-        "Seamless transition to human support agents whenever additional assistance is required. The AI can intelligently identify when to escalate a conversation.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Clock color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Seamless Agent Handoff</h4>
-              <p className="text-xs md:text-sm text-white/80">Smart escalation for complex issues</p>
-            </div>
-            <div className="relative w-full h-16 md:h-20 mt-1 md:mt-2">
-              <div className="flex justify-between items-center">
-                <div className="text-center">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 mb-1 flex items-center justify-center">
-                    <span className="text-lg md:text-xl">🤖</span>
-                  </div>
-                  <p className="text-xs">AI Agent</p>
-                </div>
+            {/* Floating sparkles */}
+            <motion.div
+              animate={{
+                y: [-5, 5, -5],
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute top-4 right-4"
+            >
+              <Sparkles className="w-5 h-5 text-white/40" />
+            </motion.div>
+
+            {/* Icon container with glow */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+              <motion.div
+                animate={{
+                  boxShadow: isHovered 
+                    ? "0 0 60px 20px rgba(255,255,255,0.3)" 
+                    : "0 0 30px 10px rgba(255,255,255,0.1)",
+                }}
+                transition={{ duration: 0.4 }}
+                className="relative mb-4"
+              >
                 <motion.div
-                  className="h-1 bg-white/50 flex-grow mx-1 md:mx-2"
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                />
-                <div className="text-center">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 mb-1 flex items-center justify-center">
-                    <span className="text-lg md:text-xl">👨‍💼</span>
-                  </div>
-                  <p className="text-xs">Human Agent</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "24/7 Support with Human-Like Voice",
-      description:
-        "Round-the-clock availability with natural voice complete with breathing sounds and pitch variations for a more authentic experience. The AI can mimic human-like speech patterns.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <LineChart color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Natural Voice Interaction</h4>
-              <p className="text-xs md:text-sm text-white/80">AI with natural pauses, breathing, and inflection</p>
-            </div>
-            <div className="w-full mt-1 md:mt-2">
-              <div className="relative h-10 md:h-12">
-                {Array(16).fill(0).map((_, i) => {
-                  const height = 4 + Math.random() * 24;
-                  return (
+                  animate={{ rotate: isHovered ? [0, -10, 10, -5, 5, 0] : 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-2xl"
+                >
+                  <IconComponent className="w-10 h-10 text-white drop-shadow-lg" />
+                </motion.div>
+                
+                {/* Orbiting dot */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0"
+                  style={{ transformOrigin: "center center" }}
+                >
+                  <div className="absolute -top-1 left-1/2 w-2 h-2 bg-white rounded-full shadow-lg" />
+                </motion.div>
+              </motion.div>
+
+              {/* Stats grid */}
+              {feature.stats && (
+                <div className="grid grid-cols-3 gap-2 w-full mt-2">
+                  {feature.stats.map((stat: any, i: number) => (
                     <motion.div
                       key={i}
-                      className="absolute bottom-0 bg-white/30 rounded-md w-0.5 md:w-1"
-                      style={{
-                        height: `${height}px`,
-                        left: `${i * 6.25}%`,
-                      }}
-                      initial={{ height: 0 }}
-                      animate={{ height: `${height}px` }}
-                      transition={{
-                        duration: 0.5,
-                        delay: i * 0.03,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                      }}
-                    />
-                  );
-                })}
-              </div>
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                      className="bg-white/10 backdrop-blur-md p-2 rounded-xl text-center border border-white/10"
+                    >
+                      <div className="font-bold text-white text-sm md:text-base">
+                        <AnimatedCounter value={stat.value} />
+                      </div>
+                      <div className="text-[10px] md:text-xs text-white/70">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      ),
-    },
-    {
-      title: "Multi-Language Support",
-      description:
-        "Communication in over 30 languages with real-time translation capabilities. Supports multiple dialects and accents.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <div className="text-2xl md:text-4xl">⚛🗣</div>
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Language Flexibility</h4>
-              <p className="text-xs md:text-sm text-white/80">Seamlessly switch between languages for natural conversations</p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 w-full mt-1 md:mt-2">
-              <div className="bg-white/10 p-1.5 md:p-2 rounded-lg text-center">
-                <div className="font-bold text-xs md:text-sm">English</div>
-                <div className="text-xs text-white/70">Hello, how may I assist you today?</div>
-              </div>
-              <div className="bg-white/10 p-1.5 md:p-2 rounded-lg text-center">
-                <div className="font-bold text-xs md:text-sm">हिन्दी</div>
-                <div className="text-xs text-white/70">नमस्ते, मैं आपकी कैसे सहायता कर सकता हूँ?</div>
-              </div>
-              <div className="bg-white/10 p-1.5 md:p-2 rounded-lg text-center">
-                <div className="font-bold text-xs md:text-sm">Spanish</div>
-                <div className="text-xs text-white/70">Hola, ¿cómo puedo ayudarte hoy?</div>
-              </div>
-              <div className="bg-white/10 p-1.5 md:p-2 rounded-lg text-center">
-                <div className="font-bold text-xs md:text-sm">French</div>
-                <div className="text-xs text-white/70">Bonjour, comment puis-je vous aider?</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Smart and Always Learning",
-      description:
-        "AI that improves in real-time, becoming more effective with each conversation. Feedback loop ensures continuous learning.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Brain color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Continuous Improvement</h4>
-              <p className="text-xs md:text-sm text-white/80">AI learns from every interaction</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-2 mt-1 md:mt-2">
-              <div className="flex justify-between mb-1 text-xs">
-                <span>Learning Progress</span>
-                <span>+22% this month</span>
-              </div>
-              <div className="h-2 md:h-3 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-white/70"
-                  initial={{ width: "40%" }}
-                  animate={{ width: "78%" }}
-                  transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-1 md:gap-2 mt-2">
-                <div className="text-center">
-                  <div className="text-xs opacity-70">Accuracy</div>
-                  <div className="text-xs md:text-sm font-bold">96.5%</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xs opacity-70">Response</div>
-                  <div className="text-xs md:text-sm font-bold">0.8s</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xs opacity-70">Topics</div>
-                  <div className="text-xs md:text-sm font-bold">1,240+</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Personalized Conversations",
-      description:
-        "Dynamic interactions that adapt to customer needs with AI agents that switch based on context.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center">
-              <UserCircle color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            </div>
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Tailored Interactions</h4>
-              <p className="text-xs md:text-sm text-white/80">AI adapts to each customer&apos;s communication style</p>
-            </div>
-            <div className="w-full mt-1 md:mt-2 bg-white/10 p-1.5 md:p-2 rounded-lg">
-              <div className="mb-1 pb-1 border-b border-white/20">
-                <div className="text-xs text-white/70">Customer Profile:</div>
-                <div className="text-xs font-semibold">Prefers: Technical details • Direct • Quick</div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-start">
-                  <div className="text-xs bg-white/20 p-1 md:p-1.5 rounded-lg">Can you explain how your security system works?</div>
-                </div>
-                <div className="flex items-start justify-end">
-                  <div className="text-xs bg-white/30 p-1 md:p-1.5 rounded-lg">Our platform uses end-to-end encryption with AES-256. All data is encrypted in transit and at rest.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Top-Level Security",
-      description:
-        "End-to-end protection for all customer data & interactions. We are GDPR, CCPA, ACC, ISO 27001, SOC 2, RGDP, and HIPAA compliant.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Shield color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Enterprise-Grade Protection</h4>
-              <p className="text-xs md:text-sm text-white/80">Military-grade encryption standards</p>
-            </div>
-            <div className="relative w-16 h-16 md:w-20 md:h-20 mt-1 md:mt-2">
+
+          {/* Content section */}
+          <div className="p-6 md:p-8">
+            {/* Title with animated check */}
+            <div className="flex items-start gap-3 mb-4">
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                {feature.title}
+              </h3>
               <motion.div
-                className="absolute inset-0 rounded-full border-1 md:border-2 border-white/30"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              />
+                initial={{ scale: 0, rotate: -180 }}
+                whileInView={{ scale: 1, rotate: 0 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", delay: 0.5 }}
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Description */}
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+              {feature.description}
+            </p>
+
+            {/* Learn more link */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center gap-2 text-sm font-semibold"
+            >
+              <span className={`bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent`}>
+                Learn more
+              </span>
               <motion.div
-                className="absolute inset-3 rounded-full border-1 md:border-2 border-white/50"
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/10 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center">
-                  <Shield size={16} className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
-              </div>
-            </div>
+                animate={{ x: isHovered ? 5 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChevronRight className={`w-4 h-4 ${isHovered ? 'text-cyan-500' : 'text-gray-400'}`} />
+              </motion.div>
+            </motion.div>
           </div>
+
+          {/* Bottom accent line */}
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className={`h-1 bg-gradient-to-r ${feature.gradient}`}
+            style={{ transformOrigin: "left" }}
+          />
         </div>
-      ),
-    },
-    {
-      title: "Cost-Effective and Scalable",
-      description:
-        "Approximately 40% cost reduction compared to traditional customer care agencies while maintaining quality.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <BarChart4 color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Significant Cost Savings</h4>
-              <p className="text-xs md:text-sm text-white/80">Lower costs, higher satisfaction</p>
-            </div>
-            <div className="w-full mt-1 md:mt-2">
-              <div className="flex justify-between mb-1">
-                <div className="text-xs">Traditional Support</div>
-                <div className="text-xs">$100k/mo</div>
-              </div>
-              <div className="h-3 md:h-4 bg-white/20 rounded-md mb-2">
-                <div className="h-full bg-white/40 rounded-md" style={{ width: "100%" }}></div>
-              </div>
-              <div className="flex justify-between mb-1">
-                <div className="text-xs">Our AI Solution</div>
-                <div className="text-xs">$60k/mo</div>
-              </div>
-              <div className="h-3 md:h-4 bg-white/20 rounded-md">
-                <div className="h-full bg-white/40 rounded-md" style={{ width: "60%" }}></div>
-              </div>
-              <div className="mt-2 text-center bg-white/10 p-1 rounded-md">
-                <span className="text-sm md:text-base font-bold">40% Cost Reduction</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Seamless System Integration",
-      description:
-        "Easy connection with existing business systems without complicated setup. Technical support available 24/7.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center">
-              <LayoutPanelLeft color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            </div>
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Easy Connection</h4>
-              <p className="text-xs md:text-sm text-white/80">Works with existing tools with minimal setup</p>
-            </div>
-            <div className="grid grid-cols-3 gap-1 w-full mt-1">
-              {["CRM", "ERP", "Help", "Chat", "Email", "CX"].map((item, i) => (
-                <div key={i} className="bg-white/10 p-1 rounded-lg text-center">
-                  <div className="text-xs font-medium">{item}</div>
-                </div>
-              ))}
-            </div>
-            <div className="text-center text-xs text-white/70">+ more integrations available</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Multi-Agent Context-Aware AI",
-      description:
-        "Advanced AI architecture that provides precise query resolution specific to your business needs.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center">
-              <Brain color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            </div>
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Collaborative AI Network</h4>
-              <p className="text-xs md:text-sm text-white/80">Specialized agents solving complex queries</p>
-            </div>
-            <div className="relative w-full h-24 md:h-28 mt-1">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 flex items-center justify-center z-10 relative">
-                    <Users color="white" size={20} className="w-5 h-5 md:w-6 md:h-6" />
-                  </div>
-                  <div className="absolute top-0 left-0 -translate-x-full -translate-y-1/2">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center">
-                      <BarChart4 color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                    </div>
-                  </div>
-                  <div className="absolute top-0 right-0 translate-x-full -translate-y-1/2">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center">
-                      <MessageCircle color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 -translate-x-full translate-y-1/2">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center">
-                      <Search color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 right-0 translate-x-full translate-y-1/2">
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center">
-                      <Database color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Database Integration",
-      description:
-        "Connection to your business database for highly personalized customer responses. The AI can access customer data, order history, and more.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Database color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Data-Powered Responses</h4>
-              <p className="text-xs md:text-sm text-white/80">Personalized experiences from your data</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-1.5 mt-1">
-              <div className="grid grid-cols-2 gap-1.5 mb-1.5">
-                <div>
-                  <div className="text-xs opacity-70 mb-0.5">Customer</div>
-                  <div className="bg-white/20 p-1 rounded text-xs">
-                    <div>ID: #38291</div>
-                    <div>Name: John S.</div>
-                    <div>Plan: Premium</div>
-                    <div>Since: 06/23</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs opacity-70 mb-0.5">Preferences</div>
-                  <div className="bg-white/20 p-1 rounded text-xs">
-                    <div>Contact: Email</div>
-                    <div>Billing: Monthly</div>
-                    <div>Updates: Yes</div>
-                    <div>Products: A,C,D</div>
-                  </div>
-                </div>
-              </div>
-              <div className="text-center bg-white/20 p-1 rounded text-xs">
-                <div className="opacity-70 mb-0.5">AI Response:</div>
-                <div>&quot;Welcome back, John! I see you&apos;ve been with us since June. Want to hear about Product B?&quot;</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Complex Query Handling",
-      description:
-        "Sophisticated AI models that can address complicated customer inquiries. These models are designed to understand and respond to intricate questions.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center">
-              <Brain color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            </div>
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Advanced Problem Solving</h4>
-              <p className="text-xs md:text-sm text-white/80">Handling complex multi-step inquiries</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-1.5 mt-1">
-              <div className="flex items-start mb-1.5">
-                <div className="text-xs bg-white/20 p-1 rounded-lg max-w-xs">
-                  I&apos;d like to change my plan, add a user, keep my data allocation. Will this affect my billing?
-                </div>
-              </div>
-              <div className="flex items-start justify-end">
-                <div className="text-xs bg-white/30 p-1 rounded-lg max-w-xs">
-                  I&apos;ll process the plan change, add a user while maintaining your data. Your billing cycle stays the same, but your next bill will be prorated.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Document Upload Capabilities",
-      description:
-        "Support for customer document uploads to handle complex service requests to analyze & respond to doc's content- invoices or contracts.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <FileUp color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Fast File Processing</h4>
-              <p className="text-xs md:text-sm text-white/80">AI analyzes documents to extract key info</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-1.5 mt-1">
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1">
-                  <div className="w-5 h-5 md:w-7 md:h-7 bg-white/20 rounded flex items-center justify-center">
-                    <FileText color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold">knowledge.pdf</div>
-                    <div className="text-xs opacity-70">3.2 MB</div>
-                  </div>
-                </div>
-                <div className="text-xs bg-white/20 px-1 py-0.5 rounded">Processed</div>
-              </div>
-    
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1">
-                  <div className="w-5 h-5 md:w-7 md:h-7 bg-white/20 rounded flex items-center justify-center">
-                    <BarChart2 color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold">sales.xlsx</div>
-                    <div className="text-xs opacity-70">1.8 MB</div>
-                  </div>
-                </div>
-                <div className="text-xs bg-green-500/30 px-1 py-0.5 rounded">Done</div>
-              </div>
-    
-              <div className="flex items-center justify-center my-1">
-                <button className="flex items-center justify-center w-5 h-5 md:w-6 md:h-6 bg-white/20 hover:bg-white/30 rounded-full">
-                  <Plus color="white" size={12} className="w-3 h-3 md:w-4 md:h-4" />
-                </button>
-              </div>
-    
-              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-white/70"
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 1.5 }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Real-Time Monitoring and Analytics",
-      description:
-        "Live dashboards and transcript access for quality assurance and improvement. Real-time data analytics for performance tracking & optimization.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <PieChart color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Live Performance Insights</h4>
-              <p className="text-xs md:text-sm text-white/80">Monitor performance in real-time</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-2 mt-1">
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <div>
-                  <div className="text-xs opacity-70 mb-0.5">Active Chats</div>
-                  <div className="flex justify-between items-end">
-                    <div className="text-sm md:text-lg font-bold">247</div>
-                    <div className="text-xs text-green-300">+12% ↑</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs opacity-70 mb-0.5">Avg. Resolution</div>
-                  <div className="flex justify-between items-end">
-                    <div className="text-sm md:text-lg font-bold">3:24</div>
-                    <div className="text-xs text-green-300">-18% ↓</div>
-                  </div>
-                </div>
-              </div>
-              <div className="h-12 md:h-14 flex items-end">
-                {Array(8).fill(0).map((_, i) => {
-                  const height = 30 + Math.random() * 70;
-                  return (
-                    <div
-                      key={i}
-                      className="flex-1 bg-white/40 mx-0.5 rounded-t"
-                      style={{ height: `${height}%` }}
-                    />
-                  );
-                })}
-              </div>
-              <div className="text-xs mt-1 text-center opacity-70">Hourly volume</div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Customizable AI Personas",
-      description:
-        "Create unique AI personas tailored to your brand voice and customer needs. Train them to handle specific queries and tasks effectively.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <UserCircle color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Brand-Aligned AI</h4>
-              <p className="text-xs md:text-sm text-white/80">AI personalities matching your brand</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-2 mt-1">
-              <div className="grid grid-cols-3 gap-1.5 mb-1.5">
-                {["Friendly", "Professional", "Casual"].map((persona, i) => (
-                  <div key={i} className="bg-white/20 p-1 rounded text-center">
-                    <div className="text-xs opacity-70">{persona}</div>
-                    <div className="text-xs md:text-sm font-bold">{i + 1}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="text-xs text-center opacity-70">Select your AI assistant persona</div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Business Optimization Loop",
-      description:
-        "Monthly updates & ongoing AI training customized specifically for your business ensuring the AI remains relevant & effective.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Brain color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Customized AI Learning</h4>
-              <p className="text-xs md:text-sm text-white/80">AI improves with your business specifics</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-2 mt-1">
-              <div className="relative pt-3 pb-1">
-                <div className="absolute top-0 left-0 w-full flex justify-between text-xs opacity-70">
-                  <span>Initial</span>
-                  <span>1 Mo</span>
-                  <span>3 Mo</span>
-                  <span>6 Mo</span>
-                </div>
-                <div className="h-1 md:h-1.5 bg-white/20 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-white/50 to-white/80"
-                    initial={{ width: "20%" }}
-                    animate={{ width: "75%" }}
-                    transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-1 mt-2">
-                <div className="bg-white/20 p-1 rounded text-center">
-                  <div className="text-xs opacity-70">Industry</div>
-                  <div className="text-xs md:text-sm font-bold">95%</div>
-                </div>
-                <div className="bg-white/20 p-1 rounded text-center">
-                  <div className="text-xs opacity-70">Product</div>
-                  <div className="text-xs md:text-sm font-bold">98%</div>
-                </div>
-                <div className="bg-white/20 p-1 rounded text-center">
-                  <div className="text-xs opacity-70">Process</div>
-                  <div className="text-xs md:text-sm font-bold">94%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "24/7 Availability",
-      description:
-        "AI agents are available around the clock, ensuring customer support is always accessible. No downtime, no waiting.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <Clock color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Always On</h4>
-              <p className="text-xs md:text-sm text-white/80">24/7 support without interruptions</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-2 mt-1">
-              <div className="flex justify-between mb-1">
-                <div className="text-xs opacity-70">Availability</div>
-                <div className="text-xs font-semibold">100%</div>
-              </div>
-              <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-white/70"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Multi-Channel Support",
-      description:
-        "AI agents can handle customer inquiries across various channels, including chat, email, and social media. This ensures a consistent experience.",
-      content: (
-        <div className="h-full w-full bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] flex items-center justify-center text-white py-4 px-3 md:py-6 md:px-4 rounded-2xl">
-          <div className="flex flex-col items-center gap-2 md:gap-3">
-            <MessageCircle color="white" size={36} className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14" />
-            <div className="text-center">
-              <h4 className="text-base md:text-lg font-bold mb-1">Omni-channel Support</h4>
-              <p className="text-xs md:text-sm text-white/80">Engage customers on their preferred platform</p>
-            </div>
-            <div className="w-full bg-white/10 rounded-lg p-2 mt-1">
-              <div className="grid grid-cols-3 gap-1 mb-1">
-                {["Chat", "Email", "Social"].map((channel, i) => (
-                  <div key={i} className="bg-white/20 p-1 rounded text-center">
-                    <div className="text-xs opacity-70">{channel}</div>
-                    <div className="text-xs md:text-sm font-bold">{i + 1}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="text-xs text-center opacity-70">Select your preferred channel</div>
-            </div>
-          </div>
-        </div>
-      ),
-    }
+      </motion.div>
+    </motion.div>
+  );
+});
+
+PremiumFeatureCard.displayName = "PremiumFeatureCard";
+
+// Stats showcase component
+const StatsShowcase = () => {
+  const stats = [
+    { value: "99.9%", label: "Uptime SLA", icon: TrendingUp },
+    { value: "500ms", label: "Response Time", icon: Zap },
+    { value: "30+", label: "Languages", icon: Globe },
+    { value: "24/7", label: "Support", icon: Headphones },
   ];
 
   return (
-    <div id="features-page" className="min-h-screen bg-gray-50 pt-16">
-      <div className="pt-10 md:pt-20 pb-8 text-center px-4">
-        <div className="inline-flex items-center gap-0.75 bg-blue-50 backdrop-blur px-2 py-1 md:px-3 md:py-2 mb-4 md:mb-6 rounded-full shadow-sm">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="relative my-20"
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-3xl blur-3xl" />
+      
+      <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {stats.map((stat, index) => (
           <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2 rounded-full flex items-center justify-center text-[10px] text-white"
+            key={index}
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1, type: "spring" }}
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="relative group"
           >
-            <div className="h-4 w-4 md:h-5 md:w-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
-              <Award className="h-3 w-3 md:h-4 md:w-4 text-white" />
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 rounded-2xl p-6 text-center">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg"
+              >
+                <stat.icon className="w-6 h-6 text-white" />
+              </motion.div>
+              <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent mb-1">
+                {stat.value}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
             </div>
           </motion.div>
-          <span className="text-blue-800 text-xs md:text-sm font-medium">Built for Amazing Customer Experiences</span>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
+// Video showcase section
+const VideoShowcase = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 50 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    className="relative my-24"
+  >
+    <div className="text-center mb-12">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 px-4 py-2 rounded-full mb-4"
+      >
+        <Play className="w-4 h-4 text-purple-500" />
+        <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">See It In Action</span>
+      </motion.div>
+      <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        Watch How It Works
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        Experience the power of AI-driven customer support in real-time
+      </p>
+    </div>
+
+    <div className="relative max-w-4xl mx-auto">
+      {/* Glow effect */}
+      <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-[2rem] blur-2xl" />
+      
+      {/* Video container */}
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        className="relative bg-gradient-to-br from-gray-900 to-slate-900 rounded-3xl overflow-hidden aspect-video shadow-2xl border border-white/10"
+      >
+        {/* Placeholder content */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 0.8, 0.5],
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full blur-xl"
+            />
+            <div className="relative w-20 h-20 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center shadow-2xl">
+              <Play className="w-8 h-8 text-white ml-1" />
+            </div>
+          </motion.button>
         </div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold max-w-5xl mx-auto mb-3 md:mb-4" style={{ lineHeight: 1.2 }}>
-          <GradientText>Powerful Features</GradientText> to Transform Your Customer Support
-        </h1>
-        <p className="text-sm md:text-lg text-slate-600 max-w-xl md:max-w-2xl mx-auto">
-          Discover how Callsure AI combines cutting-edge technology with human expertise to deliver exceptional customer experiences at scale.
-        </p>
+
+        {/* Decorative elements */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between text-white/80">
+          <span className="text-sm">AI Voice Agent Demo</span>
+          <span className="text-sm">2:45</span>
+        </div>
+      </motion.div>
+    </div>
+  </motion.div>
+);
+
+export default function FeaturesPage() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const features = [
+    {
+      title: "Human Touch When You Need It",
+      description: "Live agent handoff ensures customers get personal attention when AI assistance isn't enough. Seamless transition with full context preservation.",
+      icon: Users,
+      gradient: "from-cyan-500 via-cyan-400 to-blue-600",
+      stats: [
+        { value: "24/7", label: "Available" },
+        { value: "<300ms", label: "Response" },
+        { value: "98%", label: "Satisfaction" }
+      ]
+    },
+    {
+      title: "Real-Time Human Intervention",
+      description: "Seamless transition to human support agents with intelligent escalation detection. AI identifies complex queries automatically.",
+      icon: Clock,
+      gradient: "from-purple-500 via-violet-500 to-indigo-600",
+    },
+    {
+      title: "Natural Human-Like Voice",
+      description: "Round-the-clock availability with natural voice including breathing sounds, pitch variations, and emotional nuances.",
+      icon: LineChart,
+      gradient: "from-rose-500 via-pink-500 to-purple-600",
+      stats: [
+        { value: "15+", label: "Voices" },
+        { value: "50+", label: "Accents" },
+        { value: "Natural", label: "Emotion" }
+      ]
+    },
+    {
+      title: "Multi-Language Support",
+      description: "Communicate in over 30 languages with real-time translation. Support multiple dialects and regional accents.",
+      icon: Languages,
+      gradient: "from-emerald-500 via-green-500 to-teal-600",
+      stats: [
+        { value: "30+", label: "Languages" },
+        { value: "Real-time", label: "Translation" },
+        { value: "100+", label: "Dialects" }
+      ]
+    },
+    {
+      title: "Self-Learning AI",
+      description: "AI that improves in real-time, becoming more effective with each conversation through advanced feedback loops.",
+      icon: Brain,
+      gradient: "from-orange-500 via-amber-500 to-yellow-500",
+      stats: [
+        { value: "96.5%", label: "Accuracy" },
+        { value: "+22%", label: "Monthly" },
+        { value: "1,240+", label: "Topics" }
+      ]
+    },
+    {
+      title: "Personalized Conversations",
+      description: "Dynamic interactions that adapt to customer preferences, history, and communication style in real-time.",
+      icon: UserCircle,
+      gradient: "from-pink-500 via-rose-500 to-red-500",
+    },
+    {
+      title: "Enterprise Security",
+      description: "Military-grade encryption with GDPR, CCPA, ISO 27001, SOC 2, and HIPAA compliance. Your data is always protected.",
+      icon: Shield,
+      gradient: "from-cyan-500 via-blue-500 to-indigo-600",
+      stats: [
+        { value: "256-bit", label: "Encryption" },
+        { value: "SOC 2", label: "Certified" },
+        { value: "HIPAA", label: "Compliant" }
+      ]
+    },
+    {
+      title: "40% Cost Reduction",
+      description: "Dramatically reduce operational costs while maintaining exceptional service quality and customer satisfaction.",
+      icon: BarChart4,
+      gradient: "from-green-500 via-emerald-500 to-teal-500",
+      stats: [
+        { value: "40%", label: "Savings" },
+        { value: "∞", label: "Scalable" },
+        { value: "99.9%", label: "Uptime" }
+      ]
+    },
+    {
+      title: "One-Click Integration",
+      description: "Connect with your existing CRM, ERP, and helpdesk systems in minutes. No complex setup required.",
+      icon: LayoutPanelLeft,
+      gradient: "from-indigo-500 via-purple-500 to-pink-500",
+    },
+    {
+      title: "Multi-Agent Architecture",
+      description: "Advanced AI with specialized agents working together to resolve complex, multi-step customer queries.",
+      icon: Bot,
+      gradient: "from-cyan-500 via-sky-500 to-blue-600",
+    },
+    {
+      title: "Real-Time Database Access",
+      description: "Instant connection to your business database for personalized responses using customer history and preferences.",
+      icon: Database,
+      gradient: "from-amber-500 via-orange-500 to-red-500",
+    },
+    {
+      title: "Complex Query Resolution",
+      description: "Handle intricate, multi-step inquiries with sophisticated reasoning and context-aware responses.",
+      icon: Search,
+      gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
+    },
+    {
+      title: "Document Intelligence",
+      description: "Process and analyze uploaded documents including invoices, contracts, and forms with AI-powered extraction.",
+      icon: FileUp,
+      gradient: "from-sky-500 via-cyan-500 to-teal-500",
+      stats: [
+        { value: "PDF", label: "Support" },
+        { value: "DOCX", label: "Support" },
+        { value: "Images", label: "Support" }
+      ]
+    },
+    {
+      title: "Live Analytics Dashboard",
+      description: "Real-time monitoring, transcripts, and performance metrics. Track every interaction and optimize continuously.",
+      icon: PieChart,
+      gradient: "from-emerald-500 via-green-400 to-cyan-500",
+      stats: [
+        { value: "Live", label: "Monitoring" },
+        { value: "100+", label: "Metrics" },
+        { value: "Custom", label: "Reports" }
+      ]
+    },
+    {
+      title: "Custom AI Personas",
+      description: "Create unique AI personalities that match your brand voice, tone, and customer service philosophy.",
+      icon: UserCircle,
+      gradient: "from-pink-500 via-fuchsia-500 to-purple-500",
+    },
+    {
+      title: "Continuous Optimization",
+      description: "Monthly AI training updates customized for your business. Your AI agent evolves with your needs.",
+      icon: TrendingUp,
+      gradient: "from-blue-500 via-indigo-500 to-violet-500",
+    },
+        {
+      title: "Intelligent Call Routing",
+      description: "Smart routing system that directs calls to the right agent or department based on customer intent, history, and priority level.",
+      icon: Phone,
+      gradient: "from-teal-500 via-cyan-500 to-blue-500",
+      stats: [
+        { value: "Smart", label: "Routing" },
+        { value: "0s", label: "Wait Time" },
+        { value: "100%", label: "Accuracy" }
+      ]
+    },
+    {
+      title: "Omnichannel Experience",
+      description: "Unified customer experience across voice, chat, email, and social media. Seamless context preservation across all channels.",
+      icon: MessageCircle,
+      gradient: "from-violet-500 via-purple-500 to-indigo-600",
+      stats: [
+        { value: "Voice", label: "Support" },
+        { value: "Chat", label: "Support" },
+        { value: "Email", label: "Support" }
+      ]
+    },
+  ];
+
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-black dark:to-slate-950">
+      {/* Floating particles */}
+      <FloatingParticles />
+      
+      {/* Background decorations */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-cyan-500/10 dark:bg-cyan-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-pink-500/10 dark:bg-pink-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
-          {allFeatures.map((feature, index) => (
-            <div key={index} className="flex flex-col gap-6 group">
-              <div className="aspect-square rounded-2xl overflow-hidden shadow-xl">
-                {feature.content}
-              </div>
-              <div className="p-4 md:p-6 rounded-xl bg-white shadow-md transform transition-transform group-hover:scale-105">
-                <div className="flex items-start mb-3">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <span>{feature.title}</span>
-                    <CheckCircle className="text-green-500" size={18} />
-                  </h3>
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+      {/* Hero Section */}
+      <div className="relative py-8 md:py-24 px-4">
+        <div className="max-w-7xl mx-auto text-center">
+          {/* Animated badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-3 mb-8"
+          >
+            <div className="relative">
+              <motion.div
+                animate={{
+                  opacity: [0.5, 1, 0.5],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full blur-lg"
+              />
+              <div className="relative bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-cyan-500/20 dark:to-blue-500/20 backdrop-blur-xl border border-cyan-300/30 dark:border-cyan-500/20 px-6 py-2 rounded-full flex items-center gap-3">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
+                  <Award className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                </motion.div>
+                <span className="text-sm font-bold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent tracking-wide">
+                  ENTERPRISE-GRADE AI FEATURES
+                </span>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                  ))}
                 </div>
-                <p className="text-sm md:text-base text-slate-600">{feature.description}</p>
               </div>
             </div>
+          </motion.div>
+
+          {/* Main heading with gradient animation */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1]"
+          >
+            <motion.span
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="inline-block bg-gradient-to-r from-cyan-500 via-blue-500 via-purple-500 to-cyan-500 bg-[length:200%_auto] bg-clip-text text-transparent"
+            >
+              Powerful Features
+            </motion.span>
+            <br />
+            <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent">
+              Built for Scale
+            </span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12"
+          >
+            Discover how Callsure AI combines cutting-edge technology with human expertise 
+            to deliver <span className="text-cyan-600 dark:text-cyan-400 font-semibold">exceptional customer experiences</span> at enterprise scale.
+          </motion.p>
+
+          {/* CTA buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative group"
+            >
+              <motion.div
+                animate={{
+                  opacity: [0.5, 0.8, 0.5],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl blur-lg opacity-70"
+              />
+              <div className="relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-xl">
+                <Sparkles className="w-5 h-5" />
+                <span>Start Free Trial</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-8 py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Play className="w-5 h-5" />
+              <span>Watch Demo</span>
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Stats showcase */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <StatsShowcase />
+      </div>
+
+      {/* Features Grid */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          {features.map((feature, index) => (
+            <PremiumFeatureCard
+              key={index}
+              feature={feature}
+              index={index}
+              isHovered={hoveredIndex === index}
+              onHover={setHoveredIndex}
+            />
           ))}
         </div>
+      </div>
+
+      {/* Video showcase */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <VideoShowcase />
+      </div>
+
+      {/* Bottom CTA Section */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative"
+        >
+          {/* Glow effect */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 rounded-[3rem] blur-2xl" />
+          
+          <div className="relative bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-900/80 dark:to-slate-900/60 backdrop-blur-2xl border border-white/50 dark:border-slate-700/50 rounded-[2rem] p-12 md:p-16 text-center overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl" />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring" }}
+              className="relative inline-flex items-center gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 px-4 py-2 rounded-full mb-6"
+            >
+              <Zap className="w-4 h-4 text-green-500" />
+              <span className="text-sm font-semibold text-green-600 dark:text-green-400">Limited Time: 30% Off Annual Plans</span>
+            </motion.div>
+
+            <h3 className="relative text-3xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-6">
+              Ready to Transform Your
+              <br />
+              <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+                Customer Experience?
+              </span>
+            </h3>
+            
+            <p className="relative text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
+              Join thousands of forward-thinking businesses using Callsure AI to deliver 
+              exceptional support with our powerful AI voice agents.
+            </p>
+
+            {/* CTA Button */}
+            <motion.div
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative inline-block group"
+            >
+              <motion.div
+                animate={{
+                  opacity: [0.5, 1, 0.5],
+                  scale: [1, 1.15, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl blur-xl opacity-70"
+              />
+
+              <button className="relative px-10 py-5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white rounded-2xl font-bold text-lg flex items-center gap-3 shadow-2xl">
+                <Sparkles className="w-6 h-6" />
+                <span>Get Started Free</span>
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </motion.div>
+
+            {/* Trust indicators */}
+            <div className="relative flex items-center justify-center gap-8 mt-10 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                <span>SOC 2 Certified</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                <span>GDPR Compliant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                <span>99.9% Uptime</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
