@@ -96,7 +96,7 @@ export const ModernHero = () => {
                   repeat: Infinity,
                   repeatType: "reverse",
                 }}
-                className="inline-block bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-cyan-200 dark:to-white bg-clip-text text-transparent"
+                className="inline-block bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-cyan-200 dark:to-white bg-clip-text text-transparent pb-2"
                 style={{ backgroundSize: "200% auto" }}
               >
                 Ready to Scale
