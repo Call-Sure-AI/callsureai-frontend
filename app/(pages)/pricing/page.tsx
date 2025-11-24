@@ -301,7 +301,7 @@ const PricingCard = ({
     )
 }
 
-const PricingHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
+const PricingHeader = ({ subtitle }: { subtitle: string }) => (
     <motion.section
         className="text-center max-w-4xl mx-auto px-4"
         initial="hidden"
@@ -468,7 +468,6 @@ export default function Page() {
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <PricingHeader
-                        title="Simple transparent pricing"
                         subtitle="Choose the perfect plan for your business needs with no hidden fees or surprises."
                     />
 

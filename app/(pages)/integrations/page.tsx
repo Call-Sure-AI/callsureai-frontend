@@ -3,14 +3,11 @@
 import { motion } from "framer-motion";
 import React, { useState } from 'react';
 import { 
-    Globe, Database, MessageSquare, Cloud, Shield, Code, Share2, Zap,
-    Phone, Headphones, UserPlus, Server, BarChart2, Speaker,
-    PhoneCall, Languages, Bot, GitMerge, FileText, Video,
-    Calendar, AlertCircle, Brain, Users, Mic, HelpCircle, Rocket,
-    Settings, Clock, PieChart, Layers, Search,
-    AlertOctagon, Archive, Bell, BookOpen, Box, CreditCard,
-    DollarSign, Eye, Folder, Heart, Image, Key, Lock, Mail, Repeat,
-    Smartphone, ThumbsUp, Check, Unlock, User, Sparkles, ArrowRight
+    Globe, Database, MessageSquare, Cloud, Shield, Zap,
+    Phone, Headphones, UserPlus, BarChart2, Speaker,
+    Languages, Bot, GitMerge, FileText, Calendar, Brain,
+    Users, Mic, HelpCircle, Rocket, PieChart, Search,
+    CreditCard, DollarSign, Eye, Lock, Check,
 } from 'lucide-react';
 
 // Custom Chain icon implementation
@@ -32,24 +29,6 @@ const Chain = (props: any) => (
     </svg>
 );
 
-// Custom social media icons
-const Message = (props: any) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-    </svg>
-);
-
 const MessageCircle = (props: any) => (
     <svg
         {...props}
@@ -64,42 +43,6 @@ const MessageCircle = (props: any) => (
         strokeLinejoin="round"
     >
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-    </svg>
-);
-
-const Twitter = (props: any) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-    </svg>
-);
-
-const Linkedin = (props: any) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-        <rect x="2" y="9" width="4" height="12"></rect>
-        <circle cx="4" cy="4" r="2"></circle>
     </svg>
 );
 
