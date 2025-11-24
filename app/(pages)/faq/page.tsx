@@ -1,3 +1,4 @@
+// app\(pages)\faq\page.tsx
 import FAQ from "@/components/faq";
 
 export default function FAQPage() {

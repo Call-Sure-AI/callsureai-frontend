@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { ChevronDown, MessageCircle } from 'lucide-react';
+import { ChevronDown, HelpCircle } from 'lucide-react';
 
 interface Question {
     question: string;
@@ -154,7 +154,7 @@ const FAQ: React.FC = () => {
 
     const filteredQuestions = questions
         .filter(q => q.category === activeTab)
-        .slice(0, 8); // Display only the first 5 questions
+        .slice(0, 8);
 
     if (filteredQuestions.length < 8) {
         while (filteredQuestions.length < 8) {
@@ -234,59 +234,74 @@ const FAQ: React.FC = () => {
     };
 
     return (
-        <div className="relative w-full overflow-hidden min-h-screen"
-            style={{
-                background: `
-                radial-gradient(circle at 0% 0%, rgba(239, 246, 255, 0.6) 0%, transparent 100%),
-                radial-gradient(circle at 100% 100%, rgba(219, 234, 254, 0.4) 0%, transparent 100%),
-                white
-            `
-            }}>
-            <div
-                className="absolute top-0 left-0 w-96 h-96 bg-blue-100/30"
-                style={{
-                    filter: 'blur(100px)',
-                    transform: 'translate(-50%, -50%)',
-                }}
-            />
-            <div
-                className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100/30"
-                style={{
-                    filter: 'blur(100px)',
-                    transform: 'translate(50%, 50%)',
-                }}
-            />
+        <div className="relative py-24 overflow-hidden bg-gradient-to-b from-white via-gray-50 to-white dark:from-black dark:via-slate-950 dark:to-black">
+            {/* Background decoration */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 dark:bg-cyan-500/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/5 rounded-full blur-3xl" />
+
             <motion.div
-                className="relative w-full max-w-6xl mx-auto px-4 py-16"
+                className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
                 variants={containerVariants}
             >
+                {/* Header */}
                 <motion.div
-                    className="text-center mb-12"
+                    className="text-center mb-16"
                     variants={headerVariants}
                 >
+                    {/* Badge */}
                     <motion.div
-                        className="flex items-center justify-center gap-2 mb-4"
-                        initial={{ opacity: 0, scale: 0.8 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
+                        viewport={{ once: true }}
+                        className="inline-flex items-center gap-2 mb-6"
                     >
-                        <div className='flex items-center justify-center p-2 w-128 bg-blue-100 rounded-3xl'>
-                            <MessageCircle className='h-6 w-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full text-white p-1' />
-                            <span className="ml-2 text-gray-600">Frequently Asked Question</span>
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-md" />
+                            <div className="relative bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50 backdrop-blur-sm border border-cyan-200/50 dark:border-cyan-800/30 px-4 py-1.5 rounded-full flex items-center gap-2">
+                                <HelpCircle className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                                <span className="text-xs font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent tracking-wider">
+                                    FREQUENTLY ASKED QUESTIONS
+                                </span>
+                            </div>
                         </div>
                     </motion.div>
+
+                    {/* Heading */}
                     <motion.h1
-                        className="text-2xl md:text-5xl font-bold bg-[#363636]/95 text-transparent bg-clip-text mb-8"
                         variants={headerVariants}
+                        className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4"
                     >
-                        Got <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Questions?</span> We&apos;re here to <span className="inline-block bg-gradient-to-b from-[#162a47] via-[#3362A6] to-[#162a47] text-transparent bg-clip-text animate-gradient-xy">Answer!</span>
+                        <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                            Got{" "}
+                        </span>
+                        <motion.span
+                            initial={{ backgroundPosition: "0% 50%" }}
+                            animate={{ backgroundPosition: "100% 50%" }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                repeatType: "reverse",
+                            }}
+                            className="inline-block bg-gradient-to-r from-cyan-600 via-blue-500 to-cyan-600 dark:from-cyan-400 dark:via-blue-400 dark:to-cyan-400 bg-clip-text text-transparent"
+                            style={{ backgroundSize: "200% auto" }}
+                        >
+                            Questions?
+                        </motion.span>
                     </motion.h1>
+                    <motion.p
+                        variants={headerVariants}
+                        className="text-lg text-gray-600 dark:text-gray-400 mb-8"
+                    >
+                        We&apos;re here to answer!
+                    </motion.p>
+
+                    {/* Tabs */}
                     <motion.div
-                        className="flex gap-4 justify-center mb-8"
+                        className="flex flex-wrap gap-3 justify-center"
                         variants={headerVariants}
                     >
                         {tabs.map((tab, index) => (
@@ -296,25 +311,34 @@ const FAQ: React.FC = () => {
                                     setActiveTab(tab.label);
                                     setActiveQuestion(null);
                                 }}
-                                className={`px-3 py-1 md:px-6 md:py-2 rounded-full transition-colors ${activeTab === tab.label
-                                    ? 'bg-gradient-to-br from-[#162a47] via-[#3362A6] to-[#162a47]  text-white'
-                                    : 'bg-white text-blue-900 shadow-sm hover:bg-blue-50'
-                                    }`}
-                                whileHover={{ scale: 1.02 }}
+                                className={`relative px-6 py-2.5 rounded-xl font-semibold transition-all ${
+                                    activeTab === tab.label
+                                        ? 'text-white'
+                                        : 'bg-white/60 dark:bg-slate-900/60 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-slate-900/80 border border-gray-200/50 dark:border-slate-800/50'
+                                }`}
+                                whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 * index, duration: 0.5 }}
                                 type="button"
                             >
-                                {tab.label}
+                                {activeTab === tab.label && (
+                                    <>
+                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur opacity-70" />
+                                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl" />
+                                    </>
+                                )}
+                                <span className="relative z-10">{tab.label}</span>
                             </motion.button>
                         ))}
                     </motion.div>
                 </motion.div>
+
+                {/* Questions */}
                 <motion.div
                     className="relative"
-                    style={{ minHeight: '400px' }} // Ensure consistent height during transitions
+                    style={{ minHeight: '400px' }}
                 >
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -323,87 +347,113 @@ const FAQ: React.FC = () => {
                             animate="center"
                             exit="exit"
                             variants={tabContentVariants}
-                            className="max-w-3xl mx-auto space-y-3"
+                            className="max-w-4xl mx-auto space-y-4"
                         >
                             {filteredQuestions.map((item, index) => (
                                 <motion.div
                                     key={item.question}
                                     variants={questionVariants}
-                                    layout
-                                    className={`rounded-2xl overflow-hidden ${activeQuestion === item.question
-                                        ? 'bg-[#EEF2FF]'
-                                        : 'bg-[#F8FAFC]'
-                                        }`}
-                                    whileHover={{ scale: 1.01 }}
-                                    transition={{
-                                        layout: { duration: 0.3 },
-                                        scale: { duration: 0.2 }
-                                    }}
+                                    className="group relative"
                                 >
-                                    <motion.button
-                                        onClick={() => setActiveQuestion(
-                                            activeQuestion === item.question ? null : item.question
-                                        )}
-                                        className="w-full flex items-center justify-between p-2 text-left"
-                                        type="button"
+                                    {/* Card glow on hover */}
+                                    <div
+                                        className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl blur opacity-0 ${
+                                            activeQuestion === item.question ? 'opacity-30' : 'group-hover:opacity-20'
+                                        } transition-opacity duration-300`}
+                                    />
+
+                                    {/* Main card */}
+                                    <div
+                                        className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
+                                            activeQuestion === item.question
+                                                ? 'bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 border-2 border-cyan-500/50 dark:border-cyan-500/30'
+                                                : 'bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50'
+                                        }`}
                                     >
-                                        <motion.span
-                                            layout="position"
-                                            className={`text-lg ${activeQuestion === item.question
-                                                ? 'text-blue-600 font-medium'
-                                                : 'text-gray-900'
-                                                }`}
-                                        >
-                                            {`${index + 1}. ${item.question}`}
-                                        </motion.span>
-                                        <motion.div
-                                            animate={{
-                                                rotate: activeQuestion === item.question ? 180 : 0,
-                                                color: activeQuestion === item.question ? '#2563eb' : '#64748b'
-                                            }}
+                                        <motion.button
+                                            onClick={() => setActiveQuestion(
+                                                activeQuestion === item.question ? null : item.question
+                                            )}
+                                            className="w-full flex items-start justify-between p-6 text-left gap-4"
+                                            type="button"
+                                            whileHover={{ x: 4 }}
                                             transition={{ duration: 0.2 }}
-                                            className="flex items-center justify-center w-6 h-6"
                                         >
-                                            <ChevronDown className="w-5 h-5" />
-                                        </motion.div>
-                                    </motion.button>
-                                    <AnimatePresence>
-                                        {activeQuestion === item.question && (
+                                            <div className="flex items-start gap-3 flex-1">
+                                                <span
+                                                    className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                        activeQuestion === item.question
+                                                            ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
+                                                            : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                                >
+                                                    {index + 1}
+                                                </span>
+                                                <motion.span
+                                                    layout="position"
+                                                    className={`text-base font-semibold ${
+                                                        activeQuestion === item.question
+                                                            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent'
+                                                            : 'text-gray-900 dark:text-white'
+                                                    }`}
+                                                >
+                                                    {item.question}
+                                                </motion.span>
+                                            </div>
                                             <motion.div
-                                                initial={{ height: 0, opacity: 0 }}
                                                 animate={{
-                                                    height: 'auto',
-                                                    opacity: 1,
-                                                    transition: {
-                                                        height: { duration: 0.3 },
-                                                        opacity: { duration: 0.2, delay: 0.1 }
-                                                    }
+                                                    rotate: activeQuestion === item.question ? 180 : 0,
                                                 }}
-                                                exit={{
-                                                    height: 0,
-                                                    opacity: 0,
-                                                    transition: {
-                                                        height: { duration: 0.3 },
-                                                        opacity: { duration: 0.2 }
-                                                    }
-                                                }}
+                                                transition={{ duration: 0.3 }}
+                                                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                                    activeQuestion === item.question
+                                                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
+                                                        : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400'
+                                                }`}
                                             >
-                                                <div className="px-6 pb-6">
-                                                    <motion.p
-                                                        className="text-gray-600 text-base leading-relaxed"
-                                                        initial={{ opacity: 0, y: 10 }}
-                                                        animate={{
-                                                            opacity: 1,
-                                                            y: 0,
-                                                            transition: { delay: 0.1 }
-                                                        }}
-                                                    >
-                                                        {item.answer}
-                                                    </motion.p>
-                                                </div>
+                                                <ChevronDown className="w-5 h-5" />
                                             </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                                        </motion.button>
+
+                                        <AnimatePresence>
+                                            {activeQuestion === item.question && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{
+                                                        height: 'auto',
+                                                        opacity: 1,
+                                                        transition: {
+                                                            height: { duration: 0.3 },
+                                                            opacity: { duration: 0.2, delay: 0.1 }
+                                                        }
+                                                    }}
+                                                    exit={{
+                                                        height: 0,
+                                                        opacity: 0,
+                                                        transition: {
+                                                            height: { duration: 0.3 },
+                                                            opacity: { duration: 0.2 }
+                                                        }
+                                                    }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="px-6 pb-6 pl-[52px]">
+                                                        <motion.p
+                                                            className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed"
+                                                            initial={{ opacity: 0, y: 10 }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                y: 0,
+                                                                transition: { delay: 0.1 }
+                                                            }}
+                                                        >
+                                                            {item.answer}
+                                                        </motion.p>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
                                 </motion.div>
                             ))}
                         </motion.div>

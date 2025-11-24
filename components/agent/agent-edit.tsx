@@ -353,6 +353,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                 audio.src = '';
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Run only once on mount
 
     useEffect(() => {

@@ -1,16 +1,18 @@
-import Footer from "@/components/footer";
-import Navbar from "@/components/navbar";
+import { ModernNavbar } from "@/components/modern/modern-navbar";
+import { ModernFooter } from "@/components/modern/modern-footer";
 
-export default function RootLayout({
+export default function PagesLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            <Navbar />
-            {children}
-            <Footer />
-        </div>
+        <>
+            <ModernNavbar />
+            <main className="pt-20">
+                {children}
+            </main>
+            <ModernFooter />
+        </>
     );
 }
