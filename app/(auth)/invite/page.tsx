@@ -1,3 +1,4 @@
+// app\(auth)\invite\page.tsx
 import InviteContent from '@/components/auth/invite';
 import { Loader2 } from 'lucide-react';
 import { Suspense } from 'react';

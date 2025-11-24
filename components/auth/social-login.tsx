@@ -1,3 +1,4 @@
+// components/auth/social-login.tsx
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -140,20 +141,8 @@ export const SocialLogin = ({ isSignup = false }) => {
     return (
         <div 
             ref={containerRef}
-            className="flex flex-col items-center justify-center text-center mt-6 w-full"
+            className="flex flex-col items-center justify-center text-center w-full"
         >
-            {/* Divider */}
-            <div className="relative w-full mb-6">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200 dark:border-slate-700" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white dark:bg-slate-900 text-gray-500 dark:text-gray-400">
-                        or {isSignup ? 'sign up' : 'continue'} with
-                    </span>
-                </div>
-            </div>
-
             <div className="w-full flex justify-center px-4">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-3 px-4 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50">
