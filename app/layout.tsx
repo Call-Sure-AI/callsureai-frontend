@@ -1,10 +1,8 @@
-// app\layout.tsx
+// app/layout.tsx
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Script from "next/script";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { Toaster } from "@/components/ui/toaster";
 import { AppProviders } from '@/providers/app-providers';
 
 const geistSans = localFont({
@@ -36,11 +34,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string;
   const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS as string;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Adding Google Sign-In client script */}
         <Script 
@@ -52,12 +49,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppProviders>
-          <GoogleOAuthProvider
-            clientId={googleClientId}
-          >
-            {children}
-            <Toaster />
-          </GoogleOAuthProvider>
+          {children}
         </AppProviders>
         {/* Google Analytics scripts inside body */}
         <Script

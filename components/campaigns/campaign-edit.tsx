@@ -1,7 +1,9 @@
+// components\campaigns\campaign-edit.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Edit, Save, X } from "lucide-react";
+// import { motion, AnimatePresence } from 'framer-motion';
+import { Edit, Save, X, Loader2, Sparkles, FileText, Target } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +83,6 @@ export const CampaignEdit = React.memo(({ campaign, trigger }: CampaignEditProps
     };
 
     const handleCancel = () => {
-        // Reset form data to original values
         setFormData({
             campaign_name: campaign.campaign_name || '',
             description: campaign.description || ''
@@ -93,52 +94,105 @@ export const CampaignEdit = React.memo(({ campaign, trigger }: CampaignEditProps
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 {trigger || (
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <Edit className="h-4 w-4" />
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-9 px-3 text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg transition-all"
+                    >
+                        <Edit className="h-4 w-4 mr-1.5" />
+                        <span className="text-sm">Edit</span>
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Edit Campaign</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="campaign_name">Campaign Name</Label>
-                        <Input
-                            id="campaign_name"
-                            value={formData.campaign_name}
-                            onChange={(e) => handleInputChange('campaign_name', e.target.value)}
-                            placeholder="Enter campaign name"
-                        />
+            <DialogContent className="sm:max-w-[480px] p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 shadow-2xl rounded-2xl overflow-hidden">
+                {/* Gradient Header */}
+                <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500" />
+                
+                <div className="p-6">
+                    <DialogHeader className="mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                                <Target className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                                    Edit Campaign
+                                </DialogTitle>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                                    Update your campaign details
+                                </p>
+                            </div>
+                        </div>
+                    </DialogHeader>
+
+                    <div className="space-y-5">
+                        {/* Campaign Name */}
+                        <div className="space-y-2">
+                            <Label 
+                                htmlFor="campaign_name" 
+                                className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"
+                            >
+                                <FileText className="w-4 h-4 text-cyan-500" />
+                                Campaign Name
+                            </Label>
+                            <Input
+                                id="campaign_name"
+                                value={formData.campaign_name}
+                                onChange={(e) => handleInputChange('campaign_name', e.target.value)}
+                                placeholder="Enter campaign name"
+                                className="h-11 bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all"
+                            />
+                        </div>
+
+                        {/* Description */}
+                        <div className="space-y-2">
+                            <Label 
+                                htmlFor="description" 
+                                className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2"
+                            >
+                                <Sparkles className="w-4 h-4 text-purple-500" />
+                                Description
+                            </Label>
+                            <Textarea
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => handleInputChange('description', e.target.value)}
+                                placeholder="Enter campaign description"
+                                rows={4}
+                                className="bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all resize-none"
+                            />
+                        </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => handleInputChange('description', e.target.value)}
-                            placeholder="Enter campaign description"
-                            rows={3}
-                        />
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-3 mt-6 pt-5 border-t border-gray-200/50 dark:border-slate-700/50">
+                        <Button
+                            variant="outline"
+                            onClick={handleCancel}
+                            disabled={isLoading}
+                            className="px-4 py-2.5 rounded-xl border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
+                        >
+                            <X className="h-4 w-4 mr-2" />
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleSave}
+                            disabled={isLoading}
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium shadow-lg shadow-cyan-500/25 transition-all"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4 mr-2" />
+                                    Save Changes
+                                </>
+                            )}
+                        </Button>
                     </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={handleCancel}
-                        disabled={isLoading}
-                    >
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleSave}
-                        disabled={isLoading}
-                    >
-                        <Save className="h-4 w-4 mr-2" />
-                        {isLoading ? 'Saving...' : 'Save Changes'}
-                    </Button>
                 </div>
             </DialogContent>
         </Dialog>

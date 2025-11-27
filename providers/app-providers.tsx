@@ -1,9 +1,13 @@
 "use client";
 
-import { ActivityProvider } from '@/contexts/activity-context';
-import { AgentProvider } from '@/contexts/agent-context';
-import { CompanyProvider } from '@/contexts/company-context';
-import { CampaignProvider } from '@/contexts/campaign-context';
+import React from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { CompanyProvider } from "@/contexts/company-context";
+import { AgentProvider } from "@/contexts/agent-context";
+import { ActivityProvider } from "@/contexts/activity-context";
+import { CampaignProvider } from "@/contexts/campaign-context";
+import { Toaster } from "@/components/ui/toaster";
 
 interface AppProvidersProps {
     children: React.ReactNode;
@@ -11,14 +15,24 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
     return (
-        <ActivityProvider>
-            <AgentProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange={false}
+        >
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
                 <CompanyProvider>
-                    <CampaignProvider>
-                        {children}
-                    </CampaignProvider>
+                    <AgentProvider>
+                        <ActivityProvider>
+                            <CampaignProvider>
+                                {children}
+                                <Toaster />
+                            </CampaignProvider>
+                        </ActivityProvider>
+                    </AgentProvider>
                 </CompanyProvider>
-            </AgentProvider>
-        </ActivityProvider>
+            </GoogleOAuthProvider>
+        </ThemeProvider>
     );
-} 
+}

@@ -1,8 +1,8 @@
-// components\agent\agent-edit.tsx
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Upload, X, User2, Play, CircleX, Settings } from "lucide-react";
+import { Upload, X, User2, Play, Pause, CircleX, Settings, Mic, FileText, Loader2, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,16 @@ interface EditAgentData {
     files: string[];
 }
 
+// Section Header Component
+const SectionHeader = ({ icon: Icon, title }: { icon: any; title: string }) => (
+    <div className="flex items-center gap-3 mb-4">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+            <Icon className="w-4 h-4 text-white" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+    </div>
+);
+
 export const AgentEdit = React.memo(({ name, additional_context, is_active, id, files, advanced_settings }: AgentFormData) => {
     const [formData, setFormData] = useState<EditAgentData>({
         name: name ?? '',
@@ -57,7 +67,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         roleDescription: additional_context?.roleDescription ?? '',
         businessContext: additional_context?.businessContext ?? '',
         is_active: is_active ?? false,
-        confidence_threshold: 0.7, // Add this line with a default value
+        confidence_threshold: 0.7,
         advanced_settings: {
             authUrl: advanced_settings?.authUrl || '',
             clientId: advanced_settings?.clientId || '',
@@ -75,6 +85,8 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [selectedLanguageOption, setSelectedLanguageOption] = useState<{ accent: string, language: string } | null>(null);
+    const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const { token } = useIsAuthenticated();
     const { refreshAgents } = useAgents();
@@ -132,15 +144,11 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         }
     };
 
-    // Fixed loadAudio function - without tone in path
     const loadAudio = useCallback(async (gender: string, languageCode: string) => {
         setIsAudioLoading(true);
         setAudioError(false);
 
-        // Build path without tone (e.g., /voices/male-american-en.mp3)
         const audioPath = `/voices/${gender}-${languageCode}.mp3`;
-        console.log(`Loading audio: ${audioPath}`);
-
         const newAudio = new Audio(audioPath);
 
         try {
@@ -156,12 +164,11 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
             setAudio(newAudio);
             setAudioError(false);
-        } catch (e: any) {
+        } catch {
             setAudioError(true);
-            console.error('Error loading audio:', e);
             toast({
                 title: "Audio Load Error",
-                description: "Could not load the voice sample. Please check if the file exists.",
+                description: "Could not load the voice sample.",
                 variant: "destructive",
             });
         } finally {
@@ -173,7 +180,6 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         setFormData(prev => {
             const newData = { ...prev, [type]: value };
 
-            // Load audio when we have both gender and language
             if (newData.gender && newData.language && selectedLanguageOption) {
                 const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
                 loadAudio(newData.gender, languageCode);
@@ -209,11 +215,10 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         if (!audio) return;
 
         if (audio.paused) {
-            audio.play().catch(error => {
-                console.error('Error playing audio:', error);
+            audio.play().catch(() => {
                 toast({
                     title: "Playback Error",
-                    description: "Could not play the voice sample. Please try again.",
+                    description: "Could not play the voice sample.",
                     variant: "destructive",
                 });
             });
@@ -253,23 +258,22 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                 files: [...prev.files, ...uploadedUrls]
             }));
 
-            toast({
-                title: "Success",
-                description: "Files uploaded successfully!",
-            });
-
             return uploadedUrls;
-        } catch (error) {
-            throw error;
+        } catch (err) {
+            throw err;
         }
     };
 
     const handleSave = async () => {
+        if (isSaving) return;
+        
         try {
+            setIsSaving(true);
+            
             if (!id) {
                 toast({
                     title: "Error",
-                    description: "Not a valid agent ID. Please try again.",
+                    description: "Not a valid agent ID.",
                     variant: "destructive",
                 });
                 return;
@@ -317,20 +321,20 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
 
             buttonRef.current?.click();
 
-        } catch (error) {
-            console.error('Error saving agent:', error);
+        } catch {
             toast({
                 title: "Error",
-                description: "Failed to save the agent. Please try again.",
+                description: "Failed to save the agent.",
                 variant: "destructive",
             });
+        } finally {
+            setIsSaving(false);
         }
     };
 
     useEffect(() => {
         setIsMounted(true);
 
-        // Initialize language option from existing data
         if (formData.language) {
             const langOption = languageOptions.find(opt => opt.value === formData.language);
             if (langOption) {
@@ -339,7 +343,6 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                     language: langOption.language
                 });
 
-                // Load audio with the correct format
                 if (formData.gender) {
                     const languageCode = `${langOption.accent}-${langOption.language}`;
                     loadAudio(formData.gender, languageCode);
@@ -354,7 +357,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
             }
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Run only once on mount
+    }, []);
 
     useEffect(() => {
         if (formData.gender && selectedLanguageOption) {
@@ -368,7 +371,6 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         return null;
     }
 
-    // Safely get API values for textarea
     const getApiTextValue = () => {
         return Array.isArray(formData.advanced_settings.apis)
             ? formData.advanced_settings.apis.join(',')
@@ -378,411 +380,358 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button size="sm" ref={buttonRef} variant="primary" className="text-[#0A1E4E] flex justify-center items-center bg-[#0A1E4E]/10 hover:bg-[#0A1E4E]/20 transition-colors duration-200">
+                {/* FIXED: Dark mode compatible button */}
+                <Button 
+                    size="sm" 
+                    ref={buttonRef} 
+                    variant="outline"
+                    className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all duration-200 rounded-xl"
+                >
                     <Settings className="w-4 h-4 mr-2" />
-                    Edit Agent Settings
+                    Edit Settings
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-scroll p-0 
-            [&::-webkit-scrollbar]:w-2
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/10
-            [&::-webkit-scrollbar-thumb]:rounded-full
-            hover:[&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/20
-            transition-colors
-            duration-200
-            ease-in-out">
-                <DialogHeader className="sticky top-0 z-10 bg-white p-6 border-b border-gray-100">
-                    <DialogTitle className="text-2xl font-semibold">Edit Agent</DialogTitle>
-                    <CircleX className="absolute top-3 right-3 cursor-pointer" onClick={() => buttonRef.current?.click()} />
+            
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden p-0 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 rounded-2xl flex flex-col">
+                {/* Header */}
+                <DialogHeader className="flex-shrink-0 sticky top-0 z-10 bg-white dark:bg-slate-900 p-6 border-b border-gray-200 dark:border-slate-800">
+                    <div className="flex items-center justify-between">
+                        <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                            Edit Agent
+                        </DialogTitle>
+                        <button 
+                            onClick={() => buttonRef.current?.click()}
+                            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <CircleX className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                        </button>
+                    </div>
                 </DialogHeader>
-                <div className="overflow-y-auto max-h-[calc(90vh-130px)] p-0 
-                    [&::-webkit-scrollbar]:w-2
-                    [&::-webkit-scrollbar-track]:bg-transparent
-                    [&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/10
-                    [&::-webkit-scrollbar-thumb]:rounded-full
-                    hover:[&::-webkit-scrollbar-thumb]:bg-[#0A1E4E]/20
-                    transition-colors
-                    duration-200
-                    ease-in-out"
-                >
-                    <div className="p-6 space-y-8">
-                        {/* ==== SETUP SECTION ==== */}
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                    
+                    {/* Agent Profile Section */}
+                    <div className="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-gray-100 dark:border-slate-700/50">
+                        <SectionHeader icon={User2} title="Agent Profile" />
+                        
                         <div className="space-y-4">
-                            <div className="flex items-center gap-2 mb-4">
-                                <User2 className="w-5 h-5 text-blue-600" />
-                                <h3 className="text-lg font-medium text-gray-900">
-                                    Agent Profile
-                                </h3>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Agent Name <span className="text-red-500">*</span>
+                                </label>
+                                <Input
+                                    value={formData.name}
+                                    onChange={(e) => handleChange('name', e.target.value)}
+                                    placeholder="Enter agent name"
+                                    className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl h-12"
+                                />
                             </div>
 
-                            <div className="bg-gray-50 p-6 rounded-xl space-y-4">
+                            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Agent Name*
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Agent Status
                                     </label>
-                                    <Input
-                                        value={formData.name}
-                                        onChange={(e) => handleChange('name', e.target.value)}
-                                        placeholder="Enter your agent's name"
-                                        className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
-                                    />
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {formData.is_active ? 'Agent is currently online' : 'Agent is currently offline'}
+                                    </p>
                                 </div>
-
-                                <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm mt-4">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Status
-                                    </label>
-                                    <Switch
-                                        checked={formData.is_active}
-                                        onCheckedChange={(value) => handleChange('is_active', value)}
-                                    />
-                                </div>
+                                <Switch
+                                    checked={formData.is_active}
+                                    onCheckedChange={(value) => handleChange('is_active', value)}
+                                />
                             </div>
-                        </div>
-
-                        {/* ==== VOICE CUSTOMIZATION ==== */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="w-5 h-5 text-blue-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-medium text-gray-900">
-                                    Voice Customization
-                                </h3>
-                            </div>
-
-                            <div className="bg-gray-50 p-6 rounded-xl space-y-6">
-                                <div className="flex items-center gap-4">
-                                    <button
-                                        onClick={handlePlayAudio}
-                                        className={`w-12 h-12 rounded-full ${audioError ? "bg-red-500" : "bg-black"} shadow-sm flex items-center justify-center transition-colors 
-                                    ${isAudioLoading ? 'cursor-wait' : ''} 
-                                    ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/80'}`
-                                        }
-                                        disabled={!audio || isAudioLoading}
-                                    >
-                                        {isAudioLoading ? (
-                                            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                                        ) : (
-                                            isPlaying ? (
-                                                <svg
-                                                    className={`w-6 h-6 text-white`}
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <rect x="6" y="4" width="4" height="16" rx="1" />
-                                                    <rect x="14" y="4" width="4" height="16" rx="1" />
-                                                </svg>
-                                            ) : (
-                                                <Play className={`w-6 h-6 text-white`} />
-                                            )
-                                        )}
-                                    </button>
-
-                                    <div className="flex flex-wrap gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-medium text-gray-600 ml-1">
-                                                Gender*
-                                            </label>
-                                            <Select value={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
-                                                <SelectTrigger className="w-36">
-                                                    <SelectValue placeholder="Select gender" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="male">Male</SelectItem>
-                                                    <SelectItem value="female">Female</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-medium text-gray-600 ml-1">
-                                                Tone*
-                                            </label>
-                                            <Select value={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
-                                                <SelectTrigger className="w-36">
-                                                    <SelectValue placeholder="Select tone" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {toneOptions.map(option => (
-                                                        <SelectItem key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-medium text-gray-600 ml-1">
-                                                Language*
-                                            </label>
-                                            <Select value={formData.language} onValueChange={handleLanguageChange}>
-                                                <SelectTrigger className="w-36">
-                                                    <SelectValue placeholder="Select language" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {languageOptions.map(option => (
-                                                        <SelectItem key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ==== ROLE DESCRIPTION ==== */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="w-5 h-5 text-blue-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-medium text-gray-900">
-                                    Agent Training
-                                </h3>
-                            </div>
-
-                            <div className="bg-gray-50 p-6 rounded-xl space-y-6">
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Job Role Description*
-                                    </label>
-                                    <Textarea
-                                        value={formData.roleDescription}
-                                        onChange={(e) => handleChange('roleDescription', e.target.value)}
-                                        placeholder="Describe the agent's role and responsibilities..."
-                                        className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Business Context*
-                                    </label>
-                                    <Textarea
-                                        value={formData.businessContext}
-                                        onChange={(e) => handleChange('businessContext', e.target.value)}
-                                        placeholder="Tell us about your business context..."
-                                        className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ==== DOCUMENT UPLOAD ==== */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Upload className="w-5 h-5 text-blue-600" />
-                                <h3 className="text-lg font-medium text-gray-900">
-                                    Training Documents
-                                </h3>
-                            </div>
-
-                            <div className="bg-gray-50 p-6 rounded-xl space-y-4">
-                                <p className="text-sm text-gray-700">
-                                    To make your agent adhere to your business terms and compliance, upload here:
-                                </p>
-
-                                <div className="flex flex-wrap gap-4">
-                                    {/* Existing Files */}
-                                    {existingFiles.length > 0 && (
-                                        <div className="mt-4 w-full">
-                                            <p className="text-sm font-medium text-gray-700 mb-2">Current files:</p>
-                                            <ul className="space-y-1">
-                                                {existingFiles.map((fileUrl, index) => {
-                                                    const fileName = fileUrl.split('/').pop() || `File ${index + 1}`;
-                                                    return (
-                                                        <div key={`existing-${fileUrl}`} className="flex items-center gap-2">
-                                                            <Button
-                                                                variant="outline"
-                                                                className="flex-1 flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                                                            >
-                                                                <Upload className="w-4 h-4" />
-                                                                {fileName}
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                onClick={() => handleDeleteExistingFile(fileUrl)}
-                                                                className="p-2 hover:bg-red-100 hover:text-red-600"
-                                                            >
-                                                                <X className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    {/* New Files */}
-                                    {uploadedFiles.length > 0 && (
-                                        <div className="mt-4 w-full">
-                                            <p className="text-sm font-medium text-gray-700 mb-2">New files to upload:</p>
-                                            <ul className="space-y-1">
-                                                {uploadedFiles.map((file, index) => (
-                                                    <div key={`${file.name}-${index}`} className="flex items-center gap-2">
-                                                        <Button
-                                                            variant="outline"
-                                                            className="flex-1 flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                                                        >
-                                                            <Upload className="w-4 h-4" />
-                                                            {file.name}
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            onClick={() => handleDeleteFile(index)}
-                                                            className="p-2 hover:bg-red-100 hover:text-red-600"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div
-                                    className="border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50 cursor-pointer"
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleDrop}
-                                    onClick={() => document.getElementById('fileInput')?.click()}
-                                >
-                                    <input
-                                        id="fileInput"
-                                        type="file"
-                                        multiple
-                                        className="hidden"
-                                        accept='application/pdf , .docx, .doc, .png , .jpg , .jpeg'
-                                        onChange={handleFileChange}
-                                    />
-                                    <div className="flex flex-col items-center justify-center text-center">
-                                        <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                                        <h3 className="text-lg font-medium text-gray-700 mb-2">
-                                            Upload Documents
-                                        </h3>
-                                        <p className="text-sm text-gray-500">
-                                            Drag & drop your files here or click to browse
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ==== ADVANCED SETTINGS ==== */}
-                        <div className="space-y-4">
-                            <Collapsible>
-                                <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-                                    <div className="w-5 h-5 text-blue-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                        </svg>
-                                    </div>
-                                    <h3 className="text-lg font-medium text-gray-900">
-                                        Advanced Settings
-                                    </h3>
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="w-4 h-4 ml-2 transition-transform"
-                                    >
-                                        <path d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent className="bg-gray-50 p-6 rounded-xl mt-4">
-                                    <div className="space-y-4">
-                                        <p className="text-sm text-gray-700 mb-4">
-                                            To enable seamless integration, provide the following details:
-                                        </p>
-
-                                        <div className="space-y-6">
-                                            <div className="space-y-2">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Authentication URL
-                                                </label>
-                                                <Input
-                                                    value={formData.advanced_settings.authUrl}
-                                                    onChange={(e) => handleAdvancedSettingsChange({
-                                                        ...formData.advanced_settings,
-                                                        authUrl: e.target.value
-                                                    })}
-                                                    placeholder="Enter your authentication URL"
-                                                    className="w-full border-gray-200 focus:border-blue-500 h-12"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Client ID
-                                                </label>
-                                                <Input
-                                                    value={formData.advanced_settings.clientId}
-                                                    onChange={(e) => handleAdvancedSettingsChange({
-                                                        ...formData.advanced_settings,
-                                                        clientId: e.target.value
-                                                    })}
-                                                    placeholder="Enter your client ID"
-                                                    className="w-full border-gray-200 focus:border-blue-500 h-12"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Client Secret
-                                                </label>
-                                                <Input
-                                                    value={formData.advanced_settings.clientSecret}
-                                                    onChange={(e) => handleAdvancedSettingsChange({
-                                                        ...formData.advanced_settings,
-                                                        clientSecret: e.target.value
-                                                    })}
-                                                    placeholder="Enter your client secret"
-                                                    className="w-full border-gray-200 focus:border-blue-500 h-12"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    API Endpoints
-                                                </label>
-                                                <Textarea
-                                                    value={getApiTextValue()}
-                                                    onChange={(e) => handleApiUrlChange(e.target.value)}
-                                                    placeholder="Enter list of APIs separated by comma"
-                                                    className="w-full border-gray-200 focus:border-blue-500 h-24"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CollapsibleContent>
-                            </Collapsible>
                         </div>
                     </div>
+
+                    {/* Voice Customization Section */}
+                    <div className="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-gray-100 dark:border-slate-700/50">
+                        <SectionHeader icon={Mic} title="Voice Customization" />
+                        
+                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+                            {/* Play Button */}
+                            <motion.button
+                                onClick={handlePlayAudio}
+                                disabled={!audio || isAudioLoading}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`relative w-14 h-14 rounded-xl flex items-center justify-center transition-all shadow-lg ${
+                                    audioError 
+                                        ? "bg-red-500 shadow-red-500/30" 
+                                        : "bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/30"
+                                } ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isAudioLoading ? (
+                                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                ) : isPlaying ? (
+                                    <Pause className="w-6 h-6 text-white" />
+                                ) : (
+                                    <Play className="w-6 h-6 text-white ml-1" />
+                                )}
+                            </motion.button>
+
+                            <div className="flex flex-wrap gap-3 flex-1">
+                                <div className="space-y-1.5 min-w-[130px]">
+                                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Gender</label>
+                                    <Select value={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
+                                        <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl">
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
+                                            <SelectItem value="male">Male</SelectItem>
+                                            <SelectItem value="female">Female</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-1.5 min-w-[130px]">
+                                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Tone</label>
+                                    <Select value={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
+                                        <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl">
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
+                                            {toneOptions.map(option => (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-1.5 min-w-[130px]">
+                                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Language</label>
+                                    <Select value={formData.language} onValueChange={handleLanguageChange}>
+                                        <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl">
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
+                                            {languageOptions.map(option => (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Agent Training Section */}
+                    <div className="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-gray-100 dark:border-slate-700/50">
+                        <SectionHeader icon={FileText} title="Agent Training" />
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Job Role Description
+                                </label>
+                                <Textarea
+                                    value={formData.roleDescription}
+                                    onChange={(e) => handleChange('roleDescription', e.target.value)}
+                                    placeholder="Describe the agent's role..."
+                                    className="min-h-[100px] bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl resize-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Business Context
+                                </label>
+                                <Textarea
+                                    value={formData.businessContext}
+                                    onChange={(e) => handleChange('businessContext', e.target.value)}
+                                    placeholder="Describe your business context..."
+                                    className="min-h-[100px] bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl resize-none"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Document Upload Section */}
+                    <div className="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-gray-100 dark:border-slate-700/50">
+                        <SectionHeader icon={Upload} title="Training Documents" />
+                        
+                        {/* Existing Files */}
+                        <AnimatePresence>
+                            {existingFiles.length > 0 && (
+                                <div className="mb-4 space-y-2">
+                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Current files:</p>
+                                    {existingFiles.map((fileUrl, index) => {
+                                        const fileName = fileUrl.split('/').pop() || `File ${index + 1}`;
+                                        return (
+                                            <motion.div
+                                                key={`existing-${fileUrl}`}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl"
+                                            >
+                                                <FileText className="w-4 h-4 text-cyan-500" />
+                                                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{fileName}</span>
+                                                <button
+                                                    onClick={() => handleDeleteExistingFile(fileUrl)}
+                                                    className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-500"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* New Files */}
+                        <AnimatePresence>
+                            {uploadedFiles.length > 0 && (
+                                <div className="mb-4 space-y-2">
+                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">New files:</p>
+                                    {uploadedFiles.map((file, index) => (
+                                        <motion.div
+                                            key={`${file.name}-${index}`}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            className="flex items-center gap-3 p-3 bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 rounded-xl"
+                                        >
+                                            <FileText className="w-4 h-4 text-cyan-500" />
+                                            <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{file.name}</span>
+                                            <button
+                                                onClick={() => handleDeleteFile(index)}
+                                                className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-500"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Upload Area */}
+                        <div
+                            className="border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-cyan-500/50 rounded-xl p-6 cursor-pointer transition-all bg-white/50 dark:bg-slate-800/50"
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById('editFileInput')?.click()}
+                        >
+                            <input
+                                id="editFileInput"
+                                type="file"
+                                multiple
+                                className="hidden"
+                                accept='application/pdf,.docx,.doc,.png,.jpg,.jpeg'
+                                onChange={handleFileChange}
+                            />
+                            <div className="flex flex-col items-center text-center">
+                                <Upload className="w-10 h-10 text-gray-400 mb-3" />
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Drop files or click to upload</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PDF, DOCX, PNG, JPG</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Advanced Settings */}
+                    <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                        <CollapsibleTrigger className="w-full">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 hover:border-cyan-500/30 transition-all">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                                        <Settings className="w-4 h-4 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Advanced Settings</h3>
+                                </div>
+                                <motion.div animate={{ rotate: advancedOpen ? 180 : 0 }}>
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                </motion.div>
+                            </div>
+                        </CollapsibleTrigger>
+                        
+                        <CollapsibleContent>
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4 p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 space-y-4"
+                            >
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Authentication URL
+                                    </label>
+                                    <Input
+                                        value={formData.advanced_settings.authUrl}
+                                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, authUrl: e.target.value })}
+                                        placeholder="Enter auth URL"
+                                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl h-11"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Client ID
+                                    </label>
+                                    <Input
+                                        value={formData.advanced_settings.clientId}
+                                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientId: e.target.value })}
+                                        placeholder="Enter client ID"
+                                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl h-11"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Client Secret
+                                    </label>
+                                    <Input
+                                        value={formData.advanced_settings.clientSecret}
+                                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientSecret: e.target.value })}
+                                        placeholder="Enter client secret"
+                                        type="password"
+                                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl h-11"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        API Endpoints
+                                    </label>
+                                    <Textarea
+                                        value={getApiTextValue()}
+                                        onChange={(e) => handleApiUrlChange(e.target.value)}
+                                        placeholder="Enter APIs separated by comma"
+                                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl min-h-[80px]"
+                                    />
+                                </div>
+                            </motion.div>
+                        </CollapsibleContent>
+                    </Collapsible>
                 </div>
 
-                {/* Fixed submit button at bottom */}
-                <div className="border-t border-gray-100 p-6 sticky bottom-0 bg-white flex justify-end">
+                {/* Footer - Fixed at bottom */}
+                <div className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 p-5 bg-gray-50/80 dark:bg-slate-900/80 backdrop-blur-sm flex justify-end gap-3">
+                    <Button
+                        onClick={() => buttonRef.current?.click()}
+                        variant="outline"
+                        className="px-6 rounded-xl border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300"
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         onClick={handleSave}
-                        className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl"
+                        disabled={isSaving}
+                        className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-6 rounded-xl shadow-lg shadow-cyan-500/25"
                     >
-                        Save Changes
+                        {isSaving ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Saving...</span>
+                            </div>
+                        ) : (
+                            "Save Changes"
+                        )}
                     </Button>
                 </div>
             </DialogContent>

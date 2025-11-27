@@ -1,3 +1,4 @@
+// components\dashboard\chat\chat-interface.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';

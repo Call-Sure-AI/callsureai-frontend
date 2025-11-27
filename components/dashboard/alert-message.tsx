@@ -1,3 +1,4 @@
+// components\dashboard\alert-message.tsx
 "use client";
 
 import { AlertCircle } from "lucide-react";

@@ -1,9 +1,9 @@
-// components\agent\agent-creation\index.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Upload, X, Wand2, User2, Play } from 'lucide-react';
+import { Upload, X, Wand2, User2, Play, Pause, Sparkles, Bot, FileText, Settings, ChevronDown, Mic, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,6 +66,30 @@ const initialFormData: FormData = {
   files: [] as string[],
 };
 
+// Section Header Component
+const SectionHeader = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) => (
+  <div className="flex items-center gap-3 mb-4">
+    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+      <Icon className="w-5 h-5 text-white" />
+    </div>
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+      {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>}
+    </div>
+  </div>
+);
+
+// Form Section Wrapper
+const FormSection = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className={`bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 p-6 ${className}`}
+  >
+    {children}
+  </motion.div>
+);
+
 const AgentCreationForm = () => {
   const router = useRouter();
   const { user } = useCurrentUser();
@@ -81,7 +105,8 @@ const AgentCreationForm = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedLanguageOption, setSelectedLanguageOption] = useState<{ accent: string, language: string } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Add this line
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -121,23 +146,16 @@ const AgentCreationForm = () => {
     setFormData(prev => ({ ...prev, advanced_settings: { ...prev.advanced_settings, apis: value.split(',') } }));
   };
 
-  // const getAudioPath = useCallback((gender: string, tone: string, language: string) => {
-  //   if (!gender || !tone || !language) return null;
-  //   return `/voices/${gender}-${tone}-${language}.mp3`;
-  // }, []);
-
   const handleSelectionChange = (type: 'gender' | 'tone' | 'language', value: string) => {
     setFormData(prev => {
       const newData = { ...prev, [type]: value };
 
-      // Load audio when we have both gender and language (tone not needed)
       if (newData.gender && newData.language && selectedLanguageOption) {
-        // Build the language code from the selected language option
         const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
         loadAudio(newData.gender, languageCode);
       }
 
-      return newData; return newData;
+      return newData;
     });
   };
 
@@ -154,7 +172,6 @@ const AgentCreationForm = () => {
         const newData = { ...prev, language: value };
 
         if (newData.gender && langOption) {
-          // Build the language code (e.g., "american-en")
           const languageCode = `${langOption.accent}-${langOption.language}`;
           if (checkIfVoiceExists(newData.gender, languageCode)) {
             loadAudio(newData.gender, languageCode);
@@ -173,9 +190,7 @@ const AgentCreationForm = () => {
     }
   };
 
-  // Update the checkIfVoiceExists function - remove tone/accent from the check
   const checkIfVoiceExists = useCallback((gender: string, language: string) => {
-    // Check for files like "male-american-en" without tone
     const fileName = `${gender}-${language}`;
     return availableVoiceFiles.includes(fileName);
   }, []);
@@ -184,10 +199,7 @@ const AgentCreationForm = () => {
     setIsAudioLoading(true);
     setAudioError(false);
 
-    console.log(`Attempting to load voice: ${gender}-${language}`);
-
     if (!checkIfVoiceExists(gender, language)) {
-      console.log(`Voice not found: ${gender}-${language}`);
       setAudioError(true);
       setIsAudioLoading(false);
       toast({
@@ -198,51 +210,31 @@ const AgentCreationForm = () => {
       return;
     }
 
-    // Build the path without tone
     const audioPath = `${window.location.origin}/voices/${gender}-${language}.mp3`;
-    console.log('Full audio URL:', audioPath);
 
     try {
       if (!audioRef.current) {
-        console.error('Audio element reference not available');
         throw new Error('Audio element not available');
       }
 
       let isCanceled = false;
-
       const currentAudioRef = audioRef.current;
 
-      // Set up event listeners for tracking loading state
       const onCanPlay = () => {
         if (isCanceled) return;
-
-        console.log('Audio can play now');
         setIsAudioLoading(false);
         setAudioError(false);
         setAudio(currentAudioRef);
-
-        // Remove event listeners
         currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
         currentAudioRef.removeEventListener('error', onError);
       };
 
-      const onError = (e: Event) => {
+      const onError = () => {
         if (isCanceled) return;
-
-        console.error('Audio error details:', {
-          src: currentAudioRef.src,
-          error: e,
-          networkState: currentAudioRef.networkState,
-          readyState: currentAudioRef.readyState
-        });
-
         setAudioError(true);
         setIsAudioLoading(false);
-
-        // Remove event listeners
         currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
         currentAudioRef.removeEventListener('error', onError);
-
         toast({
           title: "Audio Load Error",
           description: "Could not load the voice sample. Please try a different selection.",
@@ -250,38 +242,23 @@ const AgentCreationForm = () => {
         });
       };
 
-      // Clear previous event listeners if any
       currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
       currentAudioRef.removeEventListener('error', onError);
-
-      // Add new event listeners
       currentAudioRef.addEventListener('canplaythrough', onCanPlay);
       currentAudioRef.addEventListener('error', onError);
-
-      // Set source and load audio
       currentAudioRef.src = audioPath;
-      currentAudioRef.load(); // Important!
+      currentAudioRef.load();
 
-      // Set a safety timeout
       const timeoutId = setTimeout(() => {
         if (isAudioLoading && !isCanceled) {
           isCanceled = true;
           setIsAudioLoading(false);
           setAudioError(true);
-
-          // Remove event listeners
           currentAudioRef.removeEventListener('canplaythrough', onCanPlay);
           currentAudioRef.removeEventListener('error', onError);
-
-          toast({
-            title: "Loading Error",
-            description: "Audio is taking too long to load. Please try again.",
-            variant: "destructive",
-          });
         }
       }, 7000);
 
-      // Return a cleanup function to handle component unmount or re-renders
       return () => {
         isCanceled = true;
         clearTimeout(timeoutId);
@@ -290,7 +267,6 @@ const AgentCreationForm = () => {
       };
 
     } catch (e: any) {
-      console.error('Error loading audio:', e);
       setAudioError(true);
       setIsAudioLoading(false);
       toast({
@@ -308,8 +284,7 @@ const AgentCreationForm = () => {
     if (audioRef.current.paused) {
       audioRef.current.play().then(() => {
         setIsPlaying(true);
-      }).catch(error => {
-        console.error('Error playing audio:', error);
+      }).catch(() => {
         setIsPlaying(false);
         toast({
           title: "Playback Error",
@@ -323,211 +298,184 @@ const AgentCreationForm = () => {
     }
   };
 
-const uploadFiles = async (files: File[], companyId: string, agentId: string) => {
-  try {
-    // ✅ Get token directly from localStorage
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('Authentication token not found');
-    }
-
-    const formData = new FormData();
-    
-    // Add all files
-    files.forEach(file => {
-      formData.append('files', file);
-    });
-    
-    // Add metadata
-    formData.append('company_id', companyId);
-    formData.append('agent_id', agentId);
-    formData.append('document_type', 'custom');
-
-    const response = await fetch(
-      `https://processor.callsure.ai/api/v1/documents/upload-pdfs`,
-      {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+  const uploadFiles = async (files: File[], companyId: string, agentId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
       }
-    );
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Failed to upload documents`);
-    }
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+      formData.append('company_id', companyId);
+      formData.append('agent_id', agentId);
+      formData.append('document_type', 'custom');
 
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'Upload failed');
-    }
-
-    // Extract S3 URLs from results
-    const uploadedUrls = result.results
-      .filter((r: any) => r.success)
-      .map((r: any) => r.s3_url);
-
-    setFormData(prev => ({
-      ...prev,
-      files: [...prev.files, ...uploadedUrls]
-    }));
-
-    return uploadedUrls;
-    
-  } catch (error: any) {
-    console.error('Upload error:', error);
-    throw error;
-  }
-};
-
-  // In components/agent/agent-creation/index.tsx
-  // Update the handleSubmit function:
-
-const handleSubmit = async () => {
-  // ✅ Prevent multiple submissions
-  if (isSubmitting) return;
-  
-  try {
-    setIsSubmitting(true); // ✅ Set loading state
-    
-    // ✅ Get token directly from localStorage
-    const token = localStorage.getItem('token');
-
-    const validationChecks = [
-      { condition: !user, message: "You must be logged in to create an agent." },
-      { condition: !token, message: "Please login to create an agent." },
-      { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
-      { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
-    ];
-
-    for (const check of validationChecks) {
-      if (check.condition) {
-        toast({
-          title: "Error",
-          description: check.message,
-          variant: "destructive"
-        });
-        return;
-      }
-    }
-
-    if (!user?.id) {
-      throw new Error("User ID is required");
-    }
-
-    if (!company || !company.id) {
-      throw new Error("Company ID is required");
-    }
-
-    // ✅ TypeScript guard - token is guaranteed to be string here
-    if (!token) {
-      throw new Error("Authentication token not found");
-    }
-
-    // ✅ STEP 1: Create agent first (without files)
-    const agentData: AgentFormData = {
-      user_id: user.id,
-      name: formData.name,
-      type: totalAgents === 0 ? 'base' : 'custom',
-      prompt: formData.roleDescription,
-      is_active: true,
-      additional_context: {
-        gender: formData.gender,
-        tone: formData.tone,
-        language: formData.language,
-        roleDescription: formData.roleDescription,
-        businessContext: formData.businessContext,
-      },
-      advanced_settings: formData.advanced_settings,
-      files: [], // ✅ Empty initially
-    };
-
-    // Create agent - token is guaranteed to be string now
-    const result = await createAgentAction(
-      agentData,
-      company.id as string,
-      user.id,
-      token // ✅ Now TypeScript knows token is string
-    );
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create agent');
-    }
-
-    // ✅ STEP 2: Upload files if any (after agent is created)
-    if (files && files.length > 0) {
-      try {
-        const agentId = result.data?.id; // Get the created agent ID
-        if (!agentId) {
-          throw new Error('Agent ID not returned from creation');
+      const response = await fetch(
+        `https://processor.callsure.ai/api/v1/documents/upload-pdfs`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
         }
+      );
 
-        await uploadFiles(files, company.id, agentId);
-        
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to upload documents`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Upload failed');
+      }
+
+      const uploadedUrls = result.results
+        .filter((r: any) => r.success)
+        .map((r: any) => r.s3_url);
+
+      setFormData(prev => ({
+        ...prev,
+        files: [...prev.files, ...uploadedUrls]
+      }));
+
+      return uploadedUrls;
+      
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      setIsSubmitting(true);
+      
+      const token = localStorage.getItem('token');
+
+      const validationChecks = [
+        { condition: !user, message: "You must be logged in to create an agent." },
+        { condition: !token, message: "Please login to create an agent." },
+        { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
+        { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
+      ];
+
+      for (const check of validationChecks) {
+        if (check.condition) {
+          toast({
+            title: "Error",
+            description: check.message,
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      if (!user?.id) {
+        throw new Error("User ID is required");
+      }
+
+      if (!company || !company.id) {
+        throw new Error("Company ID is required");
+      }
+
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const agentData: AgentFormData = {
+        user_id: user.id,
+        name: formData.name,
+        type: totalAgents === 0 ? 'base' : 'custom',
+        prompt: formData.roleDescription,
+        is_active: true,
+        additional_context: {
+          gender: formData.gender,
+          tone: formData.tone,
+          language: formData.language,
+          roleDescription: formData.roleDescription,
+          businessContext: formData.businessContext,
+        },
+        advanced_settings: formData.advanced_settings,
+        files: [],
+      };
+
+      const result = await createAgentAction(
+        agentData,
+        company.id as string,
+        user.id,
+        token
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create agent');
+      }
+
+      if (files && files.length > 0) {
+        try {
+          const agentId = result.data?.id;
+          if (!agentId) {
+            throw new Error('Agent ID not returned from creation');
+          }
+
+          await uploadFiles(files, company.id, agentId);
+          
+          toast({
+            title: "Success",
+            description: `Agent created with ${files.length} document(s) uploaded successfully!`,
+          });
+        } catch (uploadError: any) {
+          toast({
+            title: "Partial Success",
+            description: `Agent created but some documents failed to upload: ${uploadError.message}`,
+            variant: "destructive"
+          });
+        }
+      } else {
         toast({
           title: "Success",
-          description: `Agent created with ${files.length} document(s) uploaded successfully!`,
-        });
-      } catch (uploadError: any) {
-        // Agent created but files failed
-        toast({
-          title: "Partial Success",
-          description: `Agent created but some documents failed to upload: ${uploadError.message}`,
-          variant: "destructive"
+          description: "Agent created successfully!",
         });
       }
-    } else {
+
+      await Promise.all([refreshAgents(), refreshActivities()]);
+      router.push('/dashboard');
+
+    } catch (error: any) {
       toast({
-        title: "Success",
-        description: "Agent created successfully!",
+        title: "Error",
+        description: error && error.message ? error.message : "Failed to create agent. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Refresh and redirect
-    await Promise.all([refreshAgents(), refreshActivities()]);
-    router.push('/dashboard');
-
-} catch (error: any) {
-    toast({
-      title: "Error",
-      description: error && error.message ? error.message : "Failed to create agent. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsSubmitting(false); // ✅ Reset loading state
-  }
-};
+  };
 
   useEffect(() => {
     if (audioRef.current) {
       const audioElement = audioRef.current;
 
-      // Define event handlers
       const onPlay = () => setIsPlaying(true);
       const onPause = () => setIsPlaying(false);
-      const onEnded = () => {
-        console.log('Audio playback ended');
-        setIsPlaying(false);
-      };
-
-      // Important: Add timeupdate event to check for end of playback
+      const onEnded = () => setIsPlaying(false);
       const onTimeUpdate = () => {
         if (audioElement.currentTime >= audioElement.duration - 0.1) {
-          console.log('Audio reached end via timeupdate');
           setIsPlaying(false);
         }
       };
 
-      // Add all event listeners
       audioElement.addEventListener('play', onPlay);
       audioElement.addEventListener('pause', onPause);
       audioElement.addEventListener('ended', onEnded);
       audioElement.addEventListener('timeupdate', onTimeUpdate);
 
-      // Cleanup function
       return () => {
         audioElement.removeEventListener('play', onPlay);
         audioElement.removeEventListener('pause', onPause);
@@ -537,7 +485,7 @@ const handleSubmit = async () => {
     }
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     setIsMounted(true);
 
     try {
@@ -559,7 +507,6 @@ useEffect(() => {
               accent: langOption.accent,
               language: langOption.language
             });
-            // Build language code without tone
             const languageCode = `${langOption.accent}-${langOption.language}`;
             loadAudio(data.gender, languageCode);
           }
@@ -569,11 +516,10 @@ useEffect(() => {
       console.error('Error loading saved data:', error);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Intentionally empty - only run on mount
+  }, []);
 
-useEffect(() => {
+  useEffect(() => {
     if (formData.gender && selectedLanguageOption) {
-      // Build language code without tone
       const languageCode = `${selectedLanguageOption.accent}-${selectedLanguageOption.language}`;
       loadAudio(formData.gender, languageCode);
     }
@@ -585,7 +531,7 @@ useEffect(() => {
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.gender, selectedLanguageOption]); // loadAudio is stable, audio cleanup handled
+  }, [formData.gender, selectedLanguageOption]);
 
   if (!isMounted) {
     return null;
@@ -596,125 +542,122 @@ useEffect(() => {
   }
 
   return (
-    <div className="w-full p-6 flex items-center justify-center">
+    <div className="w-full min-h-screen py-8 px-4">
       <audio
         ref={audioRef}
         style={{ display: "none" }}
         preload="auto"
         onEnded={() => setIsPlaying(false)}
       />
-      <Card className="w-full max-w-2xl bg-white shadow-xl rounded-xl">
-        <CardHeader className="border-b border-gray-100 pb-6 sticky top-0 bg-white z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <Wand2 className="w-5 h-5 text-blue-600" />
-              </div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-3xl mx-auto"
+      >
+        {/* Header Card */}
+        <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 shadow-xl rounded-2xl overflow-hidden">
+          {/* Gradient top border */}
+          <div className="h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500" />
+          
+          <CardHeader className="border-b border-gray-200/50 dark:border-slate-800/50 pb-6 bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-cyan-500/5 dark:to-blue-500/5">
+            <div className="flex items-center gap-4">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="relative"
+              >
+                <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur-lg opacity-40" />
+                <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  <Bot className="w-7 h-7 text-white" />
+                </div>
+              </motion.div>
               <div>
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  Create your agent
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Create Your AI Agent
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Set up and train your AI assistant
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Set up and train your intelligent voice assistant
                 </p>
               </div>
             </div>
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
-          <div className="p-6 space-y-8">
-            {/* ==== SETUP SECTION ==== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <User2 className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  Agent Profile
-                </h3>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-xl space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Agent Name*
-                  </label>
-                  <Input
-                    placeholder="Enter your agent's name"
-                    className="w-full border-gray-200 focus:border-blue-500 h-12 text-lg"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                  />
+          <CardContent className="p-0 max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            <div className="p-6 space-y-6">
+              
+              {/* Agent Profile Section */}
+              <FormSection>
+                <SectionHeader icon={User2} title="Agent Profile" subtitle="Give your agent a unique identity" />
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Agent Name <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="Enter your agent's name"
+                      className="w-full bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-cyan-500/20 h-12 text-lg rounded-xl"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
+              </FormSection>
 
-            {/* ==== VOICE CUSTOMIZATION ==== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-5 h-5 text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  Voice Customization
-                </h3>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-xl space-y-6">
-                <div className="flex items-center gap-4">
-                  <button
+              {/* Voice Customization Section */}
+              <FormSection>
+                <SectionHeader icon={Mic} title="Voice Customization" subtitle="Choose how your agent sounds" />
+                
+                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+                  {/* Play Button */}
+                  <motion.button
                     onClick={handlePlayAudio}
-                    className={`w-12 h-12 rounded-full bg-gradient-to-b ${audioError ? "bg-red-500" : "from-[#162a47] via-[#3362A6]/90 to-[#162a47]"} shadow-sm flex items-center justify-center transition-colors 
-              ${isAudioLoading ? 'cursor-wait' : ''} 
-              ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`
-                    }
                     disabled={!audio || isAudioLoading}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all shadow-lg ${
+                      audioError 
+                        ? "bg-red-500 shadow-red-500/30" 
+                        : "bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/30"
+                    } ${!audio || isAudioLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'}`}
                   >
                     {isAudioLoading ? (
-                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      <Loader2 className="w-7 h-7 text-white animate-spin" />
+                    ) : isPlaying ? (
+                      <Pause className="w-7 h-7 text-white" />
                     ) : (
-                      isPlaying ? (
-                        <svg
-                          className="w-6 h-6 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <rect x="6" y="4" width="4" height="16" rx="1" />
-                          <rect x="14" y="4" width="4" height="16" rx="1" />
-                        </svg>
-                      ) : (
-                        <Play className="w-6 h-6 text-white" />
-                      )
+                      <Play className="w-7 h-7 text-white ml-1" />
                     )}
-                  </button>
+                  </motion.button>
 
-                  <div className="flex flex-wrap gap-4">
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 ml-1">
-                        Gender*
+                  {/* Voice Options */}
+                  <div className="flex flex-wrap gap-4 flex-1">
+                    <div className="space-y-2 min-w-[140px]">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Gender <span className="text-red-500">*</span>
                       </label>
                       <Select value={formData.gender} onValueChange={(value) => handleSelectionChange('gender', value)}>
-                        <SelectTrigger className="w-36">
+                        <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl">
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 ml-1">
-                        Tone*
+                    <div className="space-y-2 min-w-[140px]">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Tone <span className="text-red-500">*</span>
                       </label>
                       <Select value={formData.tone} onValueChange={(value) => handleSelectionChange('tone', value)}>
-                        <SelectTrigger className="w-36">
+                        <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl">
                           <SelectValue placeholder="Select tone" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
                           {toneOptions.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
@@ -724,15 +667,15 @@ useEffect(() => {
                       </Select>
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-600 ml-1">
-                        Language*
+                    <div className="space-y-2 min-w-[140px]">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Language <span className="text-red-500">*</span>
                       </label>
                       <Select value={formData.language} onValueChange={handleLanguageChange}>
-                        <SelectTrigger className="w-36">
+                        <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl">
                           <SelectValue placeholder="Select language" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
                           {languageOptions.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
@@ -743,94 +686,86 @@ useEffect(() => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </FormSection>
 
-            {/* ==== ROLE DESCRIPTION ==== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-5 h-5 text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                  </svg>
+              {/* Agent Training Section */}
+              <FormSection>
+                <SectionHeader icon={Wand2} title="Agent Training" subtitle="Define your agent's knowledge and behavior" />
+                
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Job Role Description <span className="text-red-500">*</span>
+                    </label>
+                    <Textarea
+                      value={formData.roleDescription}
+                      onChange={(e) => handleInputChange('roleDescription', e.target.value)}
+                      placeholder="Describe the agent's role and responsibilities..."
+                      className="min-h-[120px] resize-none bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Business Context <span className="text-red-500">*</span>
+                    </label>
+                    <Textarea
+                      value={formData.businessContext}
+                      onChange={(e) => handleInputChange('businessContext', e.target.value)}
+                      placeholder="Tell us about your business context..."
+                      className="min-h-[120px] resize-none bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-cyan-500/20 rounded-xl"
+                    />
+                  </div>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  Agent Training
-                </h3>
-              </div>
+              </FormSection>
 
-              <div className="bg-gray-50 p-6 rounded-xl space-y-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Job Role Description*
-                  </label>
-                  <Textarea
-                    value={formData.roleDescription}
-                    onChange={(e) => handleInputChange('roleDescription', e.target.value)}
-                    placeholder="Describe the agent's role and responsibilities..."
-                    className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Business Context*
-                  </label>
-                  <Textarea
-                    value={formData.businessContext}
-                    onChange={(e) => handleInputChange('businessContext', e.target.value)}
-                    placeholder="Tell us about your business context..."
-                    className="min-h-[100px] resize-none border-gray-200 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* ==== DOCUMENT UPLOAD ==== */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Upload className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  Training Documents
-                </h3>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-xl space-y-4">
-                <p className="text-sm text-gray-700">
-                  To make your agent adhere to your business terms and compliance, upload here:
+              {/* Document Upload Section */}
+              <FormSection>
+                <SectionHeader icon={FileText} title="Training Documents" subtitle="Upload files to enhance agent knowledge" />
+                
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Upload documents to help your agent understand your business terms and compliance requirements.
                 </p>
 
-                <div className="flex flex-wrap gap-4">
+                {/* Uploaded Files */}
+                <AnimatePresence>
                   {files.length > 0 && (
-                    <div className="mt-4 w-full">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Uploaded files:</p>
-                      <ul className="space-y-1">
-                        {files.map((file, index) => (
-                          <div key={`${file.name}-${index}`} className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              className="flex-1 flex items-center gap-2 h-auto py-2 px-4 border-dashed border-2"
-                            >
-                              <Upload className="w-4 h-4" />
-                              {file.name}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleDeleteFile(index)}
-                              className="p-2 hover:bg-red-100 hover:text-red-600"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-4 space-y-2"
+                    >
+                      {files.map((file, index) => (
+                        <motion.div
+                          key={`${file.name}-${index}`}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="flex items-center gap-3 p-3 bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 rounded-xl"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-white" />
                           </div>
-                        ))}
-                      </ul>
-                    </div>
+                          <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                            {file.name}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteFile(index)}
+                            className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </motion.div>
                   )}
-                </div>
+                </AnimatePresence>
 
-                <div
-                  className="border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50 cursor-pointer"
+                {/* Upload Area */}
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  className="border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 rounded-2xl p-8 cursor-pointer transition-all bg-gray-50/50 dark:bg-slate-800/50 hover:bg-cyan-50/50 dark:hover:bg-cyan-500/5"
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                   onClick={() => document.getElementById('fileInput')?.click()}
@@ -844,130 +779,140 @@ useEffect(() => {
                     onChange={handleFileChange}
                   />
                   <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-700 mb-2">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-4">
+                      <Upload className="w-7 h-7 text-cyan-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
                       Upload Documents
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      Drag & drop your files here or click to browse
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Drag & drop files here or click to browse
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                      Supports PDF, DOCX, PNG, JPG
                     </p>
                   </div>
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              </FormSection>
 
-            {/* ==== ADVANCED SETTINGS ==== */}
-            <div className="space-y-4">
-              <Collapsible>
-                <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-                  <div className="w-5 h-5 text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Advanced Settings
-                  </h3>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4 ml-2 transition-transform"
-                  >
-                    <path d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="bg-gray-50 p-6 rounded-xl mt-4">
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-700 mb-4">
-                      To enable seamless integration, provide the following details:
-                    </p>
-
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          Authentication URL
-                        </label>
-                        <Input
-                          value={formData.advanced_settings.authUrl}
-                          onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, authUrl: e.target.value })}
-                          placeholder="Enter your authentication URL"
-                          className="w-full border-gray-200 focus:border-blue-500 h-12"
-                        />
+              {/* Advanced Settings */}
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center justify-between p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 hover:border-cyan-500/30 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                        <Settings className="w-5 h-5 text-white" />
                       </div>
-
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          Client ID
-                        </label>
-                        <Input
-                          value={formData.advanced_settings.clientId}
-                          onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientId: e.target.value })}
-                          placeholder="Enter your client ID"
-                          className="w-full border-gray-200 focus:border-blue-500 h-12"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          Client Secret
-                        </label>
-                        <Input
-                          value={formData.advanced_settings.clientSecret}
-                          onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientSecret: e.target.value })}
-                          placeholder="Enter your client secret"
-                          className="w-full border-gray-200 focus:border-blue-500 h-12"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          API Endpoints
-                        </label>
-                        <Textarea
-                          value={formData.advanced_settings.apis.join(',')}
-                          onChange={(e) => handleApiUrlChange(e.target.value)}
-                          placeholder="Enter list of APIs separated by comma"
-                          className="w-full border-gray-200 focus:border-blue-500 h-24"
-                        />
+                      <div className="text-left">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Advanced Settings</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">API integrations and authentication</p>
                       </div>
                     </div>
+                    <motion.div
+                      animate={{ rotate: advancedOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    </motion.div>
                   </div>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent>
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-6 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-700/50 space-y-5"
+                  >
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Authentication URL
+                      </label>
+                      <Input
+                        value={formData.advanced_settings.authUrl}
+                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, authUrl: e.target.value })}
+                        placeholder="Enter your authentication URL"
+                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl h-12"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Client ID
+                      </label>
+                      <Input
+                        value={formData.advanced_settings.clientId}
+                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientId: e.target.value })}
+                        placeholder="Enter your client ID"
+                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl h-12"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Client Secret
+                      </label>
+                      <Input
+                        value={formData.advanced_settings.clientSecret}
+                        onChange={(e) => handleAdvancedSettingsChange({ ...formData.advanced_settings, clientSecret: e.target.value })}
+                        placeholder="Enter your client secret"
+                        type="password"
+                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl h-12"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        API Endpoints
+                      </label>
+                      <Textarea
+                        value={formData.advanced_settings.apis.join(',')}
+                        onChange={(e) => handleApiUrlChange(e.target.value)}
+                        placeholder="Enter list of APIs separated by comma"
+                        className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 focus:border-cyan-500 rounded-xl min-h-[100px]"
+                      />
+                    </div>
+                  </motion.div>
                 </CollapsibleContent>
               </Collapsible>
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
 
-        {/* Fixed submit button at bottom */}
-        <div className="border-t border-gray-100 p-6 sticky bottom-0 bg-white flex justify-between">
-          <Button
-            onClick={() => router.push('/dashboard')}
-            disabled={isSubmitting} // ✅ Disable cancel button too
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-2 h-auto text-lg font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting} // ✅ Disable while submitting
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 h-auto text-lg font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Creating Agent...</span>
-              </div>
-            ) : (
-              "Create Agent"
-            )}
-          </Button>
-        </div>
-      </Card>
+          {/* Footer Actions */}
+          <div className="border-t border-gray-200/50 dark:border-slate-800/50 p-6 bg-gray-50/50 dark:bg-slate-900/50 flex justify-between gap-4">
+            <Button
+              onClick={() => router.push('/dashboard')}
+              disabled={isSubmitting}
+              variant="outline"
+              className="px-8 py-3 h-auto text-base font-medium rounded-xl border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 py-3 h-auto text-base font-semibold rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-all disabled:opacity-50"
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Creating Agent...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    <span>Create Agent</span>
+                  </div>
+                )}
+              </Button>
+            </motion.div>
+          </div>
+        </Card>
+      </motion.div>
     </div>
   );
 };
