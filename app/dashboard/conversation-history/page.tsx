@@ -396,7 +396,7 @@ export default function ConversationHistoryPage() {
                                                     >
                                                         {/* Live Indicator Bar */}
                                                         {isLive && (
-                                                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500" />
+                                                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-500" />
                                                         )}
 
                                                         <div className="flex items-start gap-4">
