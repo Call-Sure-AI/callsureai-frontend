@@ -1,3 +1,4 @@
+// app\(settings)\campaigns\[id]\page.tsx
 "use client"
 
 import { useState, useEffect, useCallback } from "react"

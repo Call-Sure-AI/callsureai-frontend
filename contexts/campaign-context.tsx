@@ -1,10 +1,9 @@
-// contexts/campaign-context.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { CampaignResponse, CampaignFormState, FormValidationErrors } from '@/types/campaign';
 import { createCampaign, getAllCampaigns, updateCampaignStatus, updateCampaignDetails as updateCampaignDetailsService } from '@/services/campaign-service';
-import { triggerCampaign, createCampaignTriggerPayload } from '@/services/webhook-service';
+import { logCampaignActivity } from '@/services/activity-service';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAuthenticated } from '@/hooks/use-is-authenticated';
 import { useCompany } from '@/contexts/company-context';
@@ -31,34 +30,60 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
     const { token } = useIsAuthenticated();
     const { company } = useCompany();
 
-    const fetchCampaigns = async () => {
+    const fetchCampaigns = useCallback(async () => {
         try {
-            if (!token || !user || !company?.id) return;
+            // Get token from context or localStorage
+            let authToken = token;
+            if (!authToken) {
+                authToken = localStorage.getItem('token');
+            }
+            
+            if (!authToken || !user || !company?.id) {
+                console.log('fetchCampaigns - Missing requirements:', { 
+                    hasToken: !!authToken, 
+                    hasUser: !!user, 
+                    hasCompanyId: !!company?.id,
+                    companyId: company?.id
+                });
+                return;
+            }
             setLoading(true);
             setError(null);
-            const data = await getAllCampaigns(token, company.id);
-            console.log('Fetched campaigns:', data);
+            console.log('fetchCampaigns - Fetching campaigns for company:', company.id);
+            const data = await getAllCampaigns(authToken, company.id);
+            console.log('fetchCampaigns - Received campaigns:', data);
+            console.log('fetchCampaigns - Campaign count:', data?.length || 0);
             setCampaigns(data || []);
-        } catch (error: any) {
-            console.error('Failed to fetch campaigns:', error);
-            setError(error.message || 'Failed to fetch campaigns');
-            setCampaigns([]); // Set empty array on error
+        } catch (err: any) {
+            console.error('fetchCampaigns - Error:', err);
+            setError(err.message || 'Failed to fetch campaigns');
+            setCampaigns([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, user, company?.id]);
 
-    const createNewCampaign = async (formData: CampaignFormState): Promise<boolean> => {
+    const createNewCampaign = useCallback(async (formData: CampaignFormState): Promise<boolean> => {
+        console.log('createNewCampaign - Starting with token:', !!token);
+        
+        // Try to get token from localStorage as fallback
+        let authToken = token;
+        if (!authToken) {
+            authToken = localStorage.getItem('token');
+            console.log('createNewCampaign - Using localStorage token:', !!authToken);
+        }
+        
+        if (!authToken) {
+            console.error('createNewCampaign - No token available');
+            toast({
+                title: "Error",
+                description: "Please login to create a campaign.",
+                variant: "destructive"
+            });
+            return false;
+        }
+
         try {
-            if (!token) {
-                toast({
-                    title: "Error",
-                    description: "Please login to create a campaign.",
-                    variant: "destructive"
-                });
-                return false;
-            }
-
             // Convert form data to API format
             const apiFormData = {
                 campaign_name: formData.campaign_name,
@@ -70,40 +95,65 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
                 leads_csv: formData.csv_file || undefined
             };
 
-            const result = await createCampaign(apiFormData, token);
+            console.log('createNewCampaign - Calling API...');
+            const result = await createCampaign(apiFormData, authToken);
+            console.log('createNewCampaign - API Success, result:', result);
 
-            // Refresh campaigns list
-            await fetchCampaigns();
+            // Log activity for campaign creation
+            await logCampaignActivity(
+                authToken,
+                result.campaign_name || formData.campaign_name,
+                result.id,
+                'created'
+            ).catch(err => console.error('Failed to log campaign activity:', err));
 
             toast({
                 title: "Success",
-                description: `Campaign "${result.campaign_name}" created and queued successfully! You can start it manually from the campaigns list.`,
+                description: `Campaign "${result.campaign_name || formData.campaign_name}" created successfully!`,
             });
 
+            // Refresh campaigns list - fetch directly here to ensure state updates
+            console.log('createNewCampaign - Refreshing campaigns list...');
+            if (company?.id) {
+                try {
+                    const freshCampaigns = await getAllCampaigns(authToken, company.id);
+                    console.log('createNewCampaign - Fresh campaigns:', freshCampaigns?.length);
+                    setCampaigns(freshCampaigns || []);
+                    console.log('createNewCampaign - State updated with campaigns');
+                } catch (refreshErr) {
+                    console.error('createNewCampaign - Refresh error:', refreshErr);
+                }
+            }
+
             return true;
-        } catch (error: any) {
-            console.error('Failed to create campaign:', error);
+        } catch (err: any) {
+            console.error('createNewCampaign - Error:', err);
             toast({
                 title: "Error",
-                description: error.message || "Failed to create campaign. Please try again.",
+                description: err.message || "Failed to create campaign. Please try again.",
                 variant: "destructive"
             });
             return false;
         }
-    };
+    }, [token, company?.id]);
 
-    const updateCampaign = async (id: string, status: 'active' | 'paused' | 'stopped'): Promise<boolean> => {
+    const updateCampaign = useCallback(async (id: string, status: 'active' | 'paused' | 'stopped'): Promise<boolean> => {
+        let authToken = token;
+        if (!authToken) {
+            authToken = localStorage.getItem('token');
+        }
+        
+        if (!authToken) {
+            toast({
+                title: "Error",
+                description: "Please login to update campaign.",
+                variant: "destructive"
+            });
+            return false;
+        }
+
         try {
-            if (!token) {
-                toast({
-                    title: "Error",
-                    description: "Please login to update campaign.",
-                    variant: "destructive"
-                });
-                return false;
-            }
-
-            await updateCampaignStatus(id, status, token);
+            await updateCampaignStatus(id, status, authToken);
 
             // Update local state
             setCampaigns(prev => prev.map(campaign =>
@@ -117,29 +167,34 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
             });
 
             return true;
-        } catch (error: any) {
-            console.error('Failed to update campaign:', error);
+        } catch (err: any) {
+            console.error('updateCampaign - Error:', err);
             toast({
                 title: "Error",
-                description: error.message || "Failed to update campaign. Please try again.",
+                description: err.message || "Failed to update campaign. Please try again.",
                 variant: "destructive"
             });
             return false;
         }
-    };
+    }, [token]);
 
-    const updateCampaignDetails = async (id: string, formData: { campaign_name?: string; description?: string }): Promise<boolean> => {
+    const updateCampaignDetails = useCallback(async (id: string, formData: { campaign_name?: string; description?: string }): Promise<boolean> => {
+        let authToken = token;
+        if (!authToken) {
+            authToken = localStorage.getItem('token');
+        }
+        
+        if (!authToken) {
+            toast({
+                title: "Error",
+                description: "Please login to update campaign.",
+                variant: "destructive"
+            });
+            return false;
+        }
+
         try {
-            if (!token) {
-                toast({
-                    title: "Error",
-                    description: "Please login to update campaign.",
-                    variant: "destructive"
-                });
-                return false;
-            }
-
-            await updateCampaignDetailsService(id, formData, token);
+            await updateCampaignDetailsService(id, formData, authToken);
 
             // Update local state
             setCampaigns(prev => prev.map(campaign =>
@@ -152,18 +207,18 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
             });
 
             return true;
-        } catch (error: any) {
-            console.error('Failed to update campaign details:', error);
+        } catch (err: any) {
+            console.error('updateCampaignDetails - Error:', err);
             toast({
                 title: "Error",
-                description: error.message || "Failed to update campaign. Please try again.",
+                description: err.message || "Failed to update campaign. Please try again.",
                 variant: "destructive"
             });
             return false;
         }
-    };
+    }, [token]);
 
-    const validateForm = (formData: CampaignFormState): FormValidationErrors => {
+    const validateForm = useCallback((formData: CampaignFormState): FormValidationErrors => {
         const errors: FormValidationErrors = {};
 
         if (!formData.campaign_name.trim()) {
@@ -208,13 +263,14 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
         }
 
         return errors;
-    };
+    }, []);
 
     useEffect(() => {
         if (user && token && company?.id) {
+            console.log('CampaignContext - useEffect triggered, fetching campaigns...');
             fetchCampaigns();
         }
-    }, [user, token, company?.id]);
+    }, [user, token, company?.id, fetchCampaigns]);
 
     return (
         <CampaignContext.Provider value={{

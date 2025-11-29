@@ -65,7 +65,25 @@ export const getAllCampaigns = async (token: string, companyId: string, limit: n
         throw new Error(parseApiError(errorData) || 'Failed to get campaigns');
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('getAllCampaigns - Raw API response:', data);
+    
+    // Handle different response formats
+    if (Array.isArray(data)) {
+        return data;
+    }
+    if (data?.campaigns && Array.isArray(data.campaigns)) {
+        return data.campaigns;
+    }
+    if (data?.data && Array.isArray(data.data)) {
+        return data.data;
+    }
+    if (data?.items && Array.isArray(data.items)) {
+        return data.items;
+    }
+    
+    console.warn('getAllCampaigns - Unexpected response format:', data);
+    return [];
 };
 
 /**

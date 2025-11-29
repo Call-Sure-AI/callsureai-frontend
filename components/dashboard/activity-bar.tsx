@@ -4,14 +4,16 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CircleIcon,
-    GitCommitIcon,
     MessageCircleIcon,
     StarIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     XIcon,
     ActivityIcon,
-    Sparkles
+    Sparkles,
+    Target,
+    Bot,
+    Building2
 } from "lucide-react";
 import { useActivities } from '@/contexts/activity-context';
 import { getRelativeTime } from '@/utils/time-utils';
@@ -29,11 +31,16 @@ const ActivityFeed = () => {
     }, [refreshActivities]);
 
     const getActivityIcon = (entityType: string) => {
-        switch (entityType.toLowerCase()) {
+        const type = entityType?.toLowerCase() || '';
+        switch (type) {
             case 'agent':
-                return <GitCommitIcon className="w-4 h-4" />;
+                return <Bot className="w-4 h-4" />;
+            case 'campaign':
+                return <Target className="w-4 h-4" />;
             case 'chat':
                 return <MessageCircleIcon className="w-4 h-4" />;
+            case 'company':
+                return <Building2 className="w-4 h-4" />;
             case 'status':
                 return <CircleIcon className="w-4 h-4" />;
             default:
@@ -42,16 +49,56 @@ const ActivityFeed = () => {
     };
 
     const getActivityColor = (entityType: string) => {
-        switch (entityType.toLowerCase()) {
+        const type = entityType?.toLowerCase() || '';
+        switch (type) {
             case 'agent':
                 return 'from-cyan-500 to-blue-500';
+            case 'campaign':
+                return 'from-purple-500 to-pink-500';
             case 'chat':
-                return 'from-purple-500 to-indigo-500';
+                return 'from-indigo-500 to-violet-500';
+            case 'company':
+                return 'from-amber-500 to-orange-500';
             case 'status':
                 return 'from-emerald-500 to-green-500';
             default:
-                return 'from-orange-500 to-amber-500';
+                return 'from-gray-500 to-slate-500';
         }
+    };
+
+    // Format the action text to be more readable
+    const formatAction = (activity: any) => {
+        const action = activity.action?.toLowerCase() || '';
+        const entityType = activity.entity_type?.toLowerCase() || '';
+        const metadata = activity.metadata || {};
+        
+        // Get entity name from metadata
+        const entityName = metadata.name || metadata.agent_name || metadata.campaign_name || metadata.business_name || '';
+        
+        // Format action message
+        if (entityName) {
+            switch (action) {
+                case 'create':
+                    return `Created ${entityType} "${entityName}"`;
+                case 'update':
+                    return `Updated ${entityType} "${entityName}"`;
+                case 'delete':
+                    return `Deleted ${entityType} "${entityName}"`;
+                case 'start':
+                case 'started':
+                    return `Started ${entityType} "${entityName}"`;
+                case 'pause':
+                case 'paused':
+                    return `Paused ${entityType} "${entityName}"`;
+                case 'resume':
+                case 'resumed':
+                    return `Resumed ${entityType} "${entityName}"`;
+                default:
+                    return `${action} ${entityType} "${entityName}"`;
+            }
+        }
+        
+        return `${action} ${entityType}`;
     };
 
     const ActivityList = ({ isCollapsed }: { isCollapsed: boolean }) => (
@@ -102,10 +149,20 @@ const ActivityFeed = () => {
                             {!isCollapsed && (
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                        {activity.action}
+                                        {formatAction(activity)}
                                     </p>
                                     <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        <span className="truncate max-w-[60px]">{activity.entity_type || 'System'}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ${
+                                            activity.entity_type?.toLowerCase() === 'campaign' 
+                                                ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                                                : activity.entity_type?.toLowerCase() === 'agent'
+                                                ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
+                                                : activity.entity_type?.toLowerCase() === 'company'
+                                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                                                : 'bg-gray-500/10 text-gray-600 dark:text-gray-400'
+                                        }`}>
+                                            {activity.entity_type?.toLowerCase() || 'system'}
+                                        </span>
                                         <span>•</span>
                                         <span className="flex-shrink-0">{getRelativeTime(activity.created_at!)}</span>
                                     </div>

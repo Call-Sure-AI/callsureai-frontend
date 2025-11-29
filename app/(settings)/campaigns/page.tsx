@@ -1,3 +1,4 @@
+// app\(settings)\campaigns\page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -73,11 +74,13 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { useCampaigns } from "@/contexts/campaign-context"
 import { useAgents } from "@/contexts/agent-context"
+import { useActivities } from "@/contexts/activity-context"
 import { useIsAuthenticated } from "@/hooks/use-is-authenticated"
 import { CampaignFormState, defaultBookingConfig, defaultAutomationConfig, defaultDataMapping, FormValidationErrors } from "@/types/campaign"
 import { FileUploadComponent, DataMappingComponent, BookingConfigComponent, AutomationConfigComponent } from "@/components/campaigns/form-components"
 import { CampaignEdit } from "@/components/campaigns/campaign-edit"
 import * as CampaignService from "@/services/campaign-service"
+import { logCampaignActivity } from "@/services/activity-service"
 
 const LoadingSpinner = () => (
     <div className="flex items-center justify-center py-16">
@@ -180,6 +183,7 @@ export default function CampaignsPage() {
     const { token } = useIsAuthenticated()
     const { campaigns, loading, error, createNewCampaign, validateForm, refreshCampaigns } = useCampaigns()
     const { agents } = useAgents()
+    const { refreshActivities } = useActivities()
 
     const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
     const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -295,11 +299,22 @@ export default function CampaignsPage() {
             toast({ title: "Error", description: "Please login first", variant: "destructive" })
             return
         }
+        
+        // Find campaign name for activity logging
+        const campaign = campaigns.find(c => c.id === campaignId)
+        const campaignName = campaign?.campaign_name || 'Unknown Campaign'
+        
         try {
             setActionLoading(`start-${campaignId}`)
             console.log('Starting campaign:', campaignId)
             await CampaignService.startCampaign(campaignId, token)
+            
+            // Log activity
+            await logCampaignActivity(token, campaignName, campaignId, 'started')
+                .catch(err => console.error('Failed to log activity:', err))
+            
             await refreshCampaigns() // Refresh the list to get updated status
+            await refreshActivities() // Refresh activity feed
             toast({ title: "Success", description: "Campaign started successfully!" })
         } catch (error: any) {
             console.error('Failed to start campaign:', error)
@@ -315,11 +330,22 @@ export default function CampaignsPage() {
             toast({ title: "Error", description: "Please login first", variant: "destructive" })
             return
         }
+        
+        // Find campaign name for activity logging
+        const campaign = campaigns.find(c => c.id === campaignId)
+        const campaignName = campaign?.campaign_name || 'Unknown Campaign'
+        
         try {
             setActionLoading(`pause-${campaignId}`)
             console.log('Pausing campaign:', campaignId)
             await CampaignService.pauseCampaign(campaignId, token)
+            
+            // Log activity
+            await logCampaignActivity(token, campaignName, campaignId, 'paused')
+                .catch(err => console.error('Failed to log activity:', err))
+            
             await refreshCampaigns() // Refresh the list to get updated status
+            await refreshActivities() // Refresh activity feed
             toast({ title: "Success", description: "Campaign paused" })
         } catch (error: any) {
             console.error('Failed to pause campaign:', error)
@@ -335,11 +361,22 @@ export default function CampaignsPage() {
             toast({ title: "Error", description: "Please login first", variant: "destructive" })
             return
         }
+        
+        // Find campaign name for activity logging
+        const campaign = campaigns.find(c => c.id === campaignId)
+        const campaignName = campaign?.campaign_name || 'Unknown Campaign'
+        
         try {
             setActionLoading(`resume-${campaignId}`)
             console.log('Resuming campaign:', campaignId)
             await CampaignService.resumeCampaign(campaignId, token)
+            
+            // Log activity
+            await logCampaignActivity(token, campaignName, campaignId, 'resumed')
+                .catch(err => console.error('Failed to log activity:', err))
+            
             await refreshCampaigns() // Refresh the list to get updated status
+            await refreshActivities() // Refresh activity feed
             toast({ title: "Success", description: "Campaign resumed" })
         } catch (error: any) {
             console.error('Failed to resume campaign:', error)
