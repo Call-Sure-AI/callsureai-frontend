@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Upload, X, Wand2, User2, Play, Pause, Sparkles, Bot, FileText, Settings, ChevronDown, Mic, Loader2 } from 'lucide-react';
+import { Upload, X, Wand2, User2, Play, Pause, Sparkles, Bot, FileText, Settings, ChevronDown, Mic, Loader2, Headphones, TrendingUp, BookOpen, CalendarDays, Users, Phone, CalendarCheck, ClipboardList, Heart, Shield, Bell, PhoneCall, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,6 +32,23 @@ import { useCompany } from '@/contexts/company-context';
 import { availableVoiceFiles, languageOptions, toneOptions } from '@/constants';
 import AccessDenied from '@/components/dashboard/access-denied';
 
+// Use Case Options
+const useCaseOptions = [
+  { id: 'customer_support', label: 'Customer Support', icon: Headphones, description: 'Handle customer inquiries and issues' },
+  { id: 'outbound_sales', label: 'Outbound Sales', icon: TrendingUp, description: 'Make sales calls and follow-ups' },
+  { id: 'learning_development', label: 'Learning and Development', icon: BookOpen, description: 'Training and educational support' },
+  { id: 'scheduling', label: 'Scheduling', icon: CalendarDays, description: 'Manage appointments and bookings' },
+  { id: 'lead_qualification', label: 'Lead Qualification', icon: Users, description: 'Qualify and score leads' },
+  { id: 'answering_service', label: 'Answering Service', icon: Phone, description: 'Handle incoming calls 24/7' },
+  { id: 'appointment_scheduling', label: 'Appointment Scheduling', icon: CalendarCheck, description: 'Book and manage appointments' },
+  { id: 'patient_intake', label: 'Patient Intake', icon: ClipboardList, description: 'Collect patient information' },
+  { id: 'symptom_guidance', label: 'Symptom Guidance', icon: Heart, description: 'Provide health symptom guidance' },
+  { id: 'insurance_verification', label: 'Insurance Verification', icon: Shield, description: 'Verify insurance coverage' },
+  { id: 'prescription_reminders', label: 'Prescription Reminders', icon: Bell, description: 'Remind patients about medications' },
+  { id: 'telehealth_support', label: 'Telehealth Support', icon: PhoneCall, description: 'Support virtual healthcare' },
+  { id: 'other', label: 'Other', icon: HelpCircle, description: 'Custom use case' },
+];
+
 interface AdvancedSettings {
   authUrl: string;
   clientId: string;
@@ -46,6 +63,7 @@ interface FormData {
   language: string;
   roleDescription: string;
   businessContext: string;
+  useCase: string;
   advanced_settings: AdvancedSettings;
   files: string[];
 }
@@ -57,6 +75,7 @@ const initialFormData: FormData = {
   language: '',
   roleDescription: '',
   businessContext: '',
+  useCase: '',
   advanced_settings: {
     authUrl: '',
     clientId: '',
@@ -89,6 +108,59 @@ const FormSection = ({ children, className = "" }: { children: React.ReactNode; 
     {children}
   </motion.div>
 );
+
+// Use Case Card Component
+const UseCaseCard = ({ 
+  useCase, 
+  isSelected, 
+  onClick 
+}: { 
+  useCase: typeof useCaseOptions[0]; 
+  isSelected: boolean; 
+  onClick: () => void;
+}) => {
+  const Icon = useCase.icon;
+  
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+        isSelected
+          ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
+          : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-cyan-300 dark:hover:border-cyan-500/50 hover:shadow-md'
+      }`}
+    >
+      {isSelected && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </motion.div>
+      )}
+      
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
+        isSelected 
+          ? 'bg-cyan-500 shadow-lg shadow-cyan-500/30' 
+          : 'bg-gray-100 dark:bg-slate-700'
+      }`}>
+        <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+      </div>
+      
+      <h4 className={`font-semibold text-sm ${
+        isSelected ? 'text-cyan-700 dark:text-cyan-400' : 'text-gray-900 dark:text-white'
+      }`}>
+        {useCase.label}
+      </h4>
+    </motion.button>
+  );
+};
 
 const AgentCreationForm = () => {
   const router = useRouter();
@@ -135,6 +207,10 @@ const AgentCreationForm = () => {
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleUseCaseSelect = (useCaseId: string) => {
+    setFormData(prev => ({ ...prev, useCase: useCaseId }));
   };
 
   const handleAdvancedSettingsChange = (value: AdvancedSettings) => {
@@ -363,7 +439,8 @@ const AgentCreationForm = () => {
         { condition: !user, message: "You must be logged in to create an agent." },
         { condition: !token, message: "Please login to create an agent." },
         { condition: !formData.name || !formData.gender || !formData.tone || !formData.language, message: "Please complete the agent setup fields." },
-        { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." }
+        { condition: !formData.roleDescription || !formData.businessContext, message: "Please complete the agent training fields." },
+        { condition: !formData.useCase, message: "Please select a use case for your agent." }
       ];
 
       for (const check of validationChecks) {
@@ -401,6 +478,7 @@ const AgentCreationForm = () => {
           language: formData.language,
           roleDescription: formData.roleDescription,
           businessContext: formData.businessContext,
+          useCase: formData.useCase, // Added use case to additional_context
         },
         advanced_settings: formData.advanced_settings,
         files: [],
@@ -497,7 +575,8 @@ const AgentCreationForm = () => {
           name: data.name || '',
           gender: data.gender || '',
           tone: data.tone || '',
-          language: data.language || ''
+          language: data.language || '',
+          useCase: data.useCase || ''
         }));
 
         if (data.language) {
@@ -587,6 +666,35 @@ const AgentCreationForm = () => {
           <CardContent className="p-0 max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
             <div className="p-6 space-y-6">
               
+              {/* Use Case Selection Section - NEW */}
+              <FormSection>
+                <SectionHeader icon={Sparkles} title="Use Case" subtitle="What will your agent help with?" />
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {useCaseOptions.map((useCase) => (
+                    <UseCaseCard
+                      key={useCase.id}
+                      useCase={useCase}
+                      isSelected={formData.useCase === useCase.id}
+                      onClick={() => handleUseCaseSelect(useCase.id)}
+                    />
+                  ))}
+                </div>
+
+                {formData.useCase && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-3 bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 rounded-xl"
+                  >
+                    <p className="text-sm text-cyan-700 dark:text-cyan-400">
+                      <span className="font-semibold">Selected:</span>{' '}
+                      {useCaseOptions.find(u => u.id === formData.useCase)?.label} - {useCaseOptions.find(u => u.id === formData.useCase)?.description}
+                    </p>
+                  </motion.div>
+                )}
+              </FormSection>
+
               {/* Agent Profile Section */}
               <FormSection>
                 <SectionHeader icon={User2} title="Agent Profile" subtitle="Give your agent a unique identity" />

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Upload, X, User2, Play, Pause, CircleX, Settings, Mic, FileText, Loader2, ChevronDown } from "lucide-react";
+import { Upload, X, User2, Play, Pause, CircleX, Settings, Mic, FileText, Loader2, ChevronDown, Headphones, TrendingUp, BookOpen, CalendarDays, Users, Phone, CalendarCheck, ClipboardList, Heart, Shield, Bell, PhoneCall, HelpCircle, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -30,6 +30,23 @@ import { useActivities } from '@/contexts/activity-context';
 import { AgentFormData } from "@/types";
 import { languageOptions, toneOptions } from '@/constants';
 
+// Use Case Options (same as in agent-creation)
+const useCaseOptions = [
+    { id: 'customer_support', label: 'Customer Support', icon: Headphones },
+    { id: 'outbound_sales', label: 'Outbound Sales', icon: TrendingUp },
+    { id: 'learning_development', label: 'Learning & Development', icon: BookOpen },
+    { id: 'scheduling', label: 'Scheduling', icon: CalendarDays },
+    { id: 'lead_qualification', label: 'Lead Qualification', icon: Users },
+    { id: 'answering_service', label: 'Answering Service', icon: Phone },
+    { id: 'appointment_scheduling', label: 'Appointment Scheduling', icon: CalendarCheck },
+    { id: 'patient_intake', label: 'Patient Intake', icon: ClipboardList },
+    { id: 'symptom_guidance', label: 'Symptom Guidance', icon: Heart },
+    { id: 'insurance_verification', label: 'Insurance Verification', icon: Shield },
+    { id: 'prescription_reminders', label: 'Prescription Reminders', icon: Bell },
+    { id: 'telehealth_support', label: 'Telehealth Support', icon: PhoneCall },
+    { id: 'other', label: 'Other', icon: HelpCircle },
+];
+
 interface EditAgentData {
     name: string;
     gender: string;
@@ -37,6 +54,7 @@ interface EditAgentData {
     language: string;
     roleDescription: string;
     businessContext: string;
+    useCase: string;
     is_active: boolean;
     confidence_threshold: number;
     advanced_settings: {
@@ -58,6 +76,44 @@ const SectionHeader = ({ icon: Icon, title }: { icon: any; title: string }) => (
     </div>
 );
 
+// Use Case Mini Card for Edit Modal
+const UseCaseMiniCard = ({ 
+    useCase, 
+    isSelected, 
+    onClick 
+}: { 
+    useCase: typeof useCaseOptions[0]; 
+    isSelected: boolean; 
+    onClick: () => void;
+}) => {
+    const Icon = useCase.icon;
+    
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`p-3 rounded-xl border-2 transition-all text-left ${
+                isSelected
+                    ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10'
+                    : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-cyan-300 dark:hover:border-cyan-500/50'
+            }`}
+        >
+            <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    isSelected ? 'bg-cyan-500' : 'bg-gray-100 dark:bg-slate-700'
+                }`}>
+                    <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+                </div>
+                <span className={`text-xs font-medium ${
+                    isSelected ? 'text-cyan-700 dark:text-cyan-400' : 'text-gray-700 dark:text-gray-300'
+                }`}>
+                    {useCase.label}
+                </span>
+            </div>
+        </button>
+    );
+};
+
 export const AgentEdit = React.memo(({ name, additional_context, is_active, id, files, advanced_settings }: AgentFormData) => {
     const [formData, setFormData] = useState<EditAgentData>({
         name: name ?? '',
@@ -66,6 +122,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
         language: additional_context?.language ?? '',
         roleDescription: additional_context?.roleDescription ?? '',
         businessContext: additional_context?.businessContext ?? '',
+        useCase: additional_context?.useCase ?? '',
         is_active: is_active ?? false,
         confidence_threshold: 0.7,
         advanced_settings: {
@@ -86,6 +143,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
     const [isMounted, setIsMounted] = useState(false);
     const [selectedLanguageOption, setSelectedLanguageOption] = useState<{ accent: string, language: string } | null>(null);
     const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [useCaseOpen, setUseCaseOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const { token } = useIsAuthenticated();
@@ -304,6 +362,7 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                     language: formData.language,
                     roleDescription: formData.roleDescription,
                     businessContext: formData.businessContext,
+                    useCase: formData.useCase,
                 },
                 advanced_settings: formData.advanced_settings,
                 is_active: formData.is_active,
@@ -377,10 +436,11 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
             : '';
     };
 
+    const selectedUseCase = useCaseOptions.find(u => u.id === formData.useCase);
+
     return (
         <Dialog>
             <DialogTrigger asChild>
-                {/* FIXED: Dark mode compatible button */}
                 <Button 
                     size="sm" 
                     ref={buttonRef} 
@@ -444,6 +504,47 @@ export const AgentEdit = React.memo(({ name, additional_context, is_active, id, 
                             </div>
                         </div>
                     </div>
+
+                    {/* Use Case Section */}
+                    <Collapsible open={useCaseOpen} onOpenChange={setUseCaseOpen}>
+                        <CollapsibleTrigger className="w-full">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700/50 hover:border-cyan-500/30 transition-all">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                                        <Sparkles className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Use Case</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            {selectedUseCase ? selectedUseCase.label : 'Not selected'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <motion.div animate={{ rotate: useCaseOpen ? 180 : 0 }}>
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                </motion.div>
+                            </div>
+                        </CollapsibleTrigger>
+                        
+                        <CollapsibleContent>
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4 p-5 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700/50"
+                            >
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {useCaseOptions.map((useCase) => (
+                                        <UseCaseMiniCard
+                                            key={useCase.id}
+                                            useCase={useCase}
+                                            isSelected={formData.useCase === useCase.id}
+                                            onClick={() => handleChange('useCase', useCase.id)}
+                                        />
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </CollapsibleContent>
+                    </Collapsible>
 
                     {/* Voice Customization Section */}
                     <div className="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-gray-100 dark:border-slate-700/50">
