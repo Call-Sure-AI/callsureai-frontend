@@ -34,7 +34,6 @@ const PaymentMethodCard = ({
     method: { id: number; type: string; isDefault: boolean; expiryDate: string; last4?: string };
     index: number;
 }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isHovered, setIsHovered] = useState<boolean>(false);
 
     return (
