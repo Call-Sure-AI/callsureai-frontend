@@ -112,7 +112,7 @@ export default function ConversationHistoryPage() {
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
                             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                                <span className="text-cyan-600">Conversation</span> History
+                                <span className="bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 bg-clip-text text-transparent">Conversation</span> History
                             </h1>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">
                                 Browse and analyze agent conversations

@@ -349,7 +349,7 @@ export default function ChatHistory() {
             metrics: { totalDuration: "25:00", talkTime: "22:30", holdTime: "0:00", waitTime: "2:30", transfers: 0, silencePercentage: 3 },
             notes: [],
             messages: [
-                { role: 'user', content: "We're looking to expand into Europe in Q3. What challenges should we expect?", timestamp: "9:15 AM" },
+                { role: 'user', content: "We&apos;re looking to expand into Europe in Q3. What challenges should we expect?", timestamp: "9:15 AM" },
                 { role: 'assistant', content: "The main challenges include GDPR compliance, cultural adaptation, and local partnerships.", timestamp: "9:17 AM" }
             ]
         },

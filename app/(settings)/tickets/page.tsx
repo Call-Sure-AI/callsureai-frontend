@@ -391,7 +391,7 @@ export default function TicketsPage() {
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
                         <div>
                             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                                <span className="text-cyan-600">Support</span> Tickets
+                                <span className="bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 bg-clip-text text-transparent">Support</span> Tickets
                             </h1>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">
                                 Manage and track customer support requests
@@ -416,7 +416,7 @@ export default function TicketsPage() {
                                 Settings
                             </Button>
                             <Button
-                                className="rounded-xl h-10 bg-cyan-600 hover:bg-cyan-500"
+                                className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium shadow-lg shadow-cyan-500/25"
                                 onClick={() => setCreateOpen(true)}
                             >
                                 <Plus className="w-4 h-4 mr-2" />

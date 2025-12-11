@@ -1,6 +1,7 @@
+// components\settings\image-upload.tsx
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
-import { UserIcon, PencilIcon } from "lucide-react";
+import { UserIcon, Camera, Sparkles } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 
 const ProfileImageUpload = ({
@@ -77,36 +78,56 @@ const ProfileImageUpload = ({
 
     return (
         <div
-            className="relative w-32 h-32 group"
+            className="relative w-32 h-32 group cursor-pointer"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={() => fileInputRef.current?.click()}
         >
-            <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+            {/* Outer ring with gradient */}
+            <div className={`absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full transition-opacity duration-300 ${isHovered || uploading ? 'opacity-100' : 'opacity-50'}`} />
+            
+            {/* Inner container */}
+            <div className="relative w-32 h-32 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border-4 border-white dark:border-slate-900">
                 {currentImage ? (
                     <Image
                         src={currentImage}
                         alt="profile"
-                        className="w-full h-full object-cover rounded-full"
+                        className="w-full h-full object-cover"
                         width={128}
                         height={128}
                     />
                 ) : (
-                    <UserIcon className="w-16 h-16 md:w-32 md:h-32 text-gray-400" />
+                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
+                        <UserIcon className="w-16 h-16 text-gray-400 dark:text-gray-500" />
+                    </div>
                 )}
+
+                {/* Hover overlay */}
+                <div 
+                    className={`absolute inset-0 bg-gradient-to-br from-cyan-500/80 to-blue-600/80 flex flex-col items-center justify-center transition-opacity duration-300 ${
+                        isHovered || uploading ? 'opacity-100' : 'opacity-0'
+                    }`}
+                >
+                    {uploading ? (
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="text-white text-xs font-medium">Uploading...</span>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-1">
+                            <Camera className="w-6 h-6 text-white" />
+                            <span className="text-white text-xs font-medium">Change Photo</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <button
-                onClick={() => fileInputRef.current?.click()}
-                className={`absolute inset-0 w-full h-full rounded-full flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-200 ${isHovered || uploading ? 'opacity-100' : 'opacity-0'
-                    }`}
-                disabled={uploading}
-            >
-                {uploading ? (
-                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                    <PencilIcon className="w-6 h-6 text-white" />
-                )}
-            </button>
+            {/* Sparkle decoration */}
+            <div className={`absolute -top-1 -right-1 transition-all duration-300 ${isHovered ? 'scale-110 opacity-100' : 'scale-100 opacity-70'}`}>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                    <Sparkles className="w-3 h-3 text-white" />
+                </div>
+            </div>
 
             <input
                 ref={fileInputRef}

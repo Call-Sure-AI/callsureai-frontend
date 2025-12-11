@@ -222,10 +222,10 @@ export const ModernNavbar = () => {
                         
                         <div className="relative w-full h-full flex items-center justify-center">
                           <Image
-                            src="/images/csai_logos/logo_without_text/fulllogo_nobuffer.png"
+                            src="/images/csai_logos/logo_without_text/fulllogo_transparent_nobuffer.png"
                             alt="CallSureAI"
                             fill
-                            className="object-contain p-2.5 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"
+                            className="object-contain p-1.5 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"
                           />
                         </div>
                       </div>

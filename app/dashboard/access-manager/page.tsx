@@ -1,16 +1,28 @@
+// app/dashboard/access-manager/page.tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus,
-  X,
   ChevronDown,
   Users,
   Mail,
   Shield,
   Search,
   Loader2,
+  UserPlus,
+  Crown,
+  Briefcase,
+  FolderKey,
+  CheckCircle,
+  Clock,
+  XCircle,
+  RefreshCw,
+  Send,
+  Sparkles,
+  UserCheck,
+  Settings,
+  Trash2,
 } from "lucide-react";
 import {
   AccessLevel,
@@ -19,6 +31,7 @@ import {
   User,
 } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 import { useCompany } from "@/contexts/company-context";
@@ -116,15 +129,14 @@ const AccessManagerDashboard: React.FC = () => {
     }
   }, [company?.id, token]);
 
-  // useEffect that depends on fetchPendingInvitations
   useEffect(() => {
     fetchPendingInvitations();
   }, [fetchPendingInvitations]);
 
   const accessLevels: AccessLevel[] = [
-    { name: "Admin Access", icon: Shield },
-    { name: "Projects Access", icon: Users },
-    { name: "Custom Projects Access", icon: Users },
+    { name: "Admin Access", icon: Crown, description: "Full access to all features and settings" },
+    { name: "Projects Access", icon: Briefcase, description: "Access to manage projects and teams" },
+    { name: "Custom Projects Access", icon: FolderKey, description: "Limited access to specific projects" },
   ];
 
   const toggleDropdown = (userId: string): void => {
@@ -187,7 +199,6 @@ const AccessManagerDashboard: React.FC = () => {
         description: `Invitation sent to ${email}`,
       });
 
-      // Add the invited user to the list
       const newUser: User = {
         id: `invitation-${data.invitation.id}`,
         email,
@@ -221,10 +232,9 @@ const AccessManagerDashboard: React.FC = () => {
       try {
         setIsLoading(true);
 
-        // Use POST endpoint instead of DELETE
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/api/invitations/${invitationId}/delete`,
-          {}, // Empty body
+          {},
           {
             withCredentials: true,
             headers: {
@@ -251,7 +261,6 @@ const AccessManagerDashboard: React.FC = () => {
       }
     }
 
-    // Remove from UI
     setUsers((prev) => prev.filter((user) => user.id !== userId));
     const newSelectedAccess = { ...selectedAccess };
     delete newSelectedAccess[userId];
@@ -271,43 +280,58 @@ const AccessManagerDashboard: React.FC = () => {
     user.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-        staggerChildren: 0.1,
-      },
-    },
-  } as Variants;
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "pending":
+        return {
+          icon: Clock,
+          text: "Pending",
+          className: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400",
+          dotColor: "bg-amber-500"
+        };
+      case "accepted":
+        return {
+          icon: CheckCircle,
+          text: "Accepted",
+          className: "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400",
+          dotColor: "bg-green-500"
+        };
+      case "rejected":
+        return {
+          icon: XCircle,
+          text: "Rejected",
+          className: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400",
+          dotColor: "bg-red-500"
+        };
+      default:
+        return {
+          icon: Clock,
+          text: "Unknown",
+          className: "bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400",
+          dotColor: "bg-gray-500"
+        };
+    }
+  };
 
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut",
-      },
-    },
-  } as Variants;
+  const getAccessIcon = (accessName: string) => {
+    switch (accessName) {
+      case "Admin Access":
+        return Crown;
+      case "Projects Access":
+        return Briefcase;
+      case "Custom Projects Access":
+        return FolderKey;
+      default:
+        return Shield;
+    }
+  };
 
-  const dropdownVariants = {
-    hidden: { opacity: 0, y: -10, height: 0 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      height: "auto",
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-  } as Variants;
+  const stats = {
+    total: users.length,
+    pending: users.filter(u => u.status === "pending").length,
+    accepted: users.filter(u => u.status === "accepted").length,
+    rejected: users.filter(u => u.status === "rejected").length,
+  };
 
   if (!user) {
     return <AccessDenied redirectPath="/auth" />;
@@ -318,249 +342,396 @@ const AccessManagerDashboard: React.FC = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-8">
-      {/* Rest of your JSX remains the same */}
-      <motion.div
-        className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden"
-        variants={containerVariants as Variants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Header Section */}
-        <div className="bg-gradient-to-r from-[#0A1E4E] via-[#0A1E4E]/80 to-[#0A1E4E] p-8 text-white">
-          <motion.h1
-            className="text-3xl font-bold mb-2"
-            variants={itemVariants}
-          >
-            Access Manager
-          </motion.h1>
-          <motion.p className="text-blue-100" variants={itemVariants}>
-            Manage user permissions and access levels
-          </motion.p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
+      </div>
 
-        <div className="p-8">
-          {/* Search and Add Section */}
-          <motion.div
-            className="flex flex-col md:flex-row gap-4 mb-8"
-            variants={itemVariants as Variants}
-          >
-            <div className="flex-1 relative">
-              <Mail
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-              <input
-                type="email"
-                placeholder="Enter email address"
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0A1E4E] focus:border-transparent outline-none transition-all duration-200"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-sm font-medium mb-3">
+                <Shield className="w-4 h-4" />
+                Team Management
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                Access Manager
+              </h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Invite team members and manage their permissions
+              </p>
             </div>
-            <div className="relative min-w-[180px]">
-              <motion.button
-                className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 transition-colors duration-200"
-                onClick={() => toggleDropdown("temp-" + email)}
+            
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={() => fetchPendingInvitations()}
                 disabled={isLoading}
+                className="border-gray-200 dark:border-slate-700"
               >
-                <Shield size={16} className="text-[#0A1E4E]" />
-                <span>{selectedAccess[`temp-${email}`] || "Admin Access"}</span>
-                <ChevronDown
-                  size={16}
-                  className={`transform transition-transform duration-200 ${openDropdownId === "temp-" + email ? "rotate-180" : ""}`}
-                />
-              </motion.button>
-
-              <AnimatePresence>
-                {openDropdownId === "temp-" + email && (
-                  <motion.div
-                    className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden"
-                    variants={dropdownVariants as Variants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                  >
-                    {accessLevels.map(({ name, icon: Icon }) => (
-                      <motion.button
-                        key={name}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 transition-colors duration-200"
-                        onClick={() =>
-                          handleAccessSelect(`temp-${email}`, name)
-                        }
-                        whileHover={{ x: 4 }}
-                      >
-                        <Icon size={16} className="text-[#0A1E4E]" />
-                        {name}
-                      </motion.button>
-                    ))}
-                  </motion.div>
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
                 )}
-              </AnimatePresence>
+                <span className="ml-2 hidden sm:inline">Refresh</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="border-gray-200 dark:border-slate-700"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="ml-2 hidden sm:inline">Settings</span>
+              </Button>
             </div>
-            <Button
-              className="px-6 py-3 rounded-xl flex items-center gap-2 shadow-md transition-colors duration-200"
-              variant="primary"
-              onClick={handleAddUser}
-              disabled={!email || isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus size={20} />
-              )}
-              Invite User
-            </Button>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* Search Filter */}
-          <motion.div className="mb-6 relative" variants={itemVariants}>
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0A1E4E] focus:border-transparent outline-none transition-all duration-200"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </motion.div>
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+        >
+          {[
+            { label: "Total Invites", value: stats.total, icon: Users, color: "from-orange-500 to-amber-500" },
+            { label: "Pending", value: stats.pending, icon: Clock, color: "from-amber-500 to-yellow-500" },
+            { label: "Accepted", value: stats.accepted, icon: CheckCircle, color: "from-green-500 to-emerald-500" },
+            { label: "Rejected", value: stats.rejected, icon: XCircle, color: "from-red-500 to-rose-500" },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="relative p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-gray-200/50 dark:border-slate-800/50 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className={`absolute top-4 right-4 w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                <stat.icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {stat.value}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Main Content Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="rounded-2xl bg-white dark:bg-slate-900/80 border border-gray-200/50 dark:border-slate-800/50 shadow-xl overflow-hidden"
+        >
+          {/* Invite Section */}
+          <div className="p-6 border-b border-gray-200 dark:border-slate-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Invite Team Member</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Send an invitation to join your workspace</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Email Input */}
+              <div className="flex-1 relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="email"
+                  placeholder="Enter email address..."
+                  className="pl-12 h-12 bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-xl"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Access Level Dropdown */}
+              <div className="relative min-w-[220px]">
+                <button
+                  onClick={() => toggleDropdown("temp-" + email)}
+                  disabled={isLoading}
+                  className="w-full h-12 flex items-center justify-between gap-2 px-4 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-orange-300 dark:hover:border-orange-500/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const Icon = getAccessIcon(selectedAccess[`temp-${email}`] || "Admin Access");
+                      return <Icon className="w-4 h-4 text-orange-500" />;
+                    })()}
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {selectedAccess[`temp-${email}`] || "Admin Access"}
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform ${
+                      openDropdownId === "temp-" + email ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {openDropdownId === "temp-" + email && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden"
+                    >
+                      {accessLevels.map(({ name, icon: Icon, description }) => (
+                        <button
+                          key={name}
+                          onClick={() => handleAccessSelect(`temp-${email}`, name)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-start gap-3 transition-colors border-b border-gray-100 dark:border-slate-800 last:border-0"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Icon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">{name}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">{description}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Invite Button */}
+              <Button
+                onClick={handleAddUser}
+                disabled={!email || isLoading}
+                className="h-12 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl shadow-lg shadow-orange-500/25"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <Send className="w-5 h-5 mr-2" />
+                    Send Invite
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Search Section */}
+          <div className="p-6 border-b border-gray-200 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/30">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search team members..."
+                  className="pl-12 h-11 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 rounded-xl"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {filteredUsers.length} of {users.length} members
+              </div>
+            </div>
+          </div>
 
           {/* User List */}
-          <motion.div className="space-y-4" variants={itemVariants}>
-            {filteredUsers.map((user, index) => (
-              <motion.div
-                key={user.id}
-                className="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Users className="text-[#0A1E4E]" size={24} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs md:text-lg text-gray-700 font-medium">
-                      {user.email}
-                    </span>
-                    {user.status === "pending" && (
-                      <span className="text-xs text-amber-500">
-                        Invitation Pending
-                      </span>
-                    )}
-                    {user.status === "accepted" && (
-                      <span className="text-xs text-green-500">
-                        Invitation Accepted
-                      </span>
-                    )}
-                    {user.status === "rejected" && (
-                      <span className="text-xs text-red-500">
-                        Invitation Rejected
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="relative ml-auto">
-                    <motion.button
-                      className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-300 transition-colors duration-200"
-                      onClick={() => toggleDropdown(user.id)}
-                      disabled={isLoading}
-                    >
-                      <Shield size={16} className="text-[#0A1E4E]" />
-                      <span className="hidden md:block">
-                        {selectedAccess[user.id] || "Admin Access"}
-                      </span>
-                      <ChevronDown
-                        size={16}
-                        className={`transform transition-transform duration-200 ${openDropdownId === user.id ? "rotate-180" : ""}`}
-                      />
-                    </motion.button>
-
-                    <AnimatePresence>
-                      {openDropdownId === user.id && (
-                        <motion.div
-                          className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden"
-                          variants={dropdownVariants}
-                          initial="hidden"
-                          animate="visible"
-                          exit="hidden"
-                        >
-                          {accessLevels.map(({ name, icon: Icon }) => (
-                            <motion.button
-                              key={name}
-                              className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 transition-colors duration-200"
-                              onClick={() => handleAccessSelect(user.id, name)}
-                              whileHover={{ x: 4 }}
-                            >
-                              <Icon size={16} className="text-[#0A1E4E]" />
-                              {name}
-                            </motion.button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
-                    onClick={() => handleRemoveUser(user.id)}
-                    disabled={isLoading}
-                  >
-                    <X size={20} />
-                  </motion.button>
+          <div className="divide-y divide-gray-200 dark:divide-slate-800">
+            {filteredUsers.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-gray-400" />
                 </div>
-              </motion.div>
-            ))}
-
-            {filteredUsers.length === 0 && (
-              <div className="text-center p-8 bg-gray-50 rounded-xl border border-gray-200">
-                <p className="text-gray-500">
-                  No users found. Invite someone to get started!
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No team members yet</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">Invite your first team member to get started</p>
+                <div className="inline-flex items-center gap-2 text-sm text-orange-600 dark:text-orange-400">
+                  <Sparkles className="w-4 h-4" />
+                  Use the form above to send an invitation
+                </div>
               </div>
-            )}
-          </motion.div>
+            ) : (
+              filteredUsers.map((member, index) => {
+                const statusConfig = getStatusConfig(member.status);
+                const StatusIcon = statusConfig.icon;
+                const AccessIcon = getAccessIcon(selectedAccess[member.id] || "Admin Access");
 
-          {/* Footer Actions */}
-          <motion.div
-            className="flex gap-4 mt-8 pt-8 border-t border-gray-200"
-            variants={itemVariants}
-          >
+                return (
+                  <motion.div
+                    key={member.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="p-4 sm:p-5 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Avatar */}
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-semibold text-lg">
+                          {member.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${statusConfig.dotColor} border-2 border-white dark:border-slate-900`} />
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-gray-900 dark:text-white truncate">
+                            {member.email}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${statusConfig.className}`}>
+                            <StatusIcon className="w-3 h-3" />
+                            {statusConfig.text}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            Invited as {member.role}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Access Level Dropdown */}
+                      <div className="relative hidden sm:block">
+                        <button
+                          onClick={() => toggleDropdown(member.id)}
+                          disabled={isLoading}
+                          className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-orange-300 dark:hover:border-orange-500/50 transition-colors"
+                        >
+                          <AccessIcon className="w-4 h-4 text-orange-500" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {selectedAccess[member.id] || "Admin Access"}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-gray-400 transition-transform ${
+                              openDropdownId === member.id ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+
+                        <AnimatePresence>
+                          {openDropdownId === member.id && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden"
+                            >
+                              {accessLevels.map(({ name, icon: Icon, description }) => (
+                                <button
+                                  key={name}
+                                  onClick={() => handleAccessSelect(member.id, name)}
+                                  className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-start gap-3 transition-colors border-b border-gray-100 dark:border-slate-800 last:border-0"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <Icon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900 dark:text-white">{name}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">{description}</div>
+                                  </div>
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleRemoveUser(member.id)}
+                          disabled={isLoading}
+                          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Footer */}
+          {filteredUsers.length > 0 && (
+            <div className="p-6 bg-gray-50 dark:bg-slate-800/30 border-t border-gray-200 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{stats.pending}</span> pending invitations
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => fetchPendingInvitations()}
+                    disabled={isLoading}
+                    className="border-gray-200 dark:border-slate-700"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                    )}
+                    Refresh List
+                  </Button>
+                  <Button
+                    onClick={handleInviteSelected}
+                    disabled={filteredUsers.length === 0 || isLoading}
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg shadow-orange-500/25"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <UserCheck className="w-4 h-4 mr-2" />
+                    )}
+                    Resend All Pending
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Help Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 dark:from-orange-500/20 dark:via-amber-500/20 dark:to-orange-500/20 border border-orange-200/50 dark:border-orange-500/30"
+        >
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                Need help managing your team?
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Check out our guide on setting up roles and permissions for your organization.
+              </p>
+            </div>
             <Button
               variant="outline"
-              className="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors duration-200"
-              onClick={() => {
-                fetchPendingInvitations();
-              }}
-              disabled={isLoading}
+              className="border-orange-300 dark:border-orange-500/50 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10"
             >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Reset"
-              )}
+              View Documentation
             </Button>
-            <Button
-              variant="primary"
-              className="px-6 py-4 rounded-xl transition-colors duration-200 shadow-md"
-              onClick={handleInviteSelected}
-              disabled={filteredUsers.length === 0 || isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                "Invite All Users"
-              )}
-            </Button>
-          </motion.div>
-        </div>
-      </motion.div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };

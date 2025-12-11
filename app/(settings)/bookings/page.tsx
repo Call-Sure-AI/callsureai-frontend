@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Calendar,
     Clock,
@@ -13,7 +14,6 @@ import {
     Plus,
     Search,
     Download,
-    Volume2,
     User,
     CalendarCheck,
     BarChart3,
@@ -23,12 +23,15 @@ import {
     Headphones,
     Activity,
     ChevronRight,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
+    RefreshCw,
+    TrendingUp,
+    MessageSquare,
+    FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
     Table,
     TableBody,
@@ -36,7 +39,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
     Dialog,
     DialogContent,
@@ -44,70 +47,71 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger,
-} from "@/components/ui/tabs"
+} from "@/components/ui/tabs";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { toast } from "@/hooks/use-toast"
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
 
 interface AutoBooking {
-    id: string
-    leadName: string
-    leadEmail: string
-    leadPhone: string
-    leadCompany?: string
-    agentName: string
-    agentId: string
-    callDuration: number
-    callRecordingUrl?: string
-    scheduledDate: string
-    scheduledTime: string
-    meetingDuration: number
-    bookingConfidence: number // AI confidence score 0-100
-    callTranscriptHighlight?: string
-    status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no-show'
-    source: 'ai-call' | 'manual' | 'web-form'
-    campaignId: string
-    campaignName: string
-    createdAt: string
-    updatedAt: string
+    id: string;
+    leadName: string;
+    leadEmail: string;
+    leadPhone: string;
+    leadCompany?: string;
+    agentName: string;
+    agentId: string;
+    callDuration: number;
+    callRecordingUrl?: string;
+    scheduledDate: string;
+    scheduledTime: string;
+    meetingDuration: number;
+    bookingConfidence: number;
+    callTranscriptHighlight?: string;
+    status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no-show';
+    source: 'ai-call' | 'manual' | 'web-form';
+    campaignId: string;
+    campaignName: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 interface CallMetrics {
-    totalCalls: number
-    connectedCalls: number
-    bookingRate: number
-    avgCallDuration: number
-    avgConfidence: number
+    totalCalls: number;
+    connectedCalls: number;
+    bookingRate: number;
+    avgCallDuration: number;
+    avgConfidence: number;
 }
 
 export default function AutoBookingsPage() {
-    const [bookings, setBookings] = useState<AutoBooking[]>([])
-    const [selectedBooking, setSelectedBooking] = useState<AutoBooking | null>(null)
-    const [showManualBookingDialog, setShowManualBookingDialog] = useState(false)
-    const [showCallDetailsDialog, setShowCallDetailsDialog] = useState(false)
-    const [showTranscriptDialog, setShowTranscriptDialog] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
-    const [filterSource, setFilterSource] = useState<string>("all")
-    const [filterStatus, setFilterStatus] = useState<string>("all")
-    const [activeTab, setActiveTab] = useState("overview")
+    const [bookings, setBookings] = useState<AutoBooking[]>([]);
+    const [selectedBooking, setSelectedBooking] = useState<AutoBooking | null>(null);
+    const [showManualBookingDialog, setShowManualBookingDialog] = useState(false);
+    const [showCallDetailsDialog, setShowCallDetailsDialog] = useState(false);
+    const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterSource, setFilterSource] = useState<string>("all");
+    const [filterStatus, setFilterStatus] = useState<string>("all");
+    const [activeTab, setActiveTab] = useState("overview");
+    const [loading, setLoading] = useState(false);
 
     // Mock data for AI-generated bookings
     useEffect(() => {
@@ -120,7 +124,7 @@ export default function AutoBookingsPage() {
                 leadCompany: 'Tech Corp',
                 agentName: 'Sarah AI Agent',
                 agentId: 'agent-001',
-                callDuration: 245, // seconds
+                callDuration: 245,
                 callRecordingUrl: '/recordings/call-001.mp3',
                 scheduledDate: '2025-01-22',
                 scheduledTime: '14:00',
@@ -197,346 +201,442 @@ export default function AutoBookingsPage() {
                 createdAt: '2025-01-16T08:00:00Z',
                 updatedAt: '2025-01-16T08:00:00Z'
             }
-        ]
-        setBookings(mockBookings)
-    }, [])
+        ];
+        setBookings(mockBookings);
+    }, []);
 
-    // Calculate AI metrics
     const calculateMetrics = (): CallMetrics => {
-        const aiBookings = bookings.filter(b => b.source === 'ai-call')
-        const totalCalls = aiBookings.length * 3 // Assuming 3 calls per booking on average
-        const connectedCalls = aiBookings.length * 2 // Assuming 66% connection rate
-        const bookingRate = connectedCalls > 0 ? Math.round((aiBookings.length / connectedCalls) * 100) : 0
+        const aiBookings = bookings.filter(b => b.source === 'ai-call');
+        const totalCalls = aiBookings.length * 3;
+        const connectedCalls = aiBookings.length * 2;
+        const bookingRate = connectedCalls > 0 ? Math.round((aiBookings.length / connectedCalls) * 100) : 0;
         const avgCallDuration = aiBookings.length > 0 
             ? Math.round(aiBookings.reduce((acc, b) => acc + b.callDuration, 0) / aiBookings.length)
-            : 0
+            : 0;
         const avgConfidence = aiBookings.length > 0
             ? Math.round(aiBookings.reduce((acc, b) => acc + b.bookingConfidence, 0) / aiBookings.length)
-            : 0
+            : 0;
 
-        return {
-            totalCalls,
-            connectedCalls,
-            bookingRate,
-            avgCallDuration,
-            avgConfidence
-        }
-    }
+        return { totalCalls, connectedCalls, bookingRate, avgCallDuration, avgConfidence };
+    };
 
-    const metrics = calculateMetrics()
+    const metrics = calculateMetrics();
 
-    // Filter bookings
     const filteredBookings = bookings.filter(booking => {
         const matchesSearch = 
             booking.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             booking.leadEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
             booking.leadCompany?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            booking.campaignName.toLowerCase().includes(searchQuery.toLowerCase())
+            booking.campaignName.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesSource = filterSource === 'all' || booking.source === filterSource
-        const matchesStatus = filterStatus === 'all' || booking.status === filterStatus
+        const matchesSource = filterSource === 'all' || booking.source === filterSource;
+        const matchesStatus = filterStatus === 'all' || booking.status === filterStatus;
 
-        return matchesSearch && matchesSource && matchesStatus
-    })
+        return matchesSearch && matchesSource && matchesStatus;
+    });
 
     const handlePlayRecording = () => {
-        // Implement audio playback
         toast({
             title: "Playing Recording",
             description: "Audio playback started",
-        })
-    }
+        });
+    };
 
     const getSourceIcon = (source: string) => {
         switch (source) {
-            case 'ai-call':
-                return <Bot className="w-4 h-4 text-blue-500" />
-            case 'manual':
-                return <User className="w-4 h-4 text-gray-500" />
-            case 'web-form':
-                return <Calendar className="w-4 h-4 text-green-500" />
-            default:
-                return <Calendar className="w-4 h-4" />
+            case 'ai-call': return <Bot className="w-3 h-3" />;
+            case 'manual': return <User className="w-3 h-3" />;
+            case 'web-form': return <Calendar className="w-3 h-3" />;
+            default: return <Calendar className="w-3 h-3" />;
         }
-    }
+    };
 
     const getSourceColor = (source: string) => {
         switch (source) {
-            case 'ai-call':
-                return 'bg-blue-100 text-blue-800'
-            case 'manual':
-                return 'bg-gray-100 text-gray-800'
-            case 'web-form':
-                return 'bg-green-100 text-green-800'
-            default:
-                return 'bg-gray-100 text-gray-800'
+            case 'ai-call': return 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/30';
+            case 'manual': return 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-500/30';
+            case 'web-form': return 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
+            default: return 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400';
         }
-    }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'confirmed':
-                return 'bg-green-100 text-green-800'
-            case 'scheduled':
-                return 'bg-blue-100 text-blue-800'
-            case 'completed':
-                return 'bg-gray-100 text-gray-800'
-            case 'cancelled':
-                return 'bg-red-100 text-red-800'
-            case 'no-show':
-                return 'bg-yellow-100 text-yellow-800'
-            default:
-                return 'bg-gray-100 text-gray-800'
+            case 'confirmed': return 'bg-emerald-500 dark:bg-emerald-600';
+            case 'scheduled': return 'bg-cyan-500 dark:bg-cyan-600';
+            case 'completed': return 'bg-gray-500 dark:bg-gray-600';
+            case 'cancelled': return 'bg-red-500 dark:bg-red-600';
+            case 'no-show': return 'bg-yellow-500 dark:bg-yellow-600';
+            default: return 'bg-gray-500';
         }
-    }
+    };
 
     const getConfidenceColor = (confidence: number) => {
-        if (confidence >= 90) return 'text-green-600 bg-green-50'
-        if (confidence >= 75) return 'text-blue-600 bg-blue-50'
-        if (confidence >= 60) return 'text-yellow-600 bg-yellow-50'
-        return 'text-red-600 bg-red-50'
-    }
+        if (confidence >= 90) return 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
+        if (confidence >= 75) return 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/30';
+        if (confidence >= 60) return 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/30';
+        return 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30';
+    };
 
     const formatCallDuration = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins}:${secs.toString().padStart(2, '0')}`
-    }
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const handleRefresh = () => {
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+            toast({
+                title: "Refreshed",
+                description: "Bookings data updated",
+            });
+        }, 1000);
+    };
+
+    // Mobile Booking Card
+    const BookingCard = ({ booking }: { booking: AutoBooking }) => {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                onClick={() => {
+                    setSelectedBooking(booking);
+                    setShowCallDetailsDialog(true);
+                }}
+                className="relative bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-cyan-300 dark:hover:border-cyan-600 transition-all cursor-pointer hover:shadow-lg p-4"
+            >
+                {/* Header */}
+                <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Badge className={`${getSourceColor(booking.source)} text-[10px] border flex items-center gap-1`}>
+                                {getSourceIcon(booking.source)}
+                                {booking.source === 'ai-call' ? 'AI' : booking.source}
+                            </Badge>
+                            <Badge className={`${getStatusColor(booking.status)} text-white text-[10px]`}>
+                                {booking.status}
+                            </Badge>
+                            {booking.source === 'ai-call' && (
+                                <Badge className={`${getConfidenceColor(booking.bookingConfidence)} text-[10px] border`}>
+                                    {booking.bookingConfidence}%
+                                </Badge>
+                            )}
+                        </div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{booking.leadName}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{booking.leadCompany}</p>
+                    </div>
+                </div>
+
+                {/* Details */}
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                    <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3" />
+                        <span>{booking.scheduledDate}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        <span>{booking.scheduledTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Bot className="w-3 h-3" />
+                        <span className="truncate">{booking.agentName}</span>
+                    </div>
+                    {booking.source === 'ai-call' && (
+                        <div className="flex items-center gap-1.5">
+                            <Phone className="w-3 h-3" />
+                            <span>{formatCallDuration(booking.callDuration)}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Campaign */}
+                <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {booking.campaignName}
+                    </span>
+                </div>
+            </motion.div>
+        );
+    };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Header with AI emphasis */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Sparkles className="w-6 h-6 text-blue-500" />
-                        AI-Powered Bookings
-                    </h1>
-                    <p className="text-gray-500">
-                        Automated booking system powered by AI voice agents
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <Button 
-                        variant="outline"
-                        onClick={() => setShowManualBookingDialog(true)}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Manual Booking
-                    </Button>
-                    <Button 
-                        className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90"
-                    >
-                        <Bot className="w-4 h-4 mr-2" />
-                        View AI Agents
-                    </Button>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+            {/* Header */}
+            <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
+                <div className="max-w-7xl mx-auto px-6 py-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                        <div>
+                            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                                    <Sparkles className="w-5 h-5 text-white" />
+                                </div>
+                                <span><span className="bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 bg-clip-text text-transparent">AI-Powered</span> Bookings</span>
+                            </h1>
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">
+                                Automated booking system powered by AI voice agents
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                variant="outline"
+                                className="rounded-xl h-10"
+                                onClick={handleRefresh}
+                                disabled={loading}
+                            >
+                                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                                Refresh
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="rounded-xl h-10"
+                                onClick={() => setShowManualBookingDialog(true)}
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Manual Booking
+                            </Button>
+                            <Button className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium shadow-lg shadow-cyan-500/25">
+                                <Bot className="w-4 h-4 mr-2" />
+                                View AI Agents
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4"
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <PhoneCall className="w-5 h-5 text-cyan-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">AI Calls</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metrics.totalCalls}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Last 7 days</p>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.05 }}
+                            className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4"
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <Bot className="w-5 h-5 text-emerald-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">AI Bookings</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                                {bookings.filter(b => b.source === 'ai-call').length}
+                            </p>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                                <TrendingUp className="w-3 h-3" />
+                                {metrics.bookingRate}% conversion
+                            </p>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4"
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <Clock className="w-5 h-5 text-purple-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Avg Call</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                                {formatCallDuration(metrics.avgCallDuration)}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Per booking</p>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.15 }}
+                            className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4"
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <Brain className="w-5 h-5 text-amber-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">AI Confidence</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metrics.avgConfidence}%</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Avg score</p>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4"
+                        >
+                            <div className="flex items-center gap-2 mb-2">
+                                <CalendarCheck className="w-5 h-5 text-indigo-500" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Total</span>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{bookings.length}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">All sources</p>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
 
-            {/* AI Performance Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <Card className="border-blue-200 bg-blue-50/50">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600">AI Calls Made</p>
-                                <p className="text-2xl font-bold">{metrics.totalCalls}</p>
-                                <p className="text-xs text-gray-500 mt-1">Last 7 days</p>
+            <div className="max-w-7xl mx-auto px-6 py-6">
+                {/* Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                    <TabsList className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-1 rounded-xl">
+                        <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
+                        <TabsTrigger value="ai-insights" className="rounded-lg">AI Insights</TabsTrigger>
+                        <TabsTrigger value="all-bookings" className="rounded-lg">All Bookings</TabsTrigger>
+                    </TabsList>
+
+                    {/* Overview Tab */}
+                    <TabsContent value="overview" className="space-y-6">
+                        {/* Recent AI Bookings */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 dark:border-slate-800">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+                                        <Zap className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                            Recent AI-Generated Bookings
+                                        </h2>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            Latest bookings created by your AI voice agents
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <PhoneCall className="w-8 h-8 text-blue-500" />
-                        </div>
-                    </CardContent>
-                </Card>
 
-                <Card className="border-green-200 bg-green-50/50">
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600">AI Bookings</p>
-                                <p className="text-2xl font-bold">
-                                    {bookings.filter(b => b.source === 'ai-call').length}
-                                </p>
-                                <p className="text-xs text-green-600 mt-1">
-                                    {metrics.bookingRate}% conversion
-                                </p>
-                            </div>
-                            <Bot className="w-8 h-8 text-green-500" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600">Avg Call Time</p>
-                                <p className="text-2xl font-bold">
-                                    {formatCallDuration(metrics.avgCallDuration)}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">Per booking</p>
-                            </div>
-                            <Clock className="w-8 h-8 text-purple-500" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600">AI Confidence</p>
-                                <p className="text-2xl font-bold">{metrics.avgConfidence}%</p>
-                                <p className="text-xs text-gray-500 mt-1">Avg score</p>
-                            </div>
-                            <Brain className="w-8 h-8 text-amber-500" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600">Total Bookings</p>
-                                <p className="text-2xl font-bold">{bookings.length}</p>
-                                <p className="text-xs text-gray-500 mt-1">All sources</p>
-                            </div>
-                            <CalendarCheck className="w-8 h-8 text-indigo-500" />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Tabs for different views */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
-                    <TabsTrigger value="all-bookings">All Bookings</TabsTrigger>
-                </TabsList>
-
-                {/* Overview Tab */}
-                <TabsContent value="overview" className="space-y-4">
-                    {/* Recent AI Bookings */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Zap className="w-5 h-5 text-yellow-500" />
-                                Recent AI-Generated Bookings
-                            </CardTitle>
-                            <CardDescription>
-                                Latest bookings created by your AI voice agents
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
+                            {/* Desktop View */}
+                            <div className="hidden lg:block p-6 space-y-3">
                                 {bookings
                                     .filter(b => b.source === 'ai-call')
                                     .slice(0, 5)
                                     .map((booking) => (
-                                        <div
+                                        <motion.div
                                             key={booking.id}
-                                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-cyan-300 dark:hover:border-cyan-600 hover:shadow-md transition-all cursor-pointer group"
                                             onClick={() => {
-                                                setSelectedBooking(booking)
-                                                setShowCallDetailsDialog(true)
+                                                setSelectedBooking(booking);
+                                                setShowCallDetailsDialog(true);
                                             }}
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <Bot className="w-5 h-5 text-blue-600" />
+                                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:shadow-cyan-500/40 transition-shadow">
+                                                    <Bot className="w-6 h-6 text-white" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">{booking.leadName}</p>
-                                                    <p className="text-sm text-gray-500">
+                                                    <p className="font-semibold text-gray-900 dark:text-white">{booking.leadName}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
                                                         {booking.leadCompany} • {booking.scheduledDate} at {booking.scheduledTime}
                                                     </p>
-                                                    <p className="text-xs text-gray-400 mt-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                                         Agent: {booking.agentName} • Call: {formatCallDuration(booking.callDuration)}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(booking.bookingConfidence)}`}>
+                                                <Badge className={`${getConfidenceColor(booking.bookingConfidence)} text-xs border`}>
                                                     {booking.bookingConfidence}% confidence
-                                                </div>
-                                                <Badge className={getStatusColor(booking.status)}>
+                                                </Badge>
+                                                <Badge className={`${getStatusColor(booking.status)} text-white text-xs`}>
                                                     {booking.status}
                                                 </Badge>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    className="rounded-xl"
                                                     onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handlePlayRecording()
+                                                        e.stopPropagation();
+                                                        handlePlayRecording();
                                                     }}
                                                 >
                                                     <Headphones className="w-4 h-4" />
                                                 </Button>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
                             </div>
-                        </CardContent>
-                    </Card>
 
-                    {/* AI Performance Chart Placeholder */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>AI Booking Trends</CardTitle>
-                            <CardDescription>Daily AI-generated bookings over the last week</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-                                <div className="text-center">
-                                    <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                    <p className="text-gray-500">Chart visualization would go here</p>
+                            {/* Mobile View */}
+                            <div className="block lg:hidden p-4 space-y-3">
+                                {bookings
+                                    .filter(b => b.source === 'ai-call')
+                                    .slice(0, 5)
+                                    .map((booking) => (
+                                        <BookingCard key={booking.id} booking={booking} />
+                                    ))}
+                            </div>
+                        </div>
+
+                        {/* AI Performance Chart */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                                    <BarChart3 className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Booking Trends</h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Daily AI-generated bookings over the last week
+                                    </p>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+                            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
+                                <div className="text-center">
+                                    <BarChart3 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                                    <p className="text-gray-500 dark:text-gray-400">Chart visualization would go here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </TabsContent>
 
-                {/* AI Insights Tab */}
-                <TabsContent value="ai-insights" className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Top Performing Agents */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Top AI Agents</CardTitle>
-                                <CardDescription>Best performing voice agents by booking rate</CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                    {/* AI Insights Tab */}
+                    <TabsContent value="ai-insights" className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Top Performing Agents */}
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top AI Agents</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                    Best performing voice agents by booking rate
+                                </p>
                                 <div className="space-y-3">
                                     {['Sarah AI Agent', 'Mike AI Agent', 'Alex AI Agent'].map((agent, index) => (
-                                        <div key={agent} className="flex items-center justify-between">
+                                        <div key={agent} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <span className="text-sm font-medium">{index + 1}</span>
+                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                                                    <span className="text-sm font-bold text-white">{index + 1}</span>
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium">{agent}</p>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="font-medium text-gray-900 dark:text-white">{agent}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         {15 - index * 3} bookings • {95 - index * 5}% success
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Button variant="ghost" size="sm">
+                                            <Button variant="ghost" size="icon" className="rounded-xl">
                                                 <ChevronRight className="w-4 h-4" />
                                             </Button>
                                         </div>
                                     ))}
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
 
-                        {/* Call Insights */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Call Intelligence</CardTitle>
-                                <CardDescription>Common booking triggers from AI calls</CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                            {/* Call Insights */}
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Call Intelligence</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                    Common booking triggers from AI calls
+                                </p>
                                 <div className="space-y-3">
                                     {[
                                         'Mentioned Q1 goals or planning',
@@ -544,32 +644,30 @@ export default function AutoBookingsPage() {
                                         'Looking for automation solutions',
                                         'Team expansion mentioned'
                                     ].map((insight) => (
-                                        <div key={insight} className="flex items-start gap-2">
-                                            <Activity className="w-4 h-4 text-green-500 mt-0.5" />
-                                            <p className="text-sm text-gray-600">{insight}</p>
+                                        <div key={insight} className="flex items-start gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                                            <Activity className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                            <p className="text-sm text-gray-700 dark:text-gray-300">{insight}</p>
                                         </div>
                                     ))}
                                 </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                            </div>
+                        </div>
 
-                    {/* Best Call Times */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Optimal Call Windows</CardTitle>
-                            <CardDescription>Best times for AI agents to reach leads</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-5 gap-2">
+                        {/* Best Call Times */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Optimal Call Windows</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                Best times for AI agents to reach leads
+                            </p>
+                            <div className="grid grid-cols-5 gap-3">
                                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
                                     <div key={day} className="text-center">
-                                        <p className="text-xs font-medium text-gray-600 mb-2">{day}</p>
-                                        <div className="space-y-1">
+                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{day}</p>
+                                        <div className="space-y-2">
                                             {['9-11am', '2-4pm'].map((time) => (
                                                 <div
                                                     key={time}
-                                                    className="bg-green-100 text-green-700 text-xs py-1 px-2 rounded"
+                                                    className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs py-2 px-2 rounded-lg border border-emerald-200 dark:border-emerald-500/30"
                                                 >
                                                     {time}
                                                 </div>
@@ -578,29 +676,25 @@ export default function AutoBookingsPage() {
                                     </div>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+                        </div>
+                    </TabsContent>
 
-                {/* All Bookings Tab */}
-                <TabsContent value="all-bookings" className="space-y-4">
-                    {/* Filters */}
-                    <Card>
-                        <CardContent className="p-4">
+                    {/* All Bookings Tab */}
+                    <TabsContent value="all-bookings" className="space-y-6">
+                        {/* Filters */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-5">
                             <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                        <Input
-                                            placeholder="Search bookings..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-10"
-                                        />
-                                    </div>
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <Input
+                                        placeholder="Search bookings..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700"
+                                    />
                                 </div>
                                 <Select value={filterSource} onValueChange={setFilterSource}>
-                                    <SelectTrigger className="w-[180px]">
+                                    <SelectTrigger className="w-full md:w-40 h-10 rounded-xl">
                                         <SelectValue placeholder="All Sources" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -611,7 +705,7 @@ export default function AutoBookingsPage() {
                                     </SelectContent>
                                 </Select>
                                 <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                    <SelectTrigger className="w-[180px]">
+                                    <SelectTrigger className="w-full md:w-40 h-10 rounded-xl">
                                         <SelectValue placeholder="All Statuses" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -622,137 +716,177 @@ export default function AutoBookingsPage() {
                                         <SelectItem value="cancelled">Cancelled</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <Button variant="outline">
+                                <Button variant="outline" className="rounded-xl h-10">
                                     <Download className="w-4 h-4 mr-2" />
                                     Export
                                 </Button>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
 
-                    {/* Bookings Table */}
-                    <Card>
-                        <CardContent className="p-0">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Source</TableHead>
-                                        <TableHead>Lead</TableHead>
-                                        <TableHead>Meeting</TableHead>
-                                        <TableHead>Agent/Creator</TableHead>
-                                        <TableHead>Campaign</TableHead>
-                                        <TableHead>Confidence</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
+                        {/* Bookings List */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden">
+                            {/* Mobile View */}
+                            <div className="block lg:hidden p-4 space-y-3">
+                                <AnimatePresence>
                                     {filteredBookings.map((booking) => (
-                                        <TableRow key={booking.id}>
-                                            <TableCell>
-                                                <Badge className={getSourceColor(booking.source)}>
-                                                    <span className="flex items-center gap-1">
+                                        <BookingCard key={booking.id} booking={booking} />
+                                    ))}
+                                </AnimatePresence>
+
+                                {filteredBookings.length === 0 && (
+                                    <div className="text-center py-12">
+                                        <CalendarCheck className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                            No bookings found
+                                        </h3>
+                                        <p className="text-gray-500 dark:text-gray-400">
+                                            Try adjusting your filters
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Desktop View */}
+                            <div className="hidden lg:block overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[100px]">Source</TableHead>
+                                            <TableHead>Lead</TableHead>
+                                            <TableHead>Meeting</TableHead>
+                                            <TableHead>Agent/Creator</TableHead>
+                                            <TableHead>Campaign</TableHead>
+                                            <TableHead className="w-[120px]">Confidence</TableHead>
+                                            <TableHead className="w-[120px]">Status</TableHead>
+                                            <TableHead className="w-[50px]"></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredBookings.map((booking) => (
+                                            <TableRow
+                                                key={booking.id}
+                                                className="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
+                                                onClick={() => {
+                                                    setSelectedBooking(booking);
+                                                    setShowCallDetailsDialog(true);
+                                                }}
+                                            >
+                                                <TableCell>
+                                                    <Badge className={`${getSourceColor(booking.source)} text-xs border flex items-center gap-1 w-fit`}>
                                                         {getSourceIcon(booking.source)}
                                                         {booking.source === 'ai-call' ? 'AI' : booking.source}
-                                                    </span>
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div>
-                                                    <p className="font-medium">{booking.leadName}</p>
-                                                    <p className="text-sm text-gray-500">{booking.leadEmail}</p>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div>
-                                                    <p className="font-medium">{booking.scheduledDate}</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        {booking.scheduledTime} • {booking.meetingDuration}min
-                                                    </p>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{booking.agentName}</TableCell>
-                                            <TableCell>{booking.campaignName}</TableCell>
-                                            <TableCell>
-                                                {booking.source === 'ai-call' ? (
-                                                    <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(booking.bookingConfidence)}`}>
-                                                        {booking.bookingConfidence}%
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 dark:text-white">{booking.leadName}</p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">{booking.leadEmail}</p>
                                                     </div>
-                                                ) : (
-                                                    <span className="text-gray-400">-</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge className={getStatusColor(booking.status)}>
-                                                    {booking.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon">
-                                                            <MoreVertical className="w-4 h-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        {booking.source === 'ai-call' && (
-                                                            <>
-                                                                <DropdownMenuItem
-                                                                    onClick={() => {
-                                                                        setSelectedBooking(booking)
-                                                                        setShowCallDetailsDialog(true)
-                                                                    }}
-                                                                >
-                                                                    <Phone className="w-4 h-4 mr-2" />
-                                                                    View Call Details
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onClick={() => handlePlayRecording()}
-                                                                >
-                                                                    <Headphones className="w-4 h-4 mr-2" />
-                                                                    Play Recording
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onClick={() => {
-                                                                        setSelectedBooking(booking)
-                                                                        setShowTranscriptDialog(true)
-                                                                    }}
-                                                                >
-                                                                    <Volume2 className="w-4 h-4 mr-2" />
-                                                                    View Transcript
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuSeparator />
-                                                            </>
-                                                        )}
-                                                        <DropdownMenuItem>
-                                                            <CheckCircle className="w-4 h-4 mr-2" />
-                                                            Confirm Booking
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <Calendar className="w-4 h-4 mr-2" />
-                                                            Reschedule
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600">
-                                                            <XCircle className="w-4 h-4 mr-2" />
-                                                            Cancel
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 dark:text-white">{booking.scheduledDate}</p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                            {booking.scheduledTime} • {booking.meetingDuration}min
+                                                        </p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-sm">{booking.agentName}</TableCell>
+                                                <TableCell className="text-sm">{booking.campaignName}</TableCell>
+                                                <TableCell>
+                                                    {booking.source === 'ai-call' ? (
+                                                        <Badge className={`${getConfidenceColor(booking.bookingConfidence)} text-xs border`}>
+                                                            {booking.bookingConfidence}%
+                                                        </Badge>
+                                                    ) : (
+                                                        <span className="text-gray-400">-</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={`${getStatusColor(booking.status)} text-white text-xs`}>
+                                                        {booking.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            {booking.source === 'ai-call' && (
+                                                                <>
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => {
+                                                                            setSelectedBooking(booking);
+                                                                            setShowCallDetailsDialog(true);
+                                                                        }}
+                                                                    >
+                                                                        <Phone className="w-4 h-4 mr-2" />
+                                                                        View Call Details
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem onClick={() => handlePlayRecording()}>
+                                                                        <Headphones className="w-4 h-4 mr-2" />
+                                                                        Play Recording
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => {
+                                                                            setSelectedBooking(booking);
+                                                                            setShowTranscriptDialog(true);
+                                                                        }}
+                                                                    >
+                                                                        <FileText className="w-4 h-4 mr-2" />
+                                                                        View Transcript
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuSeparator />
+                                                                </>
+                                                            )}
+                                                            <DropdownMenuItem>
+                                                                <CheckCircle className="w-4 h-4 mr-2" />
+                                                                Confirm Booking
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem>
+                                                                <Calendar className="w-4 h-4 mr-2" />
+                                                                Reschedule
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem className="text-red-600 dark:text-red-400">
+                                                                <XCircle className="w-4 h-4 mr-2" />
+                                                                Cancel
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+
+                                        {filteredBookings.length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={8} className="h-32 text-center">
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <CalendarCheck className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+                                                        <p className="text-gray-500 dark:text-gray-400">
+                                                            No bookings match your filters
+                                                        </p>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
 
             {/* Call Details Dialog */}
             <Dialog open={showCallDetailsDialog} onOpenChange={setShowCallDetailsDialog}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl bg-white dark:bg-slate-900">
                     <DialogHeader>
-                        <DialogTitle>AI Call Details</DialogTitle>
+                        <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                            AI Call Details
+                        </DialogTitle>
                         <DialogDescription>
                             Review the AI agent&apos;s performance and booking details
                         </DialogDescription>
@@ -760,55 +894,64 @@ export default function AutoBookingsPage() {
 
                     {selectedBooking && selectedBooking.source === 'ai-call' && (
                         <div className="space-y-4">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <p className="text-sm font-medium text-blue-900 mb-2">Key Booking Moment</p>
-                                <p className="text-sm text-blue-700 italic">
+                            <div className="bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/30 rounded-xl p-4">
+                                <p className="text-sm font-medium text-cyan-900 dark:text-cyan-300 mb-2 flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4" />
+                                    Key Booking Moment
+                                </p>
+                                <p className="text-sm text-cyan-700 dark:text-cyan-400 italic">
                                     &ldquo;{selectedBooking.callTranscriptHighlight}&rdquo;
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label className="text-gray-500">Lead Information</Label>
-                                    <p className="font-medium">{selectedBooking.leadName}</p>
-                                    <p className="text-sm text-gray-600">{selectedBooking.leadCompany}</p>
+                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-slate-800">
+                                    <Label className="text-gray-500 dark:text-gray-400">Lead Information</Label>
+                                    <p className="font-medium text-gray-900 dark:text-white mt-1">{selectedBooking.leadName}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedBooking.leadCompany}</p>
                                 </div>
-                                <div>
-                                    <Label className="text-gray-500">AI Agent</Label>
-                                    <p className="font-medium">{selectedBooking.agentName}</p>
-                                    <p className="text-sm text-gray-600">ID: {selectedBooking.agentId}</p>
+                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-slate-800">
+                                    <Label className="text-gray-500 dark:text-gray-400">AI Agent</Label>
+                                    <p className="font-medium text-gray-900 dark:text-white mt-1">{selectedBooking.agentName}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">ID: {selectedBooking.agentId}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <Label className="text-gray-500">Call Duration</Label>
-                                    <p className="font-medium">{formatCallDuration(selectedBooking.callDuration)}</p>
+                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-slate-800">
+                                    <Label className="text-gray-500 dark:text-gray-400">Call Duration</Label>
+                                    <p className="font-medium text-gray-900 dark:text-white mt-1">
+                                        {formatCallDuration(selectedBooking.callDuration)}
+                                    </p>
                                 </div>
-                                <div>
-                                    <Label className="text-gray-500">Confidence Score</Label>
-                                    <p className={`font-medium ${selectedBooking.bookingConfidence >= 90 ? 'text-green-600' : 'text-blue-600'}`}>
+                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-slate-800">
+                                    <Label className="text-gray-500 dark:text-gray-400">Confidence Score</Label>
+                                    <p className={`font-medium mt-1 ${selectedBooking.bookingConfidence >= 90 ? 'text-emerald-600 dark:text-emerald-400' : 'text-cyan-600 dark:text-cyan-400'}`}>
                                         {selectedBooking.bookingConfidence}%
                                     </p>
                                 </div>
-                                <div>
-                                    <Label className="text-gray-500">Campaign</Label>
-                                    <p className="font-medium text-sm">{selectedBooking.campaignName}</p>
+                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-slate-800">
+                                    <Label className="text-gray-500 dark:text-gray-400">Campaign</Label>
+                                    <p className="font-medium text-sm text-gray-900 dark:text-white mt-1">
+                                        {selectedBooking.campaignName}
+                                    </p>
                                 </div>
                             </div>
 
-                            <div>
-                                <Label className="text-gray-500">Scheduled Meeting</Label>
-                                <p className="font-medium">
+                            <div className="p-4 rounded-xl bg-gray-50 dark:bg-slate-800">
+                                <Label className="text-gray-500 dark:text-gray-400">Scheduled Meeting</Label>
+                                <p className="font-medium text-gray-900 dark:text-white mt-1">
                                     {selectedBooking.scheduledDate} at {selectedBooking.scheduledTime}
                                 </p>
-                                <p className="text-sm text-gray-600">Duration: {selectedBooking.meetingDuration} minutes</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Duration: {selectedBooking.meetingDuration} minutes
+                                </p>
                             </div>
 
-                            <div className="flex gap-2"> 
+                            <div className="flex gap-2">
                                 <Button
                                     variant="outline"
-                                    className="flex-1"
+                                    className="flex-1 rounded-xl"
                                     onClick={() => handlePlayRecording()}
                                 >
                                     <Headphones className="w-4 h-4 mr-2" />
@@ -816,13 +959,13 @@ export default function AutoBookingsPage() {
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    className="flex-1"
+                                    className="flex-1 rounded-xl"
                                     onClick={() => {
-                                        setShowCallDetailsDialog(false)
-                                        setShowTranscriptDialog(true)
+                                        setShowCallDetailsDialog(false);
+                                        setShowTranscriptDialog(true);
                                     }}
                                 >
-                                    <Volume2 className="w-4 h-4 mr-2" />
+                                    <FileText className="w-4 h-4 mr-2" />
                                     View Transcript
                                 </Button>
                             </div>
@@ -830,7 +973,7 @@ export default function AutoBookingsPage() {
                     )}
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowCallDetailsDialog(false)}>
+                        <Button variant="outline" onClick={() => setShowCallDetailsDialog(false)} className="rounded-xl">
                             Close
                         </Button>
                     </DialogFooter>
@@ -839,9 +982,11 @@ export default function AutoBookingsPage() {
 
             {/* Transcript Dialog */}
             <Dialog open={showTranscriptDialog} onOpenChange={setShowTranscriptDialog}>
-                <DialogContent className="max-w-3xl max-h-[80vh]">
+                <DialogContent className="max-w-3xl max-h-[80vh] bg-white dark:bg-slate-900">
                     <DialogHeader>
-                        <DialogTitle>Call Transcript</DialogTitle>
+                        <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                            Call Transcript
+                        </DialogTitle>
                         <DialogDescription>
                             Full conversation between AI agent and lead
                         </DialogDescription>
@@ -850,38 +995,36 @@ export default function AutoBookingsPage() {
                     <div className="overflow-y-auto space-y-4 max-h-[50vh]">
                         <div className="space-y-3">
                             <div className="flex gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <Bot className="w-4 h-4 text-blue-600" />
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/25">
+                                    <Bot className="w-5 h-5 text-white" />
                                 </div>
-                                <div className="flex-1 bg-gray-50 rounded-lg p-3">
-                                    <p className="text-sm font-medium text-gray-700">AI Agent</p>
-                                    <p className="text-sm mt-1">
+                                <div className="flex-1 bg-gray-50 dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">AI Agent</p>
+                                    <p className="text-sm text-gray-900 dark:text-white">
                                         Hi! This is Sarah from CallSure AI. I&apos;m reaching out because you recently expressed interest in our sales automation platform. Do you have a moment to discuss how we might help your team?
                                     </p>
                                 </div>
                             </div>
 
                             <div className="flex gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                    <User className="w-4 h-4 text-gray-600" />
+                                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                    <User className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                                 </div>
-                                <div className="flex-1 bg-blue-50 rounded-lg p-3">
-                                    <p className="text-sm font-medium text-gray-700">Lead</p>
-                                    <p className="text-sm mt-1">
+                                <div className="flex-1 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl p-4 border border-cyan-200 dark:border-cyan-500/30">
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lead</p>
+                                    <p className="text-sm text-gray-900 dark:text-white">
                                         Oh yes, I remember filling out that form. We&apos;re actually looking at ways to improve our outbound sales process for Q1.
                                     </p>
                                 </div>
                             </div>
-
-                            {/* More transcript messages... */}
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowTranscriptDialog(false)}>
+                        <Button variant="outline" onClick={() => setShowTranscriptDialog(false)} className="rounded-xl">
                             Close
                         </Button>
-                        <Button className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90">
+                        <Button className="rounded-xl bg-cyan-600 hover:bg-cyan-500">
                             <Download className="w-4 h-4 mr-2" />
                             Export Transcript
                         </Button>
@@ -889,11 +1032,13 @@ export default function AutoBookingsPage() {
                 </DialogContent>
             </Dialog>
 
-            {/* Manual Booking Dialog (simplified) */}
+            {/* Manual Booking Dialog */}
             <Dialog open={showManualBookingDialog} onOpenChange={setShowManualBookingDialog}>
-                <DialogContent>
+                <DialogContent className="bg-white dark:bg-slate-900">
                     <DialogHeader>
-                        <DialogTitle>Manual Booking</DialogTitle>
+                        <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                            Manual Booking
+                        </DialogTitle>
                         <DialogDescription>
                             Create a booking manually (not from AI call)
                         </DialogDescription>
@@ -902,34 +1047,34 @@ export default function AutoBookingsPage() {
                     <div className="space-y-4">
                         <div>
                             <Label>Lead Name</Label>
-                            <Input placeholder="Enter lead name" />
+                            <Input placeholder="Enter lead name" className="mt-1 rounded-xl" />
                         </div>
                         <div>
                             <Label>Email</Label>
-                            <Input type="email" placeholder="lead@example.com" />
+                            <Input type="email" placeholder="lead@example.com" className="mt-1 rounded-xl" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label>Date</Label>
-                                <Input type="date" />
+                                <Input type="date" className="mt-1 rounded-xl" />
                             </div>
                             <div>
                                 <Label>Time</Label>
-                                <Input type="time" />
+                                <Input type="time" className="mt-1 rounded-xl" />
                             </div>
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowManualBookingDialog(false)}>
+                        <Button variant="outline" onClick={() => setShowManualBookingDialog(false)} className="rounded-xl">
                             Cancel
                         </Button>
-                        <Button className="bg-[#0A1E4E] hover:bg-[#0A1E4E]/90">
+                        <Button className="rounded-xl bg-cyan-600 hover:bg-cyan-500">
                             Create Booking
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
-    )
+    );
 }

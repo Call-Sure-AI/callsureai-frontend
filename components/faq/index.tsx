@@ -1,3 +1,4 @@
+// components\faq\index.tsx
 "use client";
 import React from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
