@@ -563,7 +563,7 @@ const AccessManagerDashboard: React.FC = () => {
               </div>
             ) : (
               filteredUsers.map((member, index) => {
-                const statusConfig = getStatusConfig(member.status);
+                const statusConfig = getStatusConfig(member.status || 'pending');
                 const StatusIcon = statusConfig.icon;
                 const AccessIcon = getAccessIcon(selectedAccess[member.id] || "Admin Access");
 

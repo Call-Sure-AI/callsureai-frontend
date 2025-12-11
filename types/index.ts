@@ -48,6 +48,7 @@ export interface User {
 export interface AccessLevel {
     name: AccessLevelName;
     icon: any;
+    description: string;
 }
 
 export type AccessLevelName = 'Admin Access' | 'Projects Access' | 'Custom Projects Access';
@@ -64,6 +65,8 @@ export interface HistoryEntry {
     user: string;
     actionName: string;
     actionTime: string;
+    details?: string;
+    ipAddress?: string;
 }
 
 export interface AgentFormData {
@@ -74,6 +77,8 @@ export interface AgentFormData {
     prompt: string;
     is_active: boolean;
     confidence_threshold?: number;
+    agent_name?: string;
+    persona?: string;
     additional_context: {
         gender: string;
         tone: string;
@@ -82,6 +87,7 @@ export interface AgentFormData {
         languageCode?: string;
         roleDescription: string;
         businessContext: string;
+        useCase?: string;
     };
     advanced_settings: {
         authUrl: string;

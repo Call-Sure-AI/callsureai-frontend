@@ -57,6 +57,7 @@ export interface CampaignResponse {
     };
     created_at: string;
     updated_at: string;
+    agent_name?: string;
 }
 
 export interface Lead {

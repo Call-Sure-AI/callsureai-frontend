@@ -1042,3 +1042,5 @@ export interface ScheduleSettings {
     max_concurrent_calls: number;
     pause_on_holidays: boolean;
 }
+
+export type Campaign = CampaignResponse;

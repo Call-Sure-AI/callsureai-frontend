@@ -173,11 +173,18 @@ const UrgencyDetectionDashboard = () => {
   ];
 
   // Stats data
-  const statsData = {
-    high: { value: 28, change: 12, trend: 'up' as const },
-    medium: { value: 45, change: -8, trend: 'down' as const },
-    low: { value: 132, change: 3, trend: 'up' as const },
-    avgResponse: { value: '2m 12s', change: -15, trend: 'down' as const }
+  interface StatItem {
+    value: number | string;
+    change: number;
+    trend: 'up' | 'down';
+  }
+
+
+  const statsData: Record<'high' | 'medium' | 'low' | 'avgResponse', StatItem> = {
+    high: { value: 28, change: 12, trend: 'up' },
+    medium: { value: 45, change: -8, trend: 'down' },
+    low: { value: 132, change: 3, trend: 'up' },
+    avgResponse: { value: '2m 12s', change: -15, trend: 'down' }
   };
 
   // Categories with urgency distribution

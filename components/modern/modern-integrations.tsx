@@ -197,14 +197,14 @@ export const ModernIntegrations = () => {
 
                     {/* Action buttons */}
                     <div className="flex gap-3">
-                      <CardItem
-                        translateZ={20}
-                        as={Link}
-                        href="/integrations"
-                        className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-800/50 hover:bg-gray-200 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
-                      >
-                        <span>Learn More</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                      <CardItem translateZ={20} className="flex-1">
+                        <Link
+                          href="/integrations"
+                          className="w-full h-full px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-800/50 hover:bg-gray-200 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                        >
+                          <span>Learn More</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
                       </CardItem>
 
                       <CardItem

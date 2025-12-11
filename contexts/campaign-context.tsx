@@ -35,7 +35,7 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
             // Get token from context or localStorage
             let authToken = token;
             if (!authToken) {
-                authToken = localStorage.getItem('token');
+                authToken = localStorage.getItem('token') || '';
             }
             
             if (!authToken || !user || !company?.id) {
@@ -69,7 +69,7 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
         // Try to get token from localStorage as fallback
         let authToken = token;
         if (!authToken) {
-            authToken = localStorage.getItem('token');
+            authToken = localStorage.getItem('token') || '';
             console.log('createNewCampaign - Using localStorage token:', !!authToken);
         }
         
@@ -140,7 +140,7 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
     const updateCampaign = useCallback(async (id: string, status: 'active' | 'paused' | 'stopped'): Promise<boolean> => {
         let authToken = token;
         if (!authToken) {
-            authToken = localStorage.getItem('token');
+            authToken = localStorage.getItem('token') || '';
         }
         
         if (!authToken) {
@@ -181,7 +181,7 @@ export function CampaignProvider({ children }: { children: React.ReactNode }) {
     const updateCampaignDetails = useCallback(async (id: string, formData: { campaign_name?: string; description?: string }): Promise<boolean> => {
         let authToken = token;
         if (!authToken) {
-            authToken = localStorage.getItem('token');
+            authToken = localStorage.getItem('token') || '';
         }
         
         if (!authToken) {

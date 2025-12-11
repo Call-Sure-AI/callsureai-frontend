@@ -97,13 +97,14 @@ export default function AgentsPage() {
         if (searchQuery.trim() === '' && filterStatus === 'all') {
             return agents;
         }
-        
+
         return agents.filter(agent => {
             // Search filter
             const searchLower = searchQuery.toLowerCase().trim();
             const matchesSearch = searchLower === '' || 
-                (agent.agent_name && agent.agent_name.toLowerCase().includes(searchLower)) ||
-                (agent.persona && agent.persona.toLowerCase().includes(searchLower));
+                (agent.name && agent.name.toLowerCase().includes(searchLower)) ||
+                ((agent as any).agent_name && (agent as any).agent_name.toLowerCase().includes(searchLower)) ||
+                ((agent as any).persona && (agent as any).persona.toLowerCase().includes(searchLower));
             
             // Status filter
             let matchesFilter = true;
