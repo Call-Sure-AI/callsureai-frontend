@@ -1,4 +1,4 @@
-// types.ts
+// types\index.ts
 import { LucideIcon } from 'lucide-react';
 export interface FeatureCardProps {
     icon: LucideIcon;

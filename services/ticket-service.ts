@@ -78,6 +78,30 @@ export interface TicketStats {
     };
 }
 
+// Default empty stats to return when endpoint is unavailable
+const DEFAULT_TICKET_STATS: TicketStats = {
+    total_tickets: 0,
+    new_tickets: 0,
+    open_tickets: 0,
+    in_progress_tickets: 0,
+    resolved_tickets: 0,
+    closed_tickets: 0,
+    avg_resolution_time_hours: 0,
+    tickets_by_priority: {
+        low: 0,
+        medium: 0,
+        high: 0,
+        critical: 0,
+    },
+    tickets_by_source: {
+        auto_generated: 0,
+        email: 0,
+        phone: 0,
+        chat: 0,
+        web_form: 0,
+    },
+};
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3008';
 
 /**
@@ -279,6 +303,7 @@ export const addTicketNote = async (
 
 /**
  * Get ticket statistics
+ * Returns default empty stats if the endpoint is not available (404)
  */
 export const getTicketStats = async (
     companyId: string,
@@ -298,15 +323,106 @@ export const getTicketStats = async (
         );
 
         if (!response.ok) {
+            // Handle 404 gracefully - stats endpoint may not exist yet
+            if (response.status === 404) {
+                console.log('Ticket stats endpoint not found (404) - returning default stats');
+                return DEFAULT_TICKET_STATS;
+            }
+            
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || 'Failed to fetch ticket stats');
         }
 
         return await response.json();
     } catch (error: any) {
+        // If it's a network error, return defaults instead of throwing
+        if (error.message?.includes('fetch') || error.name === 'TypeError') {
+            console.warn('Network error fetching ticket stats - returning default stats');
+            return DEFAULT_TICKET_STATS;
+        }
+        
         console.error('Error fetching ticket stats:', error);
-        throw error;
+        // Return default stats instead of throwing to prevent UI crashes
+        return DEFAULT_TICKET_STATS;
     }
+};
+
+/**
+ * Calculate stats from tickets array (fallback when stats endpoint unavailable)
+ */
+export const calculateStatsFromTickets = (tickets: Ticket[]): TicketStats => {
+    const stats: TicketStats = {
+        total_tickets: tickets.length,
+        new_tickets: 0,
+        open_tickets: 0,
+        in_progress_tickets: 0,
+        resolved_tickets: 0,
+        closed_tickets: 0,
+        avg_resolution_time_hours: 0,
+        tickets_by_priority: {
+            low: 0,
+            medium: 0,
+            high: 0,
+            critical: 0,
+        },
+        tickets_by_source: {
+            auto_generated: 0,
+            email: 0,
+            phone: 0,
+            chat: 0,
+            web_form: 0,
+        },
+    };
+
+    let totalResolutionTime = 0;
+    let resolvedCount = 0;
+
+    tickets.forEach(ticket => {
+        // Count by status
+        switch (ticket.status) {
+            case 'new':
+                stats.new_tickets++;
+                break;
+            case 'open':
+                stats.open_tickets++;
+                break;
+            case 'in_progress':
+                stats.in_progress_tickets++;
+                break;
+            case 'resolved':
+                stats.resolved_tickets++;
+                break;
+            case 'closed':
+                stats.closed_tickets++;
+                break;
+        }
+
+        // Count by priority
+        if (ticket.priority in stats.tickets_by_priority) {
+            stats.tickets_by_priority[ticket.priority]++;
+        }
+
+        // Count by source
+        if (ticket.source in stats.tickets_by_source) {
+            stats.tickets_by_source[ticket.source]++;
+        }
+
+        // Calculate resolution time
+        if (ticket.resolved_at && ticket.created_at) {
+            const created = new Date(ticket.created_at).getTime();
+            const resolved = new Date(ticket.resolved_at).getTime();
+            const hours = (resolved - created) / (1000 * 60 * 60);
+            totalResolutionTime += hours;
+            resolvedCount++;
+        }
+    });
+
+    // Calculate average resolution time
+    if (resolvedCount > 0) {
+        stats.avg_resolution_time_hours = Math.round((totalResolutionTime / resolvedCount) * 10) / 10;
+    }
+
+    return stats;
 };
 
 /**

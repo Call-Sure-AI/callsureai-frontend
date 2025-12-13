@@ -1,3 +1,4 @@
+// components\agent\agent-card.tsx
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,8 +27,7 @@ export const AgentCard = ({ agent }: { agent: any }) => {
         router.push(`/dashboard/chat?agentId=${agent.id}`);
     };
 
-    const handleIntegrate = (agent: AgentFormData) => {
-        console.log("agent", agent);
+    const handleIntegrate = () => {
         setIntegrationDialogOpen(true);
     };
 
@@ -130,7 +130,7 @@ export const AgentCard = ({ agent }: { agent: any }) => {
                                     {/* Go Live Button */}
                                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                                         <Button
-                                            onClick={() => handleIntegrate(agent)}
+                                            onClick={handleIntegrate}
                                             className="relative overflow-hidden bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium px-4 py-2 rounded-xl shadow-lg transition-all duration-300 group/btn"
                                             size="sm"
                                         >
@@ -156,6 +156,7 @@ export const AgentCard = ({ agent }: { agent: any }) => {
                 open={integrationDialogOpen}
                 onOpenChange={setIntegrationDialogOpen}
                 agentId={agent.id}
+                agentName={agent.name}
             />
         </>
     );
