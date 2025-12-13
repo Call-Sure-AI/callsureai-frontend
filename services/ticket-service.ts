@@ -23,6 +23,7 @@ export interface Ticket {
     resolved_at: string | null;
     closed_at: string | null;
     notes?: TicketNote[];
+    history?: TicketHistory[];
 }
 
 export interface TicketNote {
@@ -32,6 +33,24 @@ export interface TicketNote {
     created_by: string;
     is_internal: boolean;
     created_at: string;
+}
+
+export interface TicketHistory {
+    id: string;
+    ticket_id: string;
+    action: string;
+    field_name: string | null;
+    old_value: string | null;
+    new_value: string | null;
+    changed_by: string;
+    created_at: string;
+}
+
+export interface TeamMember {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
 }
 
 export interface CreateTicketData {
@@ -78,7 +97,6 @@ export interface TicketStats {
     };
 }
 
-// Default empty stats to return when endpoint is unavailable
 const DEFAULT_TICKET_STATS: TicketStats = {
     total_tickets: 0,
     new_tickets: 0,
@@ -104,9 +122,11 @@ const DEFAULT_TICKET_STATS: TicketStats = {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3008';
 
-/**
- * Get all tickets for a company with optional filters
- */
+const getAuthToken = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('token');
+};
+
 export const getTickets = async (
     companyId: string,
     token: string,
@@ -130,7 +150,7 @@ export const getTickets = async (
         if (filters?.offset) params.append('offset', filters.offset.toString());
 
         const response = await fetch(
-            `${API_BASE_URL}/tickets/companies/${companyId}?${params.toString()}`,
+            `${API_BASE_URL}/api/tickets/companies/${companyId}?${params.toString()}`,
             {
                 method: 'GET',
                 headers: {
@@ -141,7 +161,6 @@ export const getTickets = async (
         );
 
         if (!response.ok) {
-            // Handle 404 as empty result (no tickets yet)
             if (response.status === 404) {
                 console.log('No tickets found (404) - returning empty list');
                 return { tickets: [], total_count: 0 };
@@ -153,7 +172,6 @@ export const getTickets = async (
 
         return await response.json();
     } catch (error: any) {
-        // If it's a network error, return empty instead of throwing
         if (error.message?.includes('fetch') || error.name === 'TypeError') {
             console.warn('Network error fetching tickets - returning empty list');
             return { tickets: [], total_count: 0 };
@@ -164,9 +182,6 @@ export const getTickets = async (
     }
 };
 
-/**
- * Get a single ticket by ID
- */
 export const getTicketById = async (
     companyId: string,
     ticketId: string,
@@ -174,7 +189,7 @@ export const getTicketById = async (
 ): Promise<Ticket> => {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/tickets/companies/${companyId}/${ticketId}`,
+            `${API_BASE_URL}/api/tickets/companies/${companyId}/${ticketId}`,
             {
                 method: 'GET',
                 headers: {
@@ -196,9 +211,44 @@ export const getTicketById = async (
     }
 };
 
-/**
- * Create a new ticket
- */
+export const getTicketDetails = async (
+    companyId: string,
+    ticketId: string
+): Promise<Ticket | null> => {
+    try {
+        const token = getAuthToken();
+        if (!token) {
+            console.error('No auth token available');
+            return null;
+        }
+
+        const response = await fetch(
+            `${API_BASE_URL}/api/tickets/companies/${companyId}/${ticketId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.log('Ticket not found (404)');
+                return null;
+            }
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to fetch ticket details');
+        }
+
+        return await response.json();
+    } catch (error: any) {
+        console.error('Error fetching ticket details:', error);
+        return null;
+    }
+};
+
 export const createTicket = async (
     companyId: string,
     ticketData: CreateTicketData,
@@ -206,7 +256,7 @@ export const createTicket = async (
 ): Promise<Ticket> => {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/tickets/companies/${companyId}/create`,
+            `${API_BASE_URL}/api/tickets/companies/${companyId}/create`,
             {
                 method: 'POST',
                 headers: {
@@ -214,7 +264,6 @@ export const createTicket = async (
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    company_id: companyId,
                     ...ticketData,
                 }),
             }
@@ -222,7 +271,7 @@ export const createTicket = async (
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to create ticket');
+            throw new Error(errorData.message || errorData.detail || 'Failed to create ticket');
         }
 
         const result = await response.json();
@@ -233,9 +282,6 @@ export const createTicket = async (
     }
 };
 
-/**
- * Update a ticket
- */
 export const updateTicket = async (
     companyId: string,
     ticketId: string,
@@ -244,7 +290,7 @@ export const updateTicket = async (
 ): Promise<void> => {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/tickets/companies/${companyId}/${ticketId}`,
+            `${API_BASE_URL}/api/tickets/companies/${companyId}/${ticketId}`,
             {
                 method: 'PATCH',
                 headers: {
@@ -265,9 +311,6 @@ export const updateTicket = async (
     }
 };
 
-/**
- * Add a note to a ticket
- */
 export const addTicketNote = async (
     companyId: string,
     ticketId: string,
@@ -277,7 +320,7 @@ export const addTicketNote = async (
 ): Promise<void> => {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/tickets/companies/${companyId}/${ticketId}/notes`,
+            `${API_BASE_URL}/api/tickets/companies/${companyId}/${ticketId}/notes`,
             {
                 method: 'POST',
                 headers: {
@@ -301,10 +344,6 @@ export const addTicketNote = async (
     }
 };
 
-/**
- * Get ticket statistics
- * Returns default empty stats if the endpoint is not available (404)
- */
 export const getTicketStats = async (
     companyId: string,
     token: string,
@@ -312,7 +351,7 @@ export const getTicketStats = async (
 ): Promise<TicketStats> => {
     try {
         const response = await fetch(
-            `${API_BASE_URL}/tickets/companies/${companyId}/stats?days=${days}`,
+            `${API_BASE_URL}/api/tickets/companies/${companyId}/stats?days=${days}`,
             {
                 method: 'GET',
                 headers: {
@@ -323,7 +362,6 @@ export const getTicketStats = async (
         );
 
         if (!response.ok) {
-            // Handle 404 gracefully - stats endpoint may not exist yet
             if (response.status === 404) {
                 console.log('Ticket stats endpoint not found (404) - returning default stats');
                 return DEFAULT_TICKET_STATS;
@@ -335,21 +373,100 @@ export const getTicketStats = async (
 
         return await response.json();
     } catch (error: any) {
-        // If it's a network error, return defaults instead of throwing
         if (error.message?.includes('fetch') || error.name === 'TypeError') {
             console.warn('Network error fetching ticket stats - returning default stats');
             return DEFAULT_TICKET_STATS;
         }
         
         console.error('Error fetching ticket stats:', error);
-        // Return default stats instead of throwing to prevent UI crashes
         return DEFAULT_TICKET_STATS;
     }
 };
 
-/**
- * Calculate stats from tickets array (fallback when stats endpoint unavailable)
- */
+// Team members fetch with extensive debugging
+export const getTeamMembers = async (
+    companyId: string
+): Promise<TeamMember[]> => {
+    console.log('========================================');
+    console.log('[getTeamMembers] STARTING');
+    console.log('[getTeamMembers] Company ID:', companyId);
+    console.log('[getTeamMembers] API_BASE_URL:', API_BASE_URL);
+    
+    if (!companyId) {
+        console.error('[getTeamMembers] ERROR: No companyId provided!');
+        return [];
+    }
+
+    try {
+        const token = getAuthToken();
+        console.log('[getTeamMembers] Token exists:', !!token);
+        console.log('[getTeamMembers] Token preview:', token ? token.substring(0, 20) + '...' : 'null');
+        
+        if (!token) {
+            console.error('[getTeamMembers] ERROR: No auth token available');
+            return [];
+        }
+
+        const url = `${API_BASE_URL}/api/tickets/companies/${companyId}/team-members`;
+        console.log('[getTeamMembers] Full URL:', url);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        console.log('[getTeamMembers] Response status:', response.status);
+        console.log('[getTeamMembers] Response ok:', response.ok);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[getTeamMembers] ERROR Response:', errorText);
+            console.error('[getTeamMembers] Status:', response.status, response.statusText);
+            return [];
+        }
+
+        const data = await response.json();
+        console.log('[getTeamMembers] Raw response:', JSON.stringify(data, null, 2));
+        console.log('[getTeamMembers] Response type:', typeof data);
+        console.log('[getTeamMembers] Is Array:', Array.isArray(data));
+        
+        // Handle different response formats
+        let result: TeamMember[] = [];
+        
+        if (Array.isArray(data)) {
+            // Backend returns array directly
+            result = data;
+            console.log('[getTeamMembers] Using array directly');
+        } else if (data && typeof data === 'object') {
+            // Check for wrapped response
+            if (data.team_members && Array.isArray(data.team_members)) {
+                result = data.team_members;
+                console.log('[getTeamMembers] Using data.team_members');
+            } else if (data.data && Array.isArray(data.data)) {
+                result = data.data;
+                console.log('[getTeamMembers] Using data.data');
+            } else if (data.members && Array.isArray(data.members)) {
+                result = data.members;
+                console.log('[getTeamMembers] Using data.members');
+            }
+        }
+        
+        console.log('[getTeamMembers] Final result count:', result.length);
+        console.log('[getTeamMembers] Final result:', JSON.stringify(result, null, 2));
+        console.log('========================================');
+        
+        return result;
+    } catch (error: any) {
+        console.error('[getTeamMembers] EXCEPTION:', error.message);
+        console.error('[getTeamMembers] Stack:', error.stack);
+        console.log('========================================');
+        return [];
+    }
+};
+
 export const calculateStatsFromTickets = (tickets: Ticket[]): TicketStats => {
     const stats: TicketStats = {
         total_tickets: tickets.length,
@@ -378,7 +495,6 @@ export const calculateStatsFromTickets = (tickets: Ticket[]): TicketStats => {
     let resolvedCount = 0;
 
     tickets.forEach(ticket => {
-        // Count by status
         switch (ticket.status) {
             case 'new':
                 stats.new_tickets++;
@@ -397,17 +513,14 @@ export const calculateStatsFromTickets = (tickets: Ticket[]): TicketStats => {
                 break;
         }
 
-        // Count by priority
         if (ticket.priority in stats.tickets_by_priority) {
             stats.tickets_by_priority[ticket.priority]++;
         }
 
-        // Count by source
         if (ticket.source in stats.tickets_by_source) {
             stats.tickets_by_source[ticket.source]++;
         }
 
-        // Calculate resolution time
         if (ticket.resolved_at && ticket.created_at) {
             const created = new Date(ticket.created_at).getTime();
             const resolved = new Date(ticket.resolved_at).getTime();
@@ -417,7 +530,6 @@ export const calculateStatsFromTickets = (tickets: Ticket[]): TicketStats => {
         }
     });
 
-    // Calculate average resolution time
     if (resolvedCount > 0) {
         stats.avg_resolution_time_hours = Math.round((totalResolutionTime / resolvedCount) * 10) / 10;
     }
@@ -425,9 +537,6 @@ export const calculateStatsFromTickets = (tickets: Ticket[]): TicketStats => {
     return stats;
 };
 
-/**
- * Auto-create ticket from conversation analysis
- */
 export const autoCreateTicketFromConversation = async (
     companyId: string,
     conversationId: string,

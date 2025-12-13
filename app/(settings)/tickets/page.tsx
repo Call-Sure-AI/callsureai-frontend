@@ -1,7 +1,7 @@
 // app\(settings)\tickets\page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Table,
@@ -61,9 +61,18 @@ import {
     X,
     AlertTriangle,
     Edit,
+    Users,
 } from "lucide-react";
 import { useTickets } from "@/contexts/ticket-context";
-import { Ticket, CreateTicketData, UpdateTicketData } from "@/services/ticket-service";
+import { useCompany } from "@/contexts/company-context";
+import { 
+    Ticket, 
+    CreateTicketData, 
+    UpdateTicketData, 
+    getTicketDetails,
+    getTeamMembers,
+    TeamMember,
+} from "@/services/ticket-service";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 
@@ -78,6 +87,9 @@ export default function TicketsPage() {
         addNote,
     } = useTickets();
 
+    // Note: companyId is obtained from the ticket's company_id property directly
+    useCompany();
+
     const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
@@ -85,6 +97,12 @@ export default function TicketsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [priorityFilter, setPriorityFilter] = useState<string>("all");
+    const [loadingDetails, setLoadingDetails] = useState(false);
+
+    // Team members state for assignment dropdown
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+    const [loadingTeamMembers, setLoadingTeamMembers] = useState(false);
+    const [teamMembersError, setTeamMembersError] = useState<string | null>(null);
 
     // Create ticket form state
     const [createForm, setCreateForm] = useState<CreateTicketData>({
@@ -221,14 +239,15 @@ export default function TicketsPage() {
             setIsUpdating(true);
             await updateTicketStatus(ticketId, { status } as UpdateTicketData);
 
+            // Update selectedTicket immediately with the new status
+            if (selectedTicket && selectedTicket.id === ticketId) {
+                setSelectedTicket({ ...selectedTicket, status: status as Ticket['status'] });
+            }
+
             toast({
                 title: "Success",
                 description: "Ticket status updated",
             });
-
-            // Refresh the selected ticket
-            const updated = tickets.find(t => t.id === ticketId);
-            if (updated) setSelectedTicket(updated);
         } catch (err: any) {
             toast({
                 title: "Error",
@@ -245,17 +264,49 @@ export default function TicketsPage() {
             setIsUpdating(true);
             await updateTicketStatus(ticketId, { priority } as UpdateTicketData);
 
+            // Update selectedTicket immediately with the new priority
+            if (selectedTicket && selectedTicket.id === ticketId) {
+                setSelectedTicket({ ...selectedTicket, priority: priority as Ticket['priority'] });
+            }
+
             toast({
                 title: "Success",
                 description: "Priority updated",
             });
-
-            const updated = tickets.find(t => t.id === ticketId);
-            if (updated) setSelectedTicket(updated);
         } catch (err: any) {
             toast({
                 title: "Error",
                 description: err.message || "Failed to update priority",
+                variant: "destructive",
+            });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    // Handle assignment update
+    const handleUpdateAssignment = async (ticketId: string, assignedTo: string) => {
+        try {
+            setIsUpdating(true);
+            const assignValue = assignedTo === "unassigned" ? "" : assignedTo;
+            await updateTicketStatus(ticketId, { assigned_to: assignValue } as UpdateTicketData);
+
+            // Update selectedTicket immediately
+            if (selectedTicket && selectedTicket.id === ticketId) {
+                setSelectedTicket({ 
+                    ...selectedTicket, 
+                    assigned_to: assignValue || null 
+                });
+            }
+
+            toast({
+                title: "Success",
+                description: assignValue ? `Ticket assigned to ${assignValue}` : "Ticket unassigned",
+            });
+        } catch (err: any) {
+            toast({
+                title: "Error",
+                description: err.message || "Failed to update assignment",
                 variant: "destructive",
             });
         } finally {
@@ -269,6 +320,22 @@ export default function TicketsPage() {
         try {
             setIsAddingNote(true);
             await addNote(selectedTicket.id, noteContent, isInternalNote);
+
+            // Create new note object and add it to selectedTicket
+            const newNote = {
+                id: `note-${Date.now()}`,
+                ticket_id: selectedTicket.id,
+                content: noteContent,
+                created_by: "You",
+                is_internal: isInternalNote,
+                created_at: new Date().toISOString(),
+            };
+
+            // Update selectedTicket with the new note
+            setSelectedTicket({
+                ...selectedTicket,
+                notes: [...(selectedTicket.notes || []), newNote],
+            });
 
             toast({
                 title: "Success",
@@ -288,9 +355,68 @@ export default function TicketsPage() {
         }
     };
 
-    const handleViewDetails = (ticket: Ticket) => {
-        setSelectedTicket(ticket);
+    // Fetch team members using the ticket's company_id when modal opens
+    const fetchTeamMembersForTicket = async (ticketCompanyId: string) => {
+        console.log("========================================");
+        console.log("[fetchTeamMembersForTicket] Starting...");
+        console.log("[fetchTeamMembersForTicket] Company ID:", ticketCompanyId);
+        
+        if (!ticketCompanyId) {
+            console.error("[fetchTeamMembersForTicket] No company ID provided!");
+            setTeamMembersError("No company ID available");
+            return;
+        }
+        
+        setLoadingTeamMembers(true);
+        setTeamMembersError(null);
+        
+        try {
+            const members = await getTeamMembers(ticketCompanyId);
+            console.log("[fetchTeamMembersForTicket] Received members:", members);
+            console.log("[fetchTeamMembersForTicket] Members count:", members.length);
+            setTeamMembers(members);
+            
+            if (members.length === 0) {
+                console.warn("[fetchTeamMembersForTicket] No team members returned");
+                setTeamMembersError("No team members found");
+            }
+        } catch (err: any) {
+            console.error("[fetchTeamMembersForTicket] Error:", err);
+            setTeamMembersError(err.message || "Failed to fetch team members");
+            setTeamMembers([]);
+        } finally {
+            setLoadingTeamMembers(false);
+            console.log("========================================");
+        }
+    };
+
+    const handleViewDetails = async (ticket: Ticket) => {
+        console.log("=== Opening ticket details ===");
+        console.log("Ticket ID:", ticket.id);
+        console.log("Ticket company_id:", ticket.company_id);
+        
+        setSelectedTicket(ticket); // Show immediately with basic data
         setDetailsOpen(true);
+        setTeamMembers([]); // Reset team members
+        setTeamMembersError(null); // Reset error
+
+        // Fetch team members using the ticket's company_id
+        fetchTeamMembersForTicket(ticket.company_id);
+
+        // Fetch full details including notes using ticket's own company_id
+        try {
+            setLoadingDetails(true);
+            console.log("🔍 Fetching ticket details:", ticket.id, "company:", ticket.company_id);
+            const fullTicket = await getTicketDetails(ticket.company_id, ticket.id);
+            console.log("📋 Full ticket received:", fullTicket);
+            if (fullTicket) {
+                setSelectedTicket(fullTicket);
+            }
+        } catch (err) {
+            console.error("Failed to fetch ticket details:", err);
+        } finally {
+            setLoadingDetails(false);
+        }
     };
 
     // Mobile Ticket Card
@@ -664,7 +790,19 @@ export default function TicketsPage() {
             </div>
 
             {/* Ticket Details Modal */}
-            <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+            <Dialog
+                open={detailsOpen}
+                onOpenChange={(open) => {
+                    setDetailsOpen(open);
+                    if (!open) {
+                        setTimeout(() => {
+                            setSelectedTicket(null);
+                            setTeamMembers([]);
+                            setTeamMembersError(null);
+                        }, 200);
+                    }
+                }}
+            >
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-white dark:bg-slate-900">
                     {selectedTicket && (
                         <>
@@ -692,7 +830,10 @@ export default function TicketsPage() {
                                 <Tabs defaultValue="details" className="w-full">
                                     <TabsList className="grid w-full grid-cols-3 mb-6">
                                         <TabsTrigger value="details">Details</TabsTrigger>
-                                        <TabsTrigger value="notes">Notes</TabsTrigger>
+                                        <TabsTrigger value="notes">
+                                            Notes
+                                            {loadingDetails && <Loader2 className="w-3 h-3 ml-1 animate-spin" />}
+                                        </TabsTrigger>
                                         <TabsTrigger value="history">History</TabsTrigger>
                                     </TabsList>
 
@@ -777,15 +918,15 @@ export default function TicketsPage() {
                                             </div>
                                         )}
 
-                                        {/* Actions */}
-                                        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                        {/* Actions - in Details tab */}
+                                        <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
                                             <Select
                                                 value={selectedTicket.status}
                                                 onValueChange={(value) => handleUpdateStatus(selectedTicket.id, value)}
                                                 disabled={isUpdating}
                                             >
                                                 <SelectTrigger className="w-40 rounded-xl">
-                                                    <SelectValue />
+                                                    <SelectValue placeholder="Status" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="new">New</SelectItem>
@@ -802,7 +943,7 @@ export default function TicketsPage() {
                                                 disabled={isUpdating}
                                             >
                                                 <SelectTrigger className="w-40 rounded-xl">
-                                                    <SelectValue />
+                                                    <SelectValue placeholder="Priority" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="low">Low</SelectItem>
@@ -811,7 +952,76 @@ export default function TicketsPage() {
                                                     <SelectItem value="critical">Critical</SelectItem>
                                                 </SelectContent>
                                             </Select>
+
+                                            {/* Assignment Dropdown - Fixed to use team members */}
+                                            <div className="flex items-center gap-2">
+                                                <Select
+                                                    value={selectedTicket.assigned_to || "unassigned"}
+                                                    onValueChange={(value) => handleUpdateAssignment(selectedTicket.id, value)}
+                                                    disabled={isUpdating || loadingTeamMembers}
+                                                >
+                                                    <SelectTrigger className="w-56 rounded-xl">
+                                                        {loadingTeamMembers ? (
+                                                            <span className="flex items-center gap-2">
+                                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                                Loading team...
+                                                            </span>
+                                                        ) : (
+                                                            <SelectValue placeholder="Assign to..." />
+                                                        )}
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="unassigned">
+                                                            <span className="flex items-center gap-2">
+                                                                <User className="w-4 h-4 text-gray-400" />
+                                                                Unassigned
+                                                            </span>
+                                                        </SelectItem>
+                                                        {teamMembers.length > 0 ? (
+                                                            teamMembers.map((member) => (
+                                                                <SelectItem key={member.id} value={member.email}>
+                                                                    <span className="flex items-center gap-2">
+                                                                        <Users className="w-4 h-4 text-cyan-500" />
+                                                                        {member.name || member.email}
+                                                                    </span>
+                                                                </SelectItem>
+                                                            ))
+                                                        ) : !loadingTeamMembers ? (
+                                                            <div className="px-2 py-1.5 text-sm text-gray-500">
+                                                                No team members found
+                                                            </div>
+                                                        ) : null}
+                                                    </SelectContent>
+                                                </Select>
+
+                                                {/* Retry button if error */}
+                                                {teamMembersError && !loadingTeamMembers && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => fetchTeamMembersForTicket(selectedTicket.company_id)}
+                                                        className="rounded-lg"
+                                                        title="Retry loading team members"
+                                                    >
+                                                        <RefreshCw className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+
+                                            {isUpdating && (
+                                                <Loader2 className="w-5 h-5 animate-spin text-cyan-500" />
+                                            )}
                                         </div>
+
+                                        {/* Error message for team members */}
+                                        {teamMembersError && (
+                                            <div className="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
+                                                <p className="text-sm text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                                                    <AlertCircle className="w-4 h-4" />
+                                                    {teamMembersError} - Check console (F12) for details
+                                                </p>
+                                            </div>
+                                        )}
                                     </TabsContent>
 
                                     <TabsContent value="notes" className="space-y-4">
@@ -851,8 +1061,16 @@ export default function TicketsPage() {
                                             </div>
                                         </div>
 
+                                        {/* Loading indicator */}
+                                        {loadingDetails && (
+                                            <div className="flex items-center justify-center py-4">
+                                                <Loader2 className="w-5 h-5 animate-spin text-cyan-500" />
+                                                <span className="ml-2 text-sm text-gray-500">Loading notes...</span>
+                                            </div>
+                                        )}
+
                                         {/* Notes List */}
-                                        {selectedTicket.notes && selectedTicket.notes.length > 0 ? (
+                                        {!loadingDetails && selectedTicket.notes && selectedTicket.notes.length > 0 ? (
                                             <div className="space-y-3">
                                                 {selectedTicket.notes.map((note) => (
                                                     <div
@@ -884,17 +1102,77 @@ export default function TicketsPage() {
                                                     </div>
                                                 ))}
                                             </div>
-                                        ) : (
+                                        ) : !loadingDetails ? (
                                             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                                 No notes yet. Add the first note above.
                                             </div>
-                                        )}
+                                        ) : null}
                                     </TabsContent>
 
-                                    <TabsContent value="history">
-                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                            Ticket history will be displayed here
-                                        </div>
+                                    <TabsContent value="history" className="space-y-4">
+                                        {loadingDetails ? (
+                                            <div className="flex items-center justify-center py-8">
+                                                <Loader2 className="w-5 h-5 animate-spin text-cyan-500" />
+                                                <span className="ml-2 text-sm text-gray-500">Loading history...</span>
+                                            </div>
+                                        ) : selectedTicket.history && selectedTicket.history.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {selectedTicket.history.map((entry: any) => (
+                                                    <div
+                                                        key={entry.id}
+                                                        className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl"
+                                                    >
+                                                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                                            entry.action === 'created' ? 'bg-purple-100 dark:bg-purple-500/20' :
+                                                            entry.action === 'status_changed' ? 'bg-blue-100 dark:bg-blue-500/20' :
+                                                            entry.action === 'priority_changed' ? 'bg-orange-100 dark:bg-orange-500/20' :
+                                                            entry.action === 'assigned' ? 'bg-green-100 dark:bg-green-500/20' :
+                                                            entry.action === 'note_added' ? 'bg-cyan-100 dark:bg-cyan-500/20' :
+                                                            entry.action === 'closed' ? 'bg-gray-100 dark:bg-gray-500/20' :
+                                                            'bg-gray-100 dark:bg-gray-500/20'
+                                                        }`}>
+                                                            {entry.action === 'created' && <Plus className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                                                            {entry.action === 'status_changed' && <RefreshCw className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                                                            {entry.action === 'priority_changed' && <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />}
+                                                            {entry.action === 'assigned' && <User className="w-4 h-4 text-green-600 dark:text-green-400" />}
+                                                            {entry.action === 'note_added' && <MessageSquare className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                                                            {entry.action === 'closed' && <CheckCircle2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                                    {entry.action === 'created' && 'Ticket created'}
+                                                                    {entry.action === 'status_changed' && (
+                                                                        <>Status changed from <span className="text-orange-500">{entry.old_value}</span> to <span className="text-green-500">{entry.new_value}</span></>
+                                                                    )}
+                                                                    {entry.action === 'priority_changed' && (
+                                                                        <>Priority changed from <span className="text-orange-500">{entry.old_value}</span> to <span className="text-green-500">{entry.new_value}</span></>
+                                                                    )}
+                                                                    {entry.action === 'assigned' && (
+                                                                        entry.new_value 
+                                                                            ? <>Assigned to <span className="text-blue-500">{entry.new_value}</span></>
+                                                                            : <>Unassigned {entry.old_value && <>from <span className="text-orange-500">{entry.old_value}</span></>}</>
+                                                                    )}
+                                                                    {entry.action === 'note_added' && 'Note added'}
+                                                                    {entry.action === 'closed' && 'Ticket closed'}
+                                                                </p>
+                                                                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                                                    {formatDate(entry.created_at)}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                by {entry.changed_by}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                                <Clock className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                                                <p>No history available for this ticket.</p>
+                                            </div>
+                                        )}
                                     </TabsContent>
                                 </Tabs>
                             </div>
@@ -916,7 +1194,6 @@ export default function TicketsPage() {
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
-                        {/* Customer ID */}
                         <div>
                             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Customer ID <span className="text-red-500">*</span>
@@ -929,7 +1206,6 @@ export default function TicketsPage() {
                             />
                         </div>
 
-                        {/* Title */}
                         <div>
                             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Title <span className="text-red-500">*</span>
@@ -942,7 +1218,6 @@ export default function TicketsPage() {
                             />
                         </div>
 
-                        {/* Description */}
                         <div>
                             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Description <span className="text-red-500">*</span>
@@ -955,7 +1230,6 @@ export default function TicketsPage() {
                             />
                         </div>
 
-                        {/* Priority */}
                         <div>
                             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Priority
@@ -976,7 +1250,6 @@ export default function TicketsPage() {
                             </Select>
                         </div>
 
-                        {/* Customer Details */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1015,7 +1288,6 @@ export default function TicketsPage() {
                             />
                         </div>
 
-                        {/* Tags */}
                         <div>
                             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Tags (comma-separated)
@@ -1070,7 +1342,6 @@ export default function TicketsPage() {
                         </TabsList>
 
                         <TabsContent value="urgency" className="space-y-4 mt-4">
-                            {/* Response Time Based Priority */}
                             <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl">
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
@@ -1101,7 +1372,6 @@ export default function TicketsPage() {
                                 </div>
                             </div>
 
-                            {/* Keyword Based Priority */}
                             <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl">
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
@@ -1132,7 +1402,6 @@ export default function TicketsPage() {
                                 </div>
                             </div>
 
-                            {/* Source Based Priority */}
                             <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl">
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
@@ -1179,7 +1448,6 @@ export default function TicketsPage() {
                         </TabsContent>
 
                         <TabsContent value="hni" className="space-y-4 mt-4">
-                            {/* HNI Alert */}
                             <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
                                 <div className="flex items-center gap-2">
                                     <AlertTriangle className="h-5 w-5 text-amber-500" />
@@ -1190,7 +1458,6 @@ export default function TicketsPage() {
                                 <Switch defaultChecked />
                             </div>
 
-                            {/* HNI Customer Detection */}
                             <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl">
                                 <h3 className="font-medium text-gray-900 dark:text-white mb-4">
                                     HNI Customer Detection
@@ -1239,7 +1506,6 @@ export default function TicketsPage() {
                                 </div>
                             </div>
 
-                            {/* HNI Routing Rules */}
                             <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl">
                                 <h3 className="font-medium text-gray-900 dark:text-white mb-4">
                                     HNI Routing Rules
