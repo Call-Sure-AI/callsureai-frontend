@@ -251,7 +251,7 @@ export const IntegrationDialog: React.FC<IntegrationDialogProps> = ({
                     ...activeIntegrations,
                     Twilio: {
                         isActive: true,
-                        config: twilioFormData,
+                        config: { ...twilioFormData },
                     },
                 });
 
