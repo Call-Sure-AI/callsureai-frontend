@@ -1,3 +1,4 @@
+// components/dashboard/sidebar.tsx
 "use client";
 
 import React, { useState, useCallback } from 'react';
@@ -24,7 +25,8 @@ import {
     CalendarIcon,
     Target,
     Sparkles,
-    Bot
+    Bot,
+    PhoneIcon  // Added for Phone Numbers
 } from "lucide-react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -79,6 +81,8 @@ const Navigation: React.FC = () => {
         { id: "conversation-history", label: "Conversations", link: "/dashboard/conversation-history", icon: <Clock1Icon className="w-5 h-5" />, showMenu: true },
         { id: "tickets", icon: <TicketIcon className="w-5 h-5" />, label: "Tickets", link: "/tickets", showMenu: true },
         { id: "bookings", icon: <CalendarIcon className="w-5 h-5" />, label: "Bookings", link: "/bookings", showMenu: true },
+        // ✅ NEW: Phone Numbers navigation item
+        { id: "phone-numbers", icon: <PhoneIcon className="w-5 h-5" />, label: "Phone Numbers", link: "/phone-numbers", showMenu: true },
         {
             id: "callAnalytics", icon: <BarChart3Icon className="w-5 h-5" />, label: "Call Analytics", isDropdown: true,
             items: [

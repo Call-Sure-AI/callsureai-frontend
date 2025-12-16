@@ -1,3 +1,4 @@
+// constants\index.tsx
 import { TestimonialType } from "@/types";
 
 export const integrations = [

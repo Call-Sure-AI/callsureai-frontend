@@ -406,7 +406,7 @@ export const ModernNavbar = () => {
                         />
                         
                         <span className="relative z-10 text-sm font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                          Get Started
+                          Book a Demo
                         </span>
                         <Zap className="w-4 h-4 relative z-10 text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]" />
                       </button>
