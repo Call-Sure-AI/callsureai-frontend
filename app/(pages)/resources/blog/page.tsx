@@ -48,7 +48,7 @@ const blogPosts = [
         id: '2',
         slug: 'building-scalable-voice-ai-lessons-million-calls',
         title: 'Building Scalable Voice AI: What We Learned from 1 Million Calls',
-        excerpt: 'The engineering playbook behind processing 1M+ AI-powered conversations—including the spectacular failures that taught us the most.',
+        excerpt: 'The engineering playbook behind processing 1M+ AI-powered conversations including the spectacular failures that taught us the most.',
         image: '/images/features/trust.webp',
         category: 'Engineering',
         author: { 
@@ -67,7 +67,7 @@ const blogPosts = [
         id: '3',
         slug: 'case-study-techcorp-reduced-wait-times-80-percent',
         title: 'How TechCorp Slashed Customer Wait Times by 80% (And Boosted Revenue)',
-        excerpt: 'A detailed look at one company\'s 6-month journey from support nightmare to competitive advantage—with real numbers and lessons learned.',
+        excerpt: 'A detailed look at one company\'s 6-month journey from support nightmare to competitive advantage with real numbers and lessons learned.',
         image: '/images/features/analytics-dashboard.png',
         category: 'Case Studies',
         author: { 
@@ -86,7 +86,7 @@ const blogPosts = [
         id: '4',
         slug: 'complete-guide-training-ai-voice-agent',
         title: 'The Complete Guide to Training Your AI Voice Agent (2024 Edition)',
-        excerpt: 'Everything you need to know to build an AI agent that actually understands your customers—from data prep to continuous improvement.',
+        excerpt: 'Everything you need to know to build an AI agent that actually understands your customers from data prep to continuous improvement.',
         image: '/images/features/instant-setup.webp',
         category: 'Tutorials',
         author: { 
@@ -162,7 +162,7 @@ const blogPosts = [
         id: '8',
         slug: 'multilingual-voice-ai-global-support',
         title: 'Breaking Language Barriers: How to Deploy Voice AI Across 50+ Languages',
-        excerpt: 'A practical guide to building multilingual AI support that doesn\'t just translate—it truly understands cultural context.',
+        excerpt: 'A practical guide to building multilingual AI support that doesn\'t just translate it truly understands cultural context.',
         image: '/images/features/call-center.webp',
         category: 'Tutorials',
         author: { 
@@ -182,7 +182,7 @@ const blogPosts = [
         id: '9',
         slug: 'ai-voice-agent-security-best-practices',
         title: 'Security-First Voice AI: Protecting Customer Data in the Age of Conversational AI',
-        excerpt: 'The complete security playbook for voice AI—from encryption and authentication to compliance frameworks and threat modeling.',
+        excerpt: 'The complete security playbook for voice AI from encryption and authentication to compliance frameworks and threat modeling.',
         image: '/images/features/security.png',
         category: 'Engineering',
         author: { 
@@ -220,7 +220,7 @@ const blogPosts = [
         id: '11',
         slug: 'voice-ai-integration-crm-helpdesk',
         title: 'Seamless Integration: Connecting Voice AI to Your CRM, Helpdesk, and Tech Stack',
-        excerpt: 'Step-by-step integration guides for Salesforce, Zendesk, HubSpot, Intercom, and 20+ other platforms—with code samples and gotchas.',
+        excerpt: 'Step-by-step integration guides for Salesforce, Zendesk, HubSpot, Intercom, and 20+ other platforms with code samples and gotchas.',
         image: '/images/features/girl-coders.webp',
         category: 'Tutorials',
         author: { 
@@ -239,7 +239,7 @@ const blogPosts = [
         id: '12',
         slug: 'future-of-voice-ai-2025-predictions',
         title: '2025 Voice AI Predictions: 10 Trends That Will Reshape Customer Experience',
-        excerpt: 'From emotion-aware AI to predictive service and ambient computing—our research team\'s data-driven forecast for the year ahead.',
+        excerpt: 'From emotion-aware AI to predictive service and ambient computing our research team\'s data-driven forecast for the year ahead.',
         image: '/images/features/meeting.webp',
         category: 'AI Insights',
         author: { 
@@ -258,7 +258,7 @@ const blogPosts = [
         id: '13',
         slug: 'voice-ai-small-business-guide',
         title: 'Voice AI Isn\'t Just for Enterprises: The Small Business Playbook',
-        excerpt: 'How businesses with 10-100 employees are using voice AI to compete with giants—without enterprise budgets or IT departments.',
+        excerpt: 'How businesses with 10-100 employees are using voice AI to compete with giants without enterprise budgets or IT departments.',
         image: '/images/features/instant-setup.webp',
         category: 'Tutorials',
         author: { 
@@ -277,7 +277,7 @@ const blogPosts = [
         id: '14',
         slug: 'voice-ai-vs-chatbots-when-to-use-which',
         title: 'Voice AI vs. Chatbots: A Data-Driven Guide to Choosing the Right Channel',
-        excerpt: 'We analyzed 5M customer interactions to determine when voice beats text—and when it doesn\'t. The results surprised us.',
+        excerpt: 'We analyzed 5M customer interactions to determine when voice beats text and when it doesn\'t. The results surprised us.',
         image: '/images/features/desk-setup.webp',
         category: 'AI Insights',
         author: { 
@@ -315,7 +315,7 @@ const blogPosts = [
         id: '16',
         slug: 'voice-ai-ecommerce-conversion-optimization',
         title: 'From Support Cost to Revenue Driver: Voice AI for E-commerce Conversion',
-        excerpt: 'How online retailers are using voice AI not just to answer questions—but to close sales. Average order value up 34%.',
+        excerpt: 'How online retailers are using voice AI not just to answer questions but to close sales. Average order value up 34%.',
         image: '/images/features/E-commerce.webp',
         category: 'Case Studies',
         author: { 
@@ -353,7 +353,7 @@ const blogPosts = [
         id: '18',
         slug: 'migrating-legacy-ivr-to-conversational-ai',
         title: 'Goodbye Press 1: Migrating from Legacy IVR to Conversational AI',
-        excerpt: 'A step-by-step migration guide for replacing your aging IVR with modern voice AI—without disrupting operations or losing customers.',
+        excerpt: 'A step-by-step migration guide for replacing your aging IVR with modern voice AI without disrupting operations or losing customers.',
         image: '/images/features/custcare.webp',
         category: 'Tutorials',
         author: { 
@@ -372,7 +372,7 @@ const blogPosts = [
         id: '19',
         slug: 'voice-ai-financial-services-compliance',
         title: 'Voice AI in Financial Services: Navigating Compliance in a Regulated Industry',
-        excerpt: 'From SEC requirements to FINRA regulations—how banks and financial institutions are deploying voice AI without compliance nightmares.',
+        excerpt: 'From SEC requirements to FINRA regulations how banks and financial institutions are deploying voice AI without compliance nightmares.',
         image: '/images/features/gdpr.webp',
         category: 'Engineering',
         author: { 
@@ -429,7 +429,7 @@ const blogPosts = [
         id: '22',
         slug: 'voice-ai-accessibility-inclusive-design',
         title: 'Designing Voice AI for Everyone: Accessibility and Inclusive Design',
-        excerpt: 'Voice AI has unique potential to serve customers with disabilities—but only if designed thoughtfully. Here\'s our inclusive design framework.',
+        excerpt: 'Voice AI has unique potential to serve customers with disabilities but only if designed thoughtfully. Here\'s our inclusive design framework.',
         image: '/images/features/everyone.webp',
         category: 'AI Insights',
         author: { 
@@ -448,7 +448,7 @@ const blogPosts = [
         id: '23',
         slug: 'voice-ai-analytics-dashboard-deep-dive',
         title: 'Mastering Voice AI Analytics: The Metrics Dashboard Deep Dive',
-        excerpt: 'A comprehensive tour of CallSure\'s analytics dashboard—what each metric means, why it matters, and how to use data to drive continuous improvement.',
+        excerpt: 'A comprehensive tour of CallSure\'s analytics dashboard what each metric means, why it matters, and how to use data to drive continuous improvement.',
         image: '/images/features/monitoring.webp',
         category: 'Product Updates',
         author: { 

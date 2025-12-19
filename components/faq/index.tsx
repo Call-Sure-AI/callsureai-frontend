@@ -93,7 +93,7 @@ const FAQ: React.FC = () => {
         },
         {
             question: 'How does Callsure.ai handle customer emotions?',
-            answer: "Callsure.ai uses advanced sentiment analysis to detect customer emotions through tone, word choice, and speech patterns. When detecting frustration or anger, the AI can adjust its approach—speaking more slowly, using empathetic language, or offering to connect with a human agent. For positive emotions, it can match the customer's enthusiasm. The system is trained to recognize cultural nuances in emotional expression and can adapt accordingly. All emotional cues are logged and analyzed to help improve future interactions.",
+            answer: "Callsure.ai uses advanced sentiment analysis to detect customer emotions through tone, word choice, and speech patterns. When detecting frustration or anger, the AI can adjust its approach speaking more slowly, using empathetic language, or offering to connect with a human agent. For positive emotions, it can match the customer's enthusiasm. The system is trained to recognize cultural nuances in emotional expression and can adapt accordingly. All emotional cues are logged and analyzed to help improve future interactions.",
             category: 'Our Service'
         },
         {

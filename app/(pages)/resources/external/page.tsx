@@ -61,7 +61,7 @@ const externalResources = [
     {
         id: '2',
         title: 'McKinsey: The State of AI in Customer Service 2024',
-        description: 'How leading companies are deploying AI across customer touchpoints—with ROI benchmarks and implementation frameworks.',
+        description: 'How leading companies are deploying AI across customer touchpoints with ROI benchmarks and implementation frameworks.',
         category: 'reports',
         source: 'McKinsey & Company',
         sourceUrl: 'https://www.mckinsey.com',

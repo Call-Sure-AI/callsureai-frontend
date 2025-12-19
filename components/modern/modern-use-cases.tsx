@@ -1,7 +1,8 @@
-// components\modern\modern-use-cases.tsx
+// components/modern/modern-use-cases.tsx
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   Building2,
   ShoppingCart,
@@ -20,48 +21,60 @@ export const ModernUseCases = () => {
       title: "Enterprise",
       description: "Scale customer support across global teams with intelligent automation",
       color: "from-cyan-500 to-blue-500",
+      hoverTextColor: "group-hover:text-cyan-500 dark:group-hover:text-cyan-400",
       stats: "500+ companies",
       gradient: "from-cyan-500/10 to-blue-500/10",
+      href: "/solutions/enterprise",
     },
     {
       icon: ShoppingCart,
       title: "E-commerce",
       description: "Handle order inquiries and product support 24/7 seamlessly",
       color: "from-purple-500 to-pink-500",
+      hoverTextColor: "group-hover:text-purple-500 dark:group-hover:text-purple-400",
       stats: "2M+ orders",
       gradient: "from-purple-500/10 to-pink-500/10",
+      href: "/solutions/ecommerce",
     },
     {
       icon: HeartPulse,
       title: "Healthcare",
       description: "Manage appointments and patient communications securely",
       color: "from-green-500 to-emerald-500",
+      hoverTextColor: "group-hover:text-green-500 dark:group-hover:text-green-400",
       stats: "100K+ patients",
       gradient: "from-green-500/10 to-emerald-500/10",
+      href: "/solutions/healthcare",
     },
     {
       icon: GraduationCap,
       title: "Education",
       description: "Support student inquiries and enrollment processes efficiently",
       color: "from-orange-500 to-yellow-500",
+      hoverTextColor: "group-hover:text-orange-500 dark:group-hover:text-orange-400",
       stats: "50K+ students",
       gradient: "from-orange-500/10 to-yellow-500/10",
+      href: "/solutions/education",
     },
     {
       icon: Briefcase,
       title: "Financial Services",
       description: "Secure banking support and account management solutions",
       color: "from-indigo-500 to-purple-500",
+      hoverTextColor: "group-hover:text-indigo-500 dark:group-hover:text-indigo-400",
       stats: "Tier 1 compliant",
       gradient: "from-indigo-500/10 to-purple-500/10",
+      href: "/solutions/financial-services",
     },
     {
       icon: Home,
       title: "Real Estate",
       description: "Qualify leads and schedule property viewings automatically",
       color: "from-red-500 to-orange-500",
+      hoverTextColor: "group-hover:text-red-500 dark:group-hover:text-red-400",
       stats: "10K+ properties",
       gradient: "from-red-500/10 to-orange-500/10",
+      href: "/solutions/real-estate",
     },
   ];
 
@@ -154,88 +167,69 @@ export const ModernUseCases = () => {
                 className={`absolute -inset-0.5 bg-gradient-to-br ${useCase.color} rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-500`}
               />
 
-              {/* Main card */}
-              <div className="relative h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-2xl p-6 overflow-hidden transition-all duration-300">
-                {/* Background gradient */}
-                <div
-                  className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${useCase.gradient} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                />
+              {/* Main card - Now wrapped with Link */}
+              <Link href={useCase.href} className="block h-full">
+                <div className="relative h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-2xl p-6 overflow-hidden transition-all duration-300 cursor-pointer">
+                  {/* Background gradient */}
+                  <div
+                    className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${useCase.gradient} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                  />
 
-                {/* Animated border shimmer */}
-                <motion.div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  initial={false}
-                  animate={{
-                    background: [
-                      "linear-gradient(0deg, transparent, transparent)",
-                      `linear-gradient(180deg, transparent, ${useCase.color.replace("from-", "")})`,
-                      "linear-gradient(360deg, transparent, transparent)",
-                    ],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  style={{
-                    maskImage: "linear-gradient(transparent, black, transparent)",
-                  }}
-                />
-
-                {/* Content */}
-                <div className="relative z-10">
-                  {/* Icon container */}
-                  <motion.div
-                    initial={{ rotate: 0 }}
-                    whileHover={{ 
-                      rotate: [0, -10, 10, -10, 0],
-                      scale: [1, 1.1, 1.1, 1.1, 1.1]
-                    }}
-                    transition={{ 
-                      rotate: { duration: 0.6, ease: "easeInOut" },
-                      scale: { duration: 0.2 }
-                    }}
-                    className="relative mb-4"
-                  >
-                    <div
-                      className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${useCase.color} flex items-center justify-center shadow-lg`}
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {/* Icon container */}
+                    <motion.div
+                      initial={{ rotate: 0 }}
+                      whileHover={{ 
+                        rotate: [0, -10, 10, -10, 0],
+                        scale: [1, 1.1, 1.1, 1.1, 1.1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 0.6, ease: "easeInOut" },
+                        scale: { duration: 0.2 }
+                      }}
+                      className="relative mb-4"
                     >
-                      <useCase.icon className="w-8 h-8 text-white" />
+                      <div
+                        className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${useCase.color} flex items-center justify-center shadow-lg`}
+                      >
+                        <useCase.icon className="w-8 h-8 text-white" />
+                      </div>
+                      {/* Icon glow */}
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${useCase.color} rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity`}
+                      />
+                    </motion.div>
+
+                    {/* Title - Fixed hover color */}
+                    <h3 className={`text-xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300 ${useCase.hoverTextColor}`}>
+                      {useCase.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                      {useCase.description}
+                    </p>
+
+                    {/* Stats badge */}
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-slate-800/50 rounded-full">
+                      <div
+                        className={`w-2 h-2 rounded-full bg-gradient-to-r ${useCase.color} animate-pulse`}
+                      />
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        {useCase.stats}
+                      </span>
                     </div>
-                    {/* Icon glow */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${useCase.color} rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity`}
-                    />
-                  </motion.div>
+                  </div>
 
-                  {/* Title */}
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:${useCase.color} transition-all">
-                    {useCase.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
-                    {useCase.description}
-                  </p>
-
-                  {/* Stats badge */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-slate-800/50 rounded-full">
-                    <div
-                      className={`w-2 h-2 rounded-full bg-gradient-to-r ${useCase.color} animate-pulse`}
-                    />
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      {useCase.stats}
-                    </span>
+                  {/* Hover arrow indicator - Now clickable as part of Link */}
+                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                    <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${useCase.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    </div>
                   </div>
                 </div>
-
-                {/* Hover arrow indicator */}
-                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                  <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${useCase.color} flex items-center justify-center`}>
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              </div>
+              </Link>
             </motion.div>
           ))}
         </div>

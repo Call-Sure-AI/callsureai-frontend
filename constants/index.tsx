@@ -101,7 +101,7 @@ export const testimonials: TestimonialType[] = [
     {
         name: "Harshit Sharma",
         title: "MD, Codevik Solutions",
-        testimonial: "As a fast-growing SaaS consultancy, we support clients across time zones. Support used to be a bottleneck—until we onboarded Callsure. It now handles over 80% of our L1 queries, reduced overhead by 45%, and let our human agents focus on complex issues. It’s become a key driver of sustainable growth.",
+        testimonial: "As a fast-growing SaaS consultancy, we support clients across time zones. Support used to be a bottleneck until we onboarded Callsure. It now handles over 80% of our L1 queries, reduced overhead by 45%, and let our human agents focus on complex issues. It’s become a key driver of sustainable growth.",
         avatar: "/images/Face2.jpeg",
     },
     {
@@ -119,7 +119,7 @@ export const testimonials: TestimonialType[] = [
     {
         name: "Priya Dwivedi",
         title: "Operations Manager, Growlytic",
-        testimonial: "When Growlytic expanded into new markets last year, we were worried about maintaining consistent support quality. The implementation took longer than expected—about six weeks to fully customize—but Callsure AI has more than made up for that initial setup time. Our NPS scores have actually improved since transitioning from an all-human support model.",
+        testimonial: "When Growlytic expanded into new markets last year, we were worried about maintaining consistent support quality. The implementation took longer than expected about six weeks to fully customize but Callsure AI has more than made up for that initial setup time. Our NPS scores have actually improved since transitioning from an all-human support model.",
         avatar: "/images/Face2.jpeg",
     },
     {
@@ -131,13 +131,13 @@ export const testimonials: TestimonialType[] = [
     {
         name: "Sarah Williams",
         title: "VP of Sales, MarketEdge",
-        testimonial: "I was skeptical about AI support at first—our customers expect a premium experience. What convinced me was seeing the transcripts from actual conversations. The ROI is certainly there in terms of cost savings, but what's been truly valuable is having consistent quality regardless of time of day or support volume. That predictability is worth its weight in gold.",
+        testimonial: "I was skeptical about AI support at first our customers expect a premium experience. What convinced me was seeing the transcripts from actual conversations. The ROI is certainly there in terms of cost savings, but what's been truly valuable is having consistent quality regardless of time of day or support volume. That predictability is worth its weight in gold.",
         avatar: "/images/Face4.jpeg",
     },
     {
         name: "Rahul Malhotra",
         title: "CEO, Synapse Technologies",
-        testimonial: "In our industry, customers expect immediate support when issues arise. We initially brought Callsure in for after-hours coverage only, but it performed so well that we've expanded its role. The strategic benefit has been unexpected—with better support metrics, our sales team has a compelling advantage when pitching to prospects who've experienced support frustrations elsewhere.",
+        testimonial: "In our industry, customers expect immediate support when issues arise. We initially brought Callsure in for after-hours coverage only, but it performed so well that we've expanded its role. The strategic benefit has been unexpected with better support metrics, our sales team has a compelling advantage when pitching to prospects who've experienced support frustrations elsewhere.",
         avatar: "/images/Face5.jpeg",
     },
     {
@@ -149,13 +149,13 @@ export const testimonials: TestimonialType[] = [
     {
         name: "Michael Chen",
         title: "Operations Director, CloudServe",
-        testimonial: "With thousands of SMB clients, our support team was pulling weekend shifts just to keep up. Since implementing Callsure, we've eliminated our backlog and actually improved service levels. The most telling change? Support is no longer a topic in our executive meetings—it just works. That peace of mind lets us focus on product development instead of putting out fires.",
+        testimonial: "With thousands of SMB clients, our support team was pulling weekend shifts just to keep up. Since implementing Callsure, we've eliminated our backlog and actually improved service levels. The most telling change? Support is no longer a topic in our executive meetings it just works. That peace of mind lets us focus on product development instead of putting out fires.",
         avatar: "/images/Face7.jpeg",
     },
     {
         name: "Deepak Gupta",
         title: "CXO, OmniTrade",
-        testimonial: "The handoff between AI and human agents is what makes Callsure stand out. When an issue requires escalation, our team gets complete context without the customer having to repeat themselves. This has transformed how we handle complex support cases. I particularly value how it's given our junior support staff time to shadow senior agents on difficult issues—it's become an unexpected training tool.",
+        testimonial: "The handoff between AI and human agents is what makes Callsure stand out. When an issue requires escalation, our team gets complete context without the customer having to repeat themselves. This has transformed how we handle complex support cases. I particularly value how it's given our junior support staff time to shadow senior agents on difficult issues it's become an unexpected training tool.",
         avatar: "/images/Face8.jpeg",
     }
 ];

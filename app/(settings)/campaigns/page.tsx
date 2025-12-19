@@ -840,7 +840,7 @@ export default function CampaignsPage() {
                                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/25"><Users className="w-5 h-5 text-white" /></div>
                                 <div>
                                     <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Campaign Leads</DialogTitle>
-                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">{selectedCampaign?.campaign_name} — {selectedCampaign?.metrics?.total_leads || 0} leads</DialogDescription>
+                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">{selectedCampaign?.campaign_name}   {selectedCampaign?.metrics?.total_leads || 0} leads</DialogDescription>
                                 </div>
                             </div>
                         </DialogHeader>

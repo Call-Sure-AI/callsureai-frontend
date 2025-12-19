@@ -15,6 +15,26 @@ export const ModernLogoCarousel = () => {
     { name: "Company 8", src: "/images/logo8.png" },
   ];
 
+  // Logo card component
+  const LogoCard = ({ logo }: { logo: { name: string; src: string } }) => (
+    <div className="flex-shrink-0 group">
+      {/* Card container */}
+      <div className="w-[130px] h-[90px] sm:w-[160px] sm:h-[110px] flex items-center justify-center rounded-xl bg-white/50 dark:bg-slate-800/50 group-hover:bg-white dark:group-hover:bg-slate-800 transition-all duration-300">
+        {/* Image wrapper */}
+        <div className="relative w-[90px] h-[60px] sm:w-[120px] sm:h-[75px]">
+          <Image
+            src={logo.src}
+            alt={logo.name}
+            fill
+            sizes="120px"
+            style={{ objectFit: 'contain' }}
+            className="grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="relative py-24 overflow-hidden bg-gradient-to-b from-white via-blue-50/20 to-white dark:from-black dark:via-slate-950 dark:to-black">
       {/* Background decoration */}
@@ -96,26 +116,22 @@ export const ModernLogoCarousel = () => {
           viewport={{ once: true }}
           className="relative"
         >
-          {/* Glassmorphic container */}
-          <div className="relative rounded-3xl overflow-hidden">
-            {/* Background blur effect */}
-            <div className="absolute inset-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl" />
+          {/* Glassmorphic container - NO overflow hidden */}
+          <div className="relative rounded-3xl border border-gray-200/50 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
             
-            {/* Border glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/20 blur-sm" />
-            
-            {/* Inner container */}
-            <div className="relative border border-gray-200/50 dark:border-slate-800/50 rounded-3xl p-8">
-              {/* Gradient Masks */}
-              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white/80 dark:from-slate-900/80 to-transparent z-10 rounded-l-3xl" />
-              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/80 dark:from-slate-900/80 to-transparent z-10 rounded-r-3xl" />
+            {/* Content wrapper with generous padding */}
+            <div className="relative py-10 sm:py-12">
+              
+              {/* Gradient Masks - positioned inside */}
+              <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-r from-white/90 dark:from-slate-900/90 to-transparent z-10 pointer-events-none" style={{ borderRadius: '1.5rem 0 0 1.5rem' }} />
+              <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-l from-white/90 dark:from-slate-900/90 to-transparent z-10 pointer-events-none" style={{ borderRadius: '0 1.5rem 1.5rem 0' }} />
 
-              {/* Scrolling Logos */}
-              <div className="flex overflow-hidden">
+              {/* Scrolling wrapper - clips horizontally only */}
+              <div className="overflow-x-hidden">
                 <motion.div
-                  className="flex gap-12"
+                  className="flex items-center gap-6 sm:gap-8 px-4"
                   animate={{
-                    x: [0, -1920],
+                    x: [0, -2000],
                   }}
                   transition={{
                     x: {
@@ -128,52 +144,17 @@ export const ModernLogoCarousel = () => {
                 >
                   {/* First set */}
                   {logos.map((logo, idx) => (
-                    <motion.div
-                      key={`first-${idx}`}
-                      whileHover={{ scale: 1.1, y: -5 }}
-                      className="relative flex-shrink-0 group"
-                    >
-                      <div className="relative w-40 h-20 flex items-center justify-center">
-                        {/* Glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-blue-500/20 to-cyan-500/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
-                        
-                        {/* Logo container */}
-                        <div className="relative w-full h-full flex items-center justify-center rounded-xl bg-white/50 dark:bg-slate-800/50 p-4 group-hover:bg-white dark:group-hover:bg-slate-800 transition-all duration-300">
-                          <Image
-                            src={logo.src}
-                            alt={logo.name}
-                            width={140}
-                            height={70}
-                            className="object-contain grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
+                    <LogoCard key={`first-${idx}`} logo={logo} />
                   ))}
                   
-                  {/* Duplicate set for seamless loop */}
+                  {/* Second set */}
                   {logos.map((logo, idx) => (
-                    <motion.div
-                      key={`second-${idx}`}
-                      whileHover={{ scale: 1.1, y: -5 }}
-                      className="relative flex-shrink-0 group"
-                    >
-                      <div className="relative w-40 h-20 flex items-center justify-center">
-                        {/* Glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-blue-500/20 to-cyan-500/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
-                        
-                        {/* Logo container */}
-                        <div className="relative w-full h-full flex items-center justify-center rounded-xl bg-white/50 dark:bg-slate-800/50 p-4 group-hover:bg-white dark:group-hover:bg-slate-800 transition-all duration-300">
-                          <Image
-                            src={logo.src}
-                            alt={logo.name}
-                            width={140}
-                            height={70}
-                            className="object-contain grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
+                    <LogoCard key={`second-${idx}`} logo={logo} />
+                  ))}
+                  
+                  {/* Third set */}
+                  {logos.map((logo, idx) => (
+                    <LogoCard key={`third-${idx}`} logo={logo} />
                   ))}
                 </motion.div>
               </div>
@@ -184,26 +165,26 @@ export const ModernLogoCarousel = () => {
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
         </motion.div>
 
-{/* Optional: Trust indicators below */}
+        {/* Trust indicators below */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
           viewport={{ once: true }}
-          className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600 dark:text-gray-400"
+          className="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-sm text-gray-600 dark:text-gray-400"
         >
-<div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
             <span>70% Cost Reduction</span>
           </div>
-          <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-400" />
+          <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-400 flex-shrink-0" />
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-cyan-500" />
+            <div className="w-2 h-2 rounded-full bg-cyan-500 flex-shrink-0" />
             <span>3x Faster Response Time</span>
           </div>
-          <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-400" />
+          <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-400 flex-shrink-0" />
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
             <span>95% Customer Satisfaction</span>
           </div>
         </motion.div>

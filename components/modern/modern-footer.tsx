@@ -1,3 +1,4 @@
+// components/modern/modern-footer.tsx
 "use client";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,14 +24,14 @@ export function ModernFooter() {
         { name: "About", href: "/about" },
         { name: "Careers", href: "/careers" },
         { name: "Contact", href: "/contact" },
-        { name: "Blog", href: "/blog" },
+        { name: "Blog", href: "/resources/blog" },
       ],
     },
     {
       title: "Resources",
       links: [
-        { name: "Documentation", href: "/docs" },
-        { name: "API Reference", href: "/api" },
+        { name: "Documentation", href: "/resources/docs" },
+        { name: "API Reference", href: "/api-reference" },
         { name: "Community", href: "/community" },
         { name: "Support", href: "/support" },
       ],
@@ -41,7 +42,7 @@ export function ModernFooter() {
         { name: "Privacy Policy", href: "/privacy" },
         { name: "Terms of Service", href: "/terms" },
         { name: "Cookie Policy", href: "/cookies" },
-        { name: "Security", href: "/security" },
+        { name: "Security", href: "/docs/security" },
       ],
     },
   ];

@@ -34,7 +34,7 @@ export const ModernCTABanner = () => {
         {/* Description */}
         <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
           Join thousands of businesses automating their customer conversations
-          with AI. Start your free trial today—no credit card required.
+          with AI. Start your free trial today no credit card required.
         </p>
 
         {/* CTA Buttons */}
