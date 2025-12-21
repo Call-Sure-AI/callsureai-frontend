@@ -32,6 +32,7 @@ const benefits = [
 
 const openings = [
   {
+    id: "senior-full-stack-engineer",
     title: "Senior Full Stack Engineer",
     department: "Engineering",
     location: "Remote (US)",
@@ -40,6 +41,7 @@ const openings = [
     description: "Build and scale our AI-powered voice platform using React, Node.js, and Python.",
   },
   {
+    id: "machine-learning-engineer",
     title: "Machine Learning Engineer",
     department: "AI/ML",
     location: "Remote (Global)",
@@ -48,6 +50,7 @@ const openings = [
     description: "Develop and improve our speech recognition and natural language understanding models.",
   },
   {
+    id: "product-designer",
     title: "Product Designer",
     department: "Design",
     location: "Remote (US/EU)",
@@ -56,6 +59,7 @@ const openings = [
     description: "Design intuitive interfaces for our enterprise customers and AI agent builder.",
   },
   {
+    id: "customer-success-manager",
     title: "Customer Success Manager",
     department: "Customer Success",
     location: "New York, NY",
@@ -64,6 +68,7 @@ const openings = [
     description: "Help our enterprise customers succeed with CallSure AI and drive adoption.",
   },
   {
+    id: "sales-development-representative",
     title: "Sales Development Representative",
     department: "Sales",
     location: "San Francisco, CA",
@@ -72,6 +77,7 @@ const openings = [
     description: "Generate and qualify leads for our enterprise sales team.",
   },
   {
+    id: "devops-engineer",
     title: "DevOps Engineer",
     department: "Engineering",
     location: "Remote (Global)",
@@ -220,7 +226,7 @@ export default function CareersPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-800/50 p-6 hover:border-cyan-500/50 transition-colors cursor-pointer group"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200/50 dark:border-slate-800/50 p-6 hover:border-cyan-500/50 transition-colors group"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   <div>
@@ -247,10 +253,12 @@ export default function CareersPage() {
                       <DollarSign className="w-4 h-4" />
                       {job.salary}
                     </div>
-                    <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg">
-                      Apply
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <Link href={`/careers/apply?job=${job.id}`}>
+                      <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg">
+                        Apply
+                        <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </motion.div>
@@ -268,9 +276,9 @@ export default function CareersPage() {
           <p className="text-gray-600 dark:text-gray-400 mb-8">
             We&apos;re always looking for talented people. Send us your resume and we&apos;ll keep you in mind for future opportunities.
           </p>
-          <Link href="/contact">
+          <Link href="/careers/apply">
             <Button variant="outline" className="rounded-xl px-8 py-3">
-              Get in Touch
+              Submit General Application
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>

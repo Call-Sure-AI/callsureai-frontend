@@ -1,20 +1,33 @@
 "use client"
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { X, Check, Sparkles, Zap, Crown, Rocket, Star } from "lucide-react"
+import { X, Check, Sparkles, Zap, Crown, Rocket, Star, DollarSign, IndianRupee } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import ContactModal from "@/components/contact-us-modal"
 
+type Currency = 'INR' | 'USD';
+
 type AdditionalRevenueProps = { onClick: () => void };
+
+interface PricingData {
+    INR: {
+        price: string;
+        setupRange: string;
+    };
+    USD: {
+        price: string;
+        setupRange: string;
+    };
+}
 
 interface PricingCardProps {
     title: string;
     subtitle: string;
-    setupRange: string;
-    price: string;
+    pricing: PricingData;
+    currency: Currency;
     period: string;
     features: Feature[];
     popular?: boolean;
@@ -36,6 +49,64 @@ const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
 }
+
+// Currency Toggle Component
+const CurrencyToggle = ({ 
+    currency, 
+    onChange 
+}: { 
+    currency: Currency; 
+    onChange: (currency: Currency) => void;
+}) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-2 mb-8"
+        >
+            <div className="relative bg-gray-100 dark:bg-slate-800 p-1.5 rounded-2xl flex items-center shadow-inner">
+                {/* Sliding background */}
+                <motion.div
+                    className="absolute h-[calc(100%-12px)] rounded-xl bg-white dark:bg-slate-700 shadow-lg"
+                    initial={false}
+                    animate={{
+                        left: currency === 'INR' ? '6px' : 'calc(50% + 2px)',
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    style={{ width: 'calc(50% - 8px)' }}
+                />
+                
+                {/* INR Button */}
+                <button
+                    onClick={() => onChange('INR')}
+                    className={cn(
+                        "relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-colors duration-200 min-w-[100px] justify-center",
+                        currency === 'INR' 
+                            ? "text-gray-900 dark:text-white" 
+                            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    )}
+                >
+                    <IndianRupee className="w-4 h-4" />
+                    <span>INR</span>
+                </button>
+
+                {/* USD Button */}
+                <button
+                    onClick={() => onChange('USD')}
+                    className={cn(
+                        "relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-colors duration-200 min-w-[100px] justify-center",
+                        currency === 'USD' 
+                            ? "text-gray-900 dark:text-white" 
+                            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    )}
+                >
+                    <DollarSign className="w-4 h-4" />
+                    <span>USD</span>
+                </button>
+            </div>
+        </motion.div>
+    );
+};
 
 const AllPlansInclude: React.FC<AdditionalRevenueProps> = ({ onClick }) => {
     const features = [
@@ -121,8 +192,8 @@ const AllPlansInclude: React.FC<AdditionalRevenueProps> = ({ onClick }) => {
 const PricingCard = ({
     title,
     subtitle,
-    setupRange,
-    price,
+    pricing,
+    currency,
     period,
     features,
     popular = false,
@@ -132,6 +203,9 @@ const PricingCard = ({
     color,
     index,
 }: PricingCardProps) => {
+    const currentPricing = pricing[currency];
+    const alternatePricing = pricing[currency === 'INR' ? 'USD' : 'INR'];
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -208,22 +282,74 @@ const PricingCard = ({
                         <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
                             {subtitle}
                         </p>
-                        <p className="text-gray-500 dark:text-gray-500 text-xs mb-6">
-                            Setup: {setupRange}
-                        </p>
+                        
+                        {/* Setup Range with animation */}
+                        <div className="h-4 mb-6">
+                            <AnimatePresence mode="popLayout">
+                                <motion.p 
+                                    key={`setup-${currency}`}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -8 }}
+                                    transition={{ 
+                                        duration: 0.3,
+                                        ease: "easeOut"
+                                    }}
+                                    className="text-gray-500 dark:text-gray-500 text-xs"
+                                >
+                                    Setup: {currentPricing.setupRange}
+                                </motion.p>
+                            </AnimatePresence>
+                        </div>
 
-                        <div className="mb-2">
-                            <span className={cn(
-                                "text-4xl font-bold bg-clip-text text-transparent",
-                                popular 
-                                    ? "bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400"
-                                    : "bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300"
-                            )}>
-                                {price}
-                            </span>
-                            <span className="text-gray-600 dark:text-gray-400 text-lg">
+                        {/* Price with animation */}
+                        <div className="mb-2 h-12 flex items-center justify-center">
+                            <AnimatePresence mode="popLayout">
+                                <motion.span 
+                                    key={`price-${currency}-${currentPricing.price}`}
+                                    initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                    exit={{ opacity: 0, y: -20, filter: "blur(4px)" }}
+                                    transition={{ 
+                                        duration: 0.4,
+                                        ease: [0.25, 0.46, 0.45, 0.94]
+                                    }}
+                                    className={cn(
+                                        "text-4xl font-bold bg-clip-text text-transparent inline-block",
+                                        popular 
+                                            ? "bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400"
+                                            : "bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300"
+                                    )}
+                                >
+                                    {currentPricing.price}
+                                </motion.span>
+                            </AnimatePresence>
+                            <span className="text-gray-600 dark:text-gray-400 text-lg ml-1">
                                 {period}
                             </span>
+                        </div>
+
+                        {/* Show alternate currency as reference */}
+                        <div className="h-4">
+                            <AnimatePresence mode="popLayout">
+                                <motion.p 
+                                    key={`alt-${currency}`}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -8 }}
+                                    transition={{ 
+                                        duration: 0.3,
+                                        ease: "easeOut",
+                                        delay: 0.1
+                                    }}
+                                    className="text-xs text-gray-400 dark:text-gray-500"
+                                >
+                                    {currency === 'INR' 
+                                        ? `≈ ${alternatePricing.price} USD` 
+                                        : `≈ ${alternatePricing.price} INR`
+                                    }
+                                </motion.p>
+                            </AnimatePresence>
                         </div>
                     </CardHeader>
 
@@ -371,6 +497,7 @@ const PricingHeader = ({ subtitle }: { subtitle: string }) => (
 export default function Page() {
     const [showCalendly, setShowCalendly] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [currency, setCurrency] = useState<Currency>('INR');
 
     const openCalendly = () => {
         setShowCalendly(true);
@@ -380,12 +507,22 @@ export default function Page() {
         setShowCalendly(false);
     };
 
+    // Pricing data with INR and USD (USD is 30% higher than direct conversion)
+    // Base conversion ~83 INR/USD, then +30% markup for USD prices
     const plans = [
         {
             title: "Starter",
             subtitle: "Perfect for small businesses and startups",
-            setupRange: "₹49,999 - ₹1,49,999",
-            price: "₹14,999",
+            pricing: {
+                INR: {
+                    price: "₹14,999",
+                    setupRange: "₹49,999 - ₹1,49,999",
+                },
+                USD: {
+                    price: "$249",      // ~180 + 30% = ~234, rounded to $249
+                    setupRange: "$849 - $2,499",  // +30% markup
+                },
+            },
             period: "/mo",
             icon: <Rocket className="w-8 h-8 text-white" />,
             color: "from-cyan-500 to-blue-500",
@@ -408,8 +545,16 @@ export default function Page() {
         {
             title: "Growth",
             subtitle: "Everything you need for scaling success",
-            setupRange: "₹1,49,999 - ₹4,99,999",
-            price: "₹99,999",
+            pricing: {
+                INR: {
+                    price: "₹99,999",
+                    setupRange: "₹1,49,999 - ₹4,99,999",
+                },
+                USD: {
+                    price: "$1,699",     // ~1200 + 30% = ~1560, rounded to $1,699
+                    setupRange: "$2,599 - $8,499",  // +30% markup
+                },
+            },
             period: "/mo",
             icon: <Zap className="w-8 h-8 text-white" />,
             color: "from-cyan-500 to-blue-600",
@@ -434,8 +579,16 @@ export default function Page() {
         {
             title: "Enterprise",
             subtitle: "Strategic AI transformation partnership",
-            setupRange: "₹4,99,999 - ₹15,99,999",
-            price: "₹2,49,999",
+            pricing: {
+                INR: {
+                    price: "₹2,49,999",
+                    setupRange: "₹4,99,999 - ₹15,99,999",
+                },
+                USD: {
+                    price: "$4,199",     // ~3000 + 30% = ~3900, rounded to $4,199
+                    setupRange: "$8,499 - $26,999",  // +30% markup
+                },
+            },
             period: "/mo",
             icon: <Crown className="w-8 h-8 text-white" />,
             color: "from-purple-500 to-indigo-600",
@@ -471,11 +624,17 @@ export default function Page() {
                         subtitle="Choose the perfect plan for your business needs with no hidden fees or surprises."
                     />
 
-                    <section className="flex flex-col lg:flex-row justify-center items-center lg:items-stretch gap-8 mt-16">
+                    {/* Currency Toggle */}
+                    <div className="mt-12">
+                        <CurrencyToggle currency={currency} onChange={setCurrency} />
+                    </div>
+
+                    <section className="flex flex-col lg:flex-row justify-center items-center lg:items-stretch gap-8 mt-8">
                         {plans.map((plan, index) => (
                             <PricingCard
                                 key={`pricing-card-${index}-${plan.title}`}
                                 {...plan}
+                                currency={currency}
                                 index={index}
                                 onClick={openCalendly}
                             />
