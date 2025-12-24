@@ -1,7 +1,7 @@
-// app/dashboard/call-reports/page.tsx
+// app/dashboard/call-reports/page.tsx - Complete with WebSocket
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,9 @@ import {
   AlertCircle,
   CheckCircle,
   ArrowRight,
-  Loader2
+  Loader2,
+  RefreshCw,
+  WifiOff
 } from "lucide-react";
 import {
   Table,
@@ -52,6 +54,95 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useDashboardMetrics, defaults } from '@/contexts/dashboard-metrics-context';
+
+// Mock data moved outside component to prevent re-creation on each render
+const MOCK_CALL_REPORTS: CallReport[] = [
+  {
+    id: 'CR001',
+    date: '2025-04-10',
+    time: '14:32',
+    caller: '+1 (555) 123-4567',
+    callerName: 'John Smith',
+    duration: '5m 23s',
+    durationSeconds: 323,
+    callType: 'Inbound',
+    agent: 'AI Agent 1',
+    outcome: 'Resolved',
+    sentiment: 'Positive',
+    tags: ['Support', 'Billing']
+  },
+  {
+    id: 'CR002',
+    date: '2025-04-10',
+    time: '13:15',
+    caller: '+1 (555) 234-5678',
+    callerName: 'Sarah Johnson',
+    duration: '3m 45s',
+    durationSeconds: 225,
+    callType: 'Outbound',
+    agent: 'AI Agent 2',
+    outcome: 'Escalated',
+    sentiment: 'Neutral',
+    tags: ['Sales', 'Follow-up']
+  },
+  {
+    id: 'CR003',
+    date: '2025-04-09',
+    time: '16:45',
+    caller: '+1 (555) 345-6789',
+    callerName: 'Mike Wilson',
+    duration: '8m 12s',
+    durationSeconds: 492,
+    callType: 'Inbound',
+    agent: 'AI Agent 1',
+    outcome: 'Resolved',
+    sentiment: 'Negative',
+    tags: ['Complaint', 'Urgent']
+  },
+  {
+    id: 'CR004',
+    date: '2025-04-09',
+    time: '11:20',
+    caller: '+1 (555) 456-7890',
+    callerName: 'Emily Davis',
+    duration: '2m 55s',
+    durationSeconds: 175,
+    callType: 'Outbound',
+    agent: 'AI Agent 3',
+    outcome: 'Follow-up Required',
+    sentiment: 'Positive',
+    tags: ['Onboarding']
+  },
+  {
+    id: 'CR005',
+    date: '2025-04-09',
+    time: '09:30',
+    caller: '+1 (555) 567-8901',
+    callerName: 'Robert Brown',
+    duration: '6m 18s',
+    durationSeconds: 378,
+    callType: 'Inbound',
+    agent: 'AI Agent 2',
+    outcome: 'Resolved',
+    sentiment: 'Positive',
+    tags: ['Technical', 'Support']
+  },
+  {
+    id: 'CR006',
+    date: '2025-04-08',
+    time: '15:45',
+    caller: '+1 (555) 678-9012',
+    callerName: 'Lisa Anderson',
+    duration: '4m 02s',
+    durationSeconds: 242,
+    callType: 'Inbound',
+    agent: 'AI Agent 1',
+    outcome: 'Resolved',
+    sentiment: 'Neutral',
+    tags: ['General Inquiry']
+  },
+];
 
 interface CallReport {
   id: string;
@@ -68,7 +159,46 @@ interface CallReport {
   tags?: string[];
 }
 
+// Connection Status Component
+const ConnectionStatus = ({ status, lastUpdate }: { status: string; lastUpdate: Date | null }) => {
+    const isConnected = status === 'connected';
+    
+    return (
+        <div className="flex items-center gap-2 text-xs">
+            {isConnected ? (
+                <>
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span className="text-green-600 dark:text-green-400 font-medium">Live</span>
+                </>
+            ) : status === 'connecting' || status === 'reconnecting' ? (
+                <>
+                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                    <span className="text-amber-600 dark:text-amber-400">Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <WifiOff className="w-3 h-3 text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">Offline</span>
+                </>
+            )}
+        </div>
+    );
+};
+
 const CallReportsDashboard = () => {
+  // 🔥 Get real-time data from WebSocket
+  const { 
+    callReports, 
+    callReportsStatus, 
+    lastUpdate,
+    refreshAll,
+    period,
+    setPeriod
+  } = useDashboardMetrics();
+
   const [dateRange, setDateRange] = useState('This Week');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCallType, setSelectedCallType] = useState<string>('all');
@@ -76,94 +206,15 @@ const CallReportsDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Extended mock data for call reports
-  const callReports: CallReport[] = [
-    {
-      id: 'CR001',
-      date: '2025-04-10',
-      time: '14:32',
-      caller: '+1 (555) 123-4567',
-      callerName: 'John Smith',
-      duration: '5m 23s',
-      durationSeconds: 323,
-      callType: 'Inbound',
-      agent: 'AI Agent 1',
-      outcome: 'Resolved',
-      sentiment: 'Positive',
-      tags: ['Support', 'Billing']
-    },
-    {
-      id: 'CR002',
-      date: '2025-04-10',
-      time: '13:15',
-      caller: '+1 (555) 234-5678',
-      callerName: 'Sarah Johnson',
-      duration: '3m 45s',
-      durationSeconds: 225,
-      callType: 'Outbound',
-      agent: 'AI Agent 2',
-      outcome: 'Escalated',
-      sentiment: 'Neutral',
-      tags: ['Sales', 'Follow-up']
-    },
-    {
-      id: 'CR003',
-      date: '2025-04-09',
-      time: '16:45',
-      caller: '+1 (555) 345-6789',
-      callerName: 'Mike Wilson',
-      duration: '8m 12s',
-      durationSeconds: 492,
-      callType: 'Inbound',
-      agent: 'AI Agent 1',
-      outcome: 'Resolved',
-      sentiment: 'Negative',
-      tags: ['Complaint', 'Urgent']
-    },
-    {
-      id: 'CR004',
-      date: '2025-04-09',
-      time: '11:20',
-      caller: '+1 (555) 456-7890',
-      callerName: 'Emily Davis',
-      duration: '2m 55s',
-      durationSeconds: 175,
-      callType: 'Outbound',
-      agent: 'AI Agent 3',
-      outcome: 'Follow-up Required',
-      sentiment: 'Positive',
-      tags: ['Onboarding']
-    },
-    {
-      id: 'CR005',
-      date: '2025-04-09',
-      time: '09:30',
-      caller: '+1 (555) 567-8901',
-      callerName: 'Robert Brown',
-      duration: '6m 18s',
-      durationSeconds: 378,
-      callType: 'Inbound',
-      agent: 'AI Agent 2',
-      outcome: 'Resolved',
-      sentiment: 'Positive',
-      tags: ['Technical', 'Support']
-    },
-    {
-      id: 'CR006',
-      date: '2025-04-08',
-      time: '15:45',
-      caller: '+1 (555) 678-9012',
-      callerName: 'Lisa Anderson',
-      duration: '4m 02s',
-      durationSeconds: 242,
-      callType: 'Inbound',
-      agent: 'AI Agent 1',
-      outcome: 'Resolved',
-      sentiment: 'Neutral',
-      tags: ['General Inquiry']
-    },
-  ];
+
+  // Use WebSocket data if available, otherwise use mock data
+  const callReportsData = useMemo(() => {
+    const reports = callReports?.reports || defaults.callReports.reports;
+    return reports.length > 0 ? reports : MOCK_CALL_REPORTS;
+  }, [callReports?.reports]);
+
+  // Use real data or fallback for stats
+  const wsData = callReports || defaults.callReports;
 
   const getSentimentConfig = (sentiment: string) => {
     switch (sentiment.toLowerCase()) {
@@ -251,18 +302,20 @@ const CallReportsDashboard = () => {
   };
 
   // Filter logic
-  const filteredReports = callReports.filter(report => {
-    const matchesSearch = 
-      report.caller.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.callerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.agent.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.id.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCallType = selectedCallType === 'all' || report.callType.toLowerCase() === selectedCallType;
-    const matchesSentiment = selectedSentiment === 'all' || report.sentiment.toLowerCase() === selectedSentiment;
-    
-    return matchesSearch && matchesCallType && matchesSentiment;
-  });
+  const filteredReports = useMemo(() => {
+    return callReportsData.filter(report => {
+      const matchesSearch = 
+        report.caller.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.callerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.agent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.id.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCallType = selectedCallType === 'all' || report.callType.toLowerCase() === selectedCallType;
+      const matchesSentiment = selectedSentiment === 'all' || report.sentiment.toLowerCase() === selectedSentiment;
+      
+      return matchesSearch && matchesCallType && matchesSentiment;
+    });
+  }, [callReportsData, searchQuery, selectedCallType, selectedSentiment]);
 
   // Pagination
   const itemsPerPage = 5;
@@ -282,14 +335,14 @@ const CallReportsDashboard = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  // Stats calculations
+  // Stats calculations - use WebSocket data or fallback
   const stats = {
-    totalCalls: 1247,
-    avgDuration: '4m 12s',
-    resolutionRate: 92,
-    sentimentScore: 7.8,
-    inboundCalls: 847,
-    outboundCalls: 400,
+    totalCalls: wsData.stats.totalCalls || 1247,
+    avgDuration: wsData.stats.avgDuration || '4m 12s',
+    resolutionRate: wsData.stats.resolutionRate || 92,
+    sentimentScore: wsData.stats.sentimentScore || 7.8,
+    inboundCalls: wsData.stats.inboundCalls || 847,
+    outboundCalls: wsData.stats.outboundCalls || 400,
   };
 
   return (
@@ -322,6 +375,7 @@ const CallReportsDashboard = () => {
             </div>
             
             <div className="flex items-center gap-3">
+              <ConnectionStatus status={callReportsStatus} lastUpdate={lastUpdate} />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="border-gray-200 dark:border-slate-700">
@@ -339,6 +393,14 @@ const CallReportsDashboard = () => {
                   <DropdownMenuItem onClick={() => setDateRange('Custom Range')}>Custom Range</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                variant="outline"
+                className="border-gray-200 dark:border-slate-700"
+                onClick={refreshAll}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
               <Button
                 onClick={handleExport}
                 disabled={isExporting}

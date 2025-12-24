@@ -1,7 +1,7 @@
 "use client"
 
-import { motion } from "framer-motion";
-import React, { useState } from 'react';
+import { motion, useInView } from "framer-motion";
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     Globe, Database, MessageSquare, Cloud, Shield, Zap,
     Phone, Headphones, UserPlus, BarChart2, Speaker,
@@ -9,6 +9,64 @@ import {
     Users, Mic, HelpCircle, Rocket, PieChart, Search,
     CreditCard, DollarSign, Eye, Lock, Check,
 } from 'lucide-react';
+
+// CountUp Animation Component
+const CountUp = ({ 
+    end, 
+    duration = 2, 
+    suffix = "",
+    decimals = 0 
+}: { 
+    end: number; 
+    duration?: number; 
+    suffix?: string;
+    decimals?: number;
+}) => {
+    const [count, setCount] = useState(0);
+    const ref = useRef(null);
+    // Removed once: true so it tracks when entering/leaving viewport
+    const isInView = useInView(ref, { amount: 0.5 });
+    
+    useEffect(() => {
+        // Reset to 0 when leaving viewport
+        if (!isInView) {
+            setCount(0);
+            return;
+        }
+        
+        // Animate when entering viewport
+        let startTime: number;
+        let animationFrame: number;
+        
+        const animate = (timestamp: number) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+            
+            // Easing function for smooth deceleration
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            
+            setCount(easeOutQuart * end);
+            
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+        
+        animationFrame = requestAnimationFrame(animate);
+        
+        return () => cancelAnimationFrame(animationFrame);
+    }, [isInView, end, duration]);
+    
+    const displayValue = decimals > 0 
+        ? count.toFixed(decimals) 
+        : Math.floor(count);
+    
+    return (
+        <span ref={ref}>
+            {displayValue}{suffix}
+        </span>
+    );
+};
 
 // Custom Chain icon implementation
 const Chain = (props: any) => (
@@ -84,24 +142,24 @@ const IntegrationCard = ({
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: index * 0.02 }}
             whileHover={{ y: -4 }}
-            className="group relative"
+            className="group relative h-full"
         >
             {/* Card glow on hover */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
-            {/* Main card */}
-            <div className="relative h-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-2xl p-6 transition-all duration-300 hover:border-cyan-500/50 dark:hover:border-cyan-500/30">
+            {/* Main card - flex column for consistent layout */}
+            <div className="relative h-full flex flex-col bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-2xl p-6 transition-all duration-300 hover:border-cyan-500/50 dark:hover:border-cyan-500/30">
                 {/* Background gradient */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <div className="relative z-10">
+                <div className="relative z-10 flex flex-col h-full">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                             <motion.div
                                 whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                                 transition={{ duration: 0.4 }}
-                                className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg"
+                                className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg flex-shrink-0"
                             >
                                 <Icon className="w-6 h-6 text-white" />
                             </motion.div>
@@ -109,23 +167,23 @@ const IntegrationCard = ({
                                 {title}
                             </h3>
                         </div>
-                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${getStatusStyles(status)}`}>
+                        <span className={`px-3 py-1 text-xs font-bold rounded-full flex-shrink-0 ${getStatusStyles(status)}`}>
                             {status}
                         </span>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                    {/* Description - flex-grow to fill available space */}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed flex-grow">
                         {description}
                     </p>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between">
+                    {/* Footer - always at bottom with mt-auto */}
+                    <div className="flex items-center justify-between mt-auto pt-2">
                         <span className="text-xs text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-slate-800/50 px-3 py-1 rounded-full">
                             {category}
                         </span>
                         <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent">
-                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
                                 <Check className="w-2.5 h-2.5 text-white" />
                             </div>
                             Compatible
@@ -697,9 +755,9 @@ export default function IntegrationsPage() {
                     onCategoryChange={setActiveCategory}
                 />
 
-                {/* Integration Cards Grid */}
+                {/* Integration Cards Grid - added items-stretch for equal heights */}
                 {filteredIntegrations.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                         {filteredIntegrations.map((integration, index) => (
                             <IntegrationCard
                                 key={index}
@@ -748,10 +806,10 @@ export default function IntegrationsPage() {
                         <div className="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 rounded-3xl p-8 md:p-12">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                                 {[
-                                    { value: "2000+", label: "Integrations" },
-                                    { value: "20+", label: "Categories" },
-                                    { value: "99.9%", label: "Uptime" },
-                                    { value: "24/7", label: "Support" },
+                                    { value: 2000, suffix: "+", label: "Integrations", duration: 2.5 },
+                                    { value: 20, suffix: "+", label: "Categories", duration: 2 },
+                                    { value: 99.9, suffix: "%", label: "Uptime", duration: 2, decimals: 1 },
+                                    { value: 24, suffix: "/7", label: "Support", duration: 1.5 },
                                 ].map((stat, index) => (
                                     <motion.div
                                         key={index}
@@ -762,7 +820,12 @@ export default function IntegrationsPage() {
                                         className="text-center"
                                     >
                                         <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400 bg-clip-text text-transparent mb-2">
-                                            {stat.value}
+                                            <CountUp 
+                                                end={stat.value} 
+                                                suffix={stat.suffix} 
+                                                duration={stat.duration}
+                                                decimals={stat.decimals || 0}
+                                            />
                                         </div>
                                         <div className="text-sm text-gray-600 dark:text-gray-400">
                                             {stat.label}

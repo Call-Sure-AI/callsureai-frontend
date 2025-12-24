@@ -10,7 +10,7 @@ export const ModernIntegrations = () => {
   const integrations = [
     {
       name: "Slack",
-      description: "Get real-time notifications and manage calls directly in Slack",
+      description: "Get real-time notifications & manage calls directly",
       image: "/images/slack-logo.png",
       color: "from-purple-500 to-pink-500",
       gradient: "from-purple-500/10 to-pink-500/10",
@@ -184,7 +184,8 @@ export const ModernIntegrations = () => {
                           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                         />
                         
-                        <div className="relative w-24 h-24 filter drop-shadow-2xl">
+                        {/* Logo with rounded corners - no background */}
+                        <div className="relative w-24 h-24 rounded-3xl overflow-hidden filter drop-shadow-2xl">
                           <Image
                             src={integration.image}
                             alt={integration.name}

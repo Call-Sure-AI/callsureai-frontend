@@ -1,3 +1,4 @@
+// hooks\use-websocket.ts
 import { useState, useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 

@@ -16,10 +16,10 @@ export const ModernCTABanner = () => {
           duration: 0.8,
           ease: "easeInOut",
         }}
-        className="mt-8 text-center"
+        className="mt-8 text-center pt-44"
       >
         {/* Badge */}
-        <div className="inline-flex items-center space-x-2 bg-cyan-500/100 border border-cyan-500/30 rounded-full px-4 py-2 mb-6">
+        <div className="inline-flex items-center space-x-2 bg-cyan-500/100 border border-cyan-500/30 rounded-full px-4 py-2 mb-6 mt-12">
           <Sparkles className="w-4 h-4 text-cyan-400" />
           <span className="text-sm font-medium text-cyan-100">
             Limited Time Offer
@@ -113,7 +113,7 @@ export const ModernCTABanner = () => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <span>Free 14-day trial</span>
+            <span>Free 14-day Trial</span>
           </div>
           <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600" />
           <div className="flex items-center space-x-2">
@@ -130,7 +130,7 @@ export const ModernCTABanner = () => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <span>No credit card required</span>
+            <span>No Credit Card Required</span>
           </div>
           <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-600" />
           <div className="flex items-center space-x-2">
@@ -147,7 +147,7 @@ export const ModernCTABanner = () => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <span>Cancel anytime</span>
+            <span>Cancel Anytime</span>
           </div>
         </div>
       </motion.div>

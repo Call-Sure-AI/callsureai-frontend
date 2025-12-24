@@ -265,7 +265,7 @@ export const ModernHero = () => {
               <div className="w-4 h-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
                 <Sparkles className="w-2.5 h-2.5 text-white" />
               </div>
-              <span className="font-medium">No Credit Card</span>
+              <span className="font-medium">No Credit Card Required</span>
             </div>
             
             <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-400" />

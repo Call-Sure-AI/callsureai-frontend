@@ -1,7 +1,7 @@
-// app/dashboard/urgency-detection/page.tsx
+// app/dashboard/urgency-detection/page.tsx - Complete with WebSocket
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,8 @@ import {
   Flame,
   Timer,
   Activity,
-  BarChart3
+  BarChart3,
+  WifiOff
 } from "lucide-react";
 import {
   Table,
@@ -59,6 +60,89 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useDashboardMetrics, defaults } from '@/contexts/dashboard-metrics-context';
+
+// Mock data moved outside component to prevent re-creation on each render
+const MOCK_URGENCY_DATA: UrgencyRecord[] = [
+  {
+    id: 'URG001',
+    timestamp: '2025-04-11T14:25:00',
+    caller: '+1 (555) 123-4567',
+    name: 'John Smith',
+    duration: '3m 45s',
+    urgencyLevel: 'High',
+    triggerPhrases: ['immediately', 'urgent', 'emergency'],
+    status: 'Resolved',
+    agent: 'AI Agent 2',
+    category: 'Technical Issue',
+    summary: 'Critical system outage affecting production environment.'
+  },
+  {
+    id: 'URG002',
+    timestamp: '2025-04-11T10:12:00',
+    caller: '+1 (555) 234-5678',
+    name: 'Sarah Johnson',
+    duration: '6m 20s',
+    urgencyLevel: 'Medium',
+    triggerPhrases: ['soon', 'important', 'waiting'],
+    status: 'In Progress',
+    agent: 'AI Agent 1',
+    category: 'Billing Question',
+    summary: 'Invoice discrepancy needs resolution before payment deadline.'
+  },
+  {
+    id: 'URG003',
+    timestamp: '2025-04-10T16:48:00',
+    caller: '+1 (555) 345-6789',
+    name: 'David Williams',
+    duration: '8m 10s',
+    urgencyLevel: 'High',
+    triggerPhrases: ['critical', 'deadline', 'now'],
+    status: 'Escalated',
+    agent: 'AI Agent 3',
+    category: 'Account Access',
+    summary: 'Account locked, customer unable to access critical data.'
+  },
+  {
+    id: 'URG004',
+    timestamp: '2025-04-10T11:35:00',
+    caller: '+1 (555) 456-7890',
+    name: 'Emily Davis',
+    duration: '4m 55s',
+    urgencyLevel: 'Low',
+    triggerPhrases: ['whenever', 'no rush', 'later'],
+    status: 'Resolved',
+    agent: 'AI Agent 1',
+    category: 'General Inquiry',
+    summary: 'Product information request, non-time-sensitive.'
+  },
+  {
+    id: 'URG005',
+    timestamp: '2025-04-10T09:20:00',
+    caller: '+1 (555) 567-8901',
+    name: 'Michael Brown',
+    duration: '5m 30s',
+    urgencyLevel: 'High',
+    triggerPhrases: ['asap', 'escalate', 'manager'],
+    status: 'Pending',
+    agent: 'AI Agent 2',
+    category: 'Service Complaint',
+    summary: 'Repeated service failures, customer threatening to cancel.'
+  },
+  {
+    id: 'URG006',
+    timestamp: '2025-04-09T15:45:00',
+    caller: '+1 (555) 678-9012',
+    name: 'Lisa Anderson',
+    duration: '2m 15s',
+    urgencyLevel: 'Medium',
+    triggerPhrases: ['today', 'need help', 'problem'],
+    status: 'Resolved',
+    agent: 'AI Agent 1',
+    category: 'Technical Issue',
+    summary: 'Minor configuration issue resolved during call.'
+  },
+];
 
 interface UrgencyRecord {
   id: string;
@@ -82,7 +166,46 @@ interface CategoryData {
   total: number;
 }
 
+// Connection Status Component
+const ConnectionStatus = ({ status, lastUpdate }: { status: string; lastUpdate: Date | null }) => {
+    const isConnected = status === 'connected';
+    
+    return (
+        <div className="flex items-center gap-2 text-xs">
+            {isConnected ? (
+                <>
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span className="text-green-600 dark:text-green-400 font-medium">Live</span>
+                </>
+            ) : status === 'connecting' || status === 'reconnecting' ? (
+                <>
+                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                    <span className="text-amber-600 dark:text-amber-400">Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <WifiOff className="w-3 h-3 text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">Offline</span>
+                </>
+            )}
+        </div>
+    );
+};
+
 const UrgencyDetectionDashboard = () => {
+  // 🔥 Get real-time data from WebSocket
+  const { 
+    urgency, 
+    urgencyStatus, 
+    lastUpdate,
+    refreshAll,
+    period,
+    setPeriod
+  } = useDashboardMetrics();
+
   const [timeRange, setTimeRange] = useState('last7Days');
   const [urgencyLevel, setUrgencyLevel] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,105 +213,32 @@ const UrgencyDetectionDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Mock data for urgency detection
-  const urgencyData: UrgencyRecord[] = [
-    {
-      id: 'URG001',
-      timestamp: '2025-04-11T14:25:00',
-      caller: '+1 (555) 123-4567',
-      name: 'John Smith',
-      duration: '3m 45s',
-      urgencyLevel: 'High',
-      triggerPhrases: ['immediately', 'urgent', 'emergency'],
-      status: 'Resolved',
-      agent: 'AI Agent 2',
-      category: 'Technical Issue',
-      summary: 'Critical system outage affecting production environment.'
-    },
-    {
-      id: 'URG002',
-      timestamp: '2025-04-11T10:12:00',
-      caller: '+1 (555) 234-5678',
-      name: 'Sarah Johnson',
-      duration: '6m 20s',
-      urgencyLevel: 'Medium',
-      triggerPhrases: ['soon', 'important', 'waiting'],
-      status: 'In Progress',
-      agent: 'AI Agent 1',
-      category: 'Billing Question',
-      summary: 'Invoice discrepancy needs resolution before payment deadline.'
-    },
-    {
-      id: 'URG003',
-      timestamp: '2025-04-10T16:48:00',
-      caller: '+1 (555) 345-6789',
-      name: 'David Williams',
-      duration: '8m 10s',
-      urgencyLevel: 'High',
-      triggerPhrases: ['critical', 'deadline', 'now'],
-      status: 'Escalated',
-      agent: 'AI Agent 3',
-      category: 'Account Access',
-      summary: 'Account locked, customer unable to access critical data.'
-    },
-    {
-      id: 'URG004',
-      timestamp: '2025-04-10T11:35:00',
-      caller: '+1 (555) 456-7890',
-      name: 'Emily Davis',
-      duration: '4m 55s',
-      urgencyLevel: 'Low',
-      triggerPhrases: ['whenever', 'no rush', 'later'],
-      status: 'Resolved',
-      agent: 'AI Agent 1',
-      category: 'General Inquiry',
-      summary: 'Product information request, non-time-sensitive.'
-    },
-    {
-      id: 'URG005',
-      timestamp: '2025-04-10T09:20:00',
-      caller: '+1 (555) 567-8901',
-      name: 'Michael Brown',
-      duration: '5m 30s',
-      urgencyLevel: 'High',
-      triggerPhrases: ['asap', 'escalate', 'manager'],
-      status: 'Pending',
-      agent: 'AI Agent 2',
-      category: 'Service Complaint',
-      summary: 'Repeated service failures, customer threatening to cancel.'
-    },
-    {
-      id: 'URG006',
-      timestamp: '2025-04-09T15:45:00',
-      caller: '+1 (555) 678-9012',
-      name: 'Lisa Anderson',
-      duration: '2m 15s',
-      urgencyLevel: 'Medium',
-      triggerPhrases: ['today', 'need help', 'problem'],
-      status: 'Resolved',
-      agent: 'AI Agent 1',
-      category: 'Technical Issue',
-      summary: 'Minor configuration issue resolved during call.'
-    },
-  ];
+  // Use WebSocket data if available, otherwise use mock data
+  const urgencyData = useMemo(() => {
+    const records = urgency?.records || defaults.urgency.records;
+    return records.length > 0 ? records : MOCK_URGENCY_DATA;
+  }, [urgency?.records]);
 
-  // Stats data
+  // Use real data or fallback to mock for other data
+  const wsData = urgency || defaults.urgency;
+
+
+  // Stats data - use WebSocket data or fallback
   interface StatItem {
     value: number | string;
     change: number;
     trend: 'up' | 'down';
   }
 
-
-  const statsData: Record<'high' | 'medium' | 'low' | 'avgResponse', StatItem> = {
+  const statsData: Record<'high' | 'medium' | 'low' | 'avgResponse', StatItem> = wsData.stats || {
     high: { value: 28, change: 12, trend: 'up' },
     medium: { value: 45, change: -8, trend: 'down' },
     low: { value: 132, change: 3, trend: 'up' },
     avgResponse: { value: '2m 12s', change: -15, trend: 'down' }
   };
 
-  // Categories with urgency distribution
-  const categoryData: CategoryData[] = [
+  // Categories with urgency distribution - use WebSocket data or fallback
+  const categoryData: CategoryData[] = wsData.categories.length > 0 ? wsData.categories : [
     { category: "Technical Issues", high: 35, medium: 40, low: 25, total: 156 },
     { category: "Billing Questions", high: 25, medium: 45, low: 30, total: 89 },
     { category: "Account Access", high: 50, medium: 35, low: 15, total: 67 },
@@ -269,18 +319,20 @@ const UrgencyDetectionDashboard = () => {
   };
 
   // Filter records
-  const filteredRecords = urgencyData.filter(record => {
-    const matchesSearch = 
-      record.caller.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.triggerPhrases.some(p => p.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      record.id.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesUrgency = urgencyLevel === 'all' || record.urgencyLevel.toLowerCase() === urgencyLevel;
-    const matchesStatus = selectedStatus === 'all' || record.status.toLowerCase().replace(' ', '-') === selectedStatus;
-    
-    return matchesSearch && matchesUrgency && matchesStatus;
-  });
+  const filteredRecords = useMemo(() => {
+    return urgencyData.filter(record => {
+      const matchesSearch = 
+        record.caller.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.triggerPhrases.some(p => p.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        record.id.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesUrgency = urgencyLevel === 'all' || record.urgencyLevel.toLowerCase() === urgencyLevel;
+      const matchesStatus = selectedStatus === 'all' || record.status.toLowerCase().replace(' ', '-') === selectedStatus;
+      
+      return matchesSearch && matchesUrgency && matchesStatus;
+    });
+  }, [urgencyData, searchQuery, urgencyLevel, selectedStatus]);
 
   // Pagination
   const itemsPerPage = 5;
@@ -370,9 +422,11 @@ const UrgencyDetectionDashboard = () => {
             </div>
             
             <div className="flex items-center gap-3">
+              <ConnectionStatus status={urgencyStatus} lastUpdate={lastUpdate} />
               <Button
                 variant="outline"
                 className="border-gray-200 dark:border-slate-700"
+                onClick={refreshAll}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh

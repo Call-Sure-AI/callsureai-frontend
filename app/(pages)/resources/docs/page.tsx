@@ -10,19 +10,24 @@ import {
     Book, 
     Code, 
     Zap, 
+    Settings, 
     Shield, 
     Webhook,
     ChevronRight,
     ChevronDown,
     Copy,
     Check,
+    ExternalLink,
     ArrowRight,
     Terminal,
     Braces,
+    Phone,
     MessageSquare,
     BarChart3,
     Users,
+    CreditCard,
     Globe,
+    Sparkles,
     BookOpen,
     Lightbulb,
     PlayCircle,
@@ -171,8 +176,6 @@ print(agent.id)`,
 
 // Code Block Component
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
-  // Then somewhere in the component, use it:
-  <span className="text-xs text-gray-500">{language}</span>
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -270,18 +273,20 @@ const CategoryCard = ({ category, index }: { category: typeof docCategories[0]; 
                                             transition={{ delay: idx * 0.05 }}
                                             className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group/item"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <FileText className="w-4 h-4 text-gray-400 group-hover/item:text-cyan-500 transition-colors" />
-                                                <span className="text-sm text-gray-700 dark:text-gray-300 group-hover/item:text-cyan-600 dark:group-hover/item:text-cyan-400 transition-colors">
+                                            {/* Left side - Title (flexible, truncates if needed) */}
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <FileText className="w-4 h-4 text-gray-400 group-hover/item:text-cyan-500 transition-colors flex-shrink-0" />
+                                                <span className="text-sm text-gray-700 dark:text-gray-300 group-hover/item:text-cyan-600 dark:group-hover/item:text-cyan-400 transition-colors truncate">
                                                     {article.title}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-gray-400 flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {article.time}
+                                            {/* Right side - Time (fixed width for alignment) */}
+                                            <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                                                <span className="text-xs text-gray-400 flex items-center gap-1 min-w-[60px] justify-end">
+                                                    <Clock className="w-3 h-3 flex-shrink-0" />
+                                                    <span className="whitespace-nowrap">{article.time}</span>
                                                 </span>
-                                                <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                                <ChevronRight className="w-4 h-4 text-gray-400 opacity-0 group-hover/item:opacity-100 transition-opacity flex-shrink-0" />
                                             </div>
                                         </motion.a>
                                     ))}

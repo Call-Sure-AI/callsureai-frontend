@@ -2,12 +2,13 @@
 
 import React, { memo, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { 
   Users, Clock, LineChart, BarChart4, PieChart, Shield, Brain, 
   FileUp, Database, CheckCircle, Award, MessageCircle, Search, 
   LayoutPanelLeft, UserCircle, Sparkles,
   ArrowRight, Zap, Globe, Headphones, Bot, Languages, Lock,
-  TrendingUp, Star, Play, ChevronRight, Phone 
+  TrendingUp, Star, Play, ChevronRight, Phone, X 
 } from "lucide-react";
 
 // Floating particles component
@@ -75,7 +76,7 @@ const PremiumFeatureCard = memo(({
       transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => onHover(index)}
       onMouseLeave={() => onHover(null)}
-      className="group relative"
+      className="group relative h-full"
     >
       {/* Outer glow effect */}
       <motion.div
@@ -98,13 +99,13 @@ const PremiumFeatureCard = memo(({
         style={{ transformStyle: "preserve-3d", perspective: 1000 }}
       >
         {/* Main card */}
-        <div className="relative h-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/50 dark:border-slate-700/50 rounded-[1.5rem] overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-cyan-500/5">
+        <div className="relative h-full flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/50 dark:border-slate-700/50 rounded-[1.5rem] overflow-hidden shadow-xl dark:shadow-2xl dark:shadow-cyan-500/5">
           
           {/* Animated gradient border */}
           <div className="absolute inset-0 rounded-[1.5rem] p-[1px] bg-gradient-to-br from-transparent via-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
           {/* Top gradient section with 3D effect */}
-          <div className={`relative h-52 md:h-60 bg-gradient-to-br ${feature.gradient} overflow-hidden`}>
+          <div className={`relative h-52 md:h-60 bg-gradient-to-br ${feature.gradient} overflow-hidden flex-shrink-0`}>
             {/* Mesh gradient overlay */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_50%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.15),transparent_50%)]" />
@@ -194,8 +195,8 @@ const PremiumFeatureCard = memo(({
             </div>
           </div>
 
-          {/* Content section */}
-          <div className="p-6 md:p-8">
+          {/* Content section - flex-grow to fill remaining space */}
+          <div className="p-6 md:p-8 flex flex-col flex-grow">
             {/* Title with animated check */}
             <div className="flex items-start gap-3 mb-4">
               <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -206,6 +207,7 @@ const PremiumFeatureCard = memo(({
                 whileInView={{ scale: 1, rotate: 0 }}
                 viewport={{ once: true }}
                 transition={{ type: "spring", delay: 0.5 }}
+                className="flex-shrink-0"
               >
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
                   <CheckCircle className="w-4 h-4 text-white" />
@@ -214,17 +216,17 @@ const PremiumFeatureCard = memo(({
             </div>
 
             {/* Description */}
-            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-6 flex-grow">
               {feature.description}
             </p>
 
-            {/* Learn more link */}
+            {/* Learn more link - pushed to bottom */}
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.6 }}
-              className="flex items-center gap-2 text-sm font-semibold"
+              className="flex items-center gap-2 text-sm font-semibold mt-auto"
             >
               <span className={`bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent`}>
                 Learn more
@@ -238,13 +240,13 @@ const PremiumFeatureCard = memo(({
             </motion.div>
           </div>
 
-          {/* Bottom accent line */}
+          {/* Bottom accent line - always at bottom */}
           <motion.div
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className={`h-1 bg-gradient-to-r ${feature.gradient}`}
+            className={`h-1 bg-gradient-to-r ${feature.gradient} flex-shrink-0`}
             style={{ transformOrigin: "left" }}
           />
         </div>
@@ -306,7 +308,7 @@ const StatsShowcase = () => {
 };
 
 // Video showcase section
-const VideoShowcase = () => (
+const VideoShowcase = ({ onPlayClick }: { onPlayClick: () => void }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -338,9 +340,19 @@ const VideoShowcase = () => (
       {/* Video container */}
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="relative bg-gradient-to-br from-gray-900 to-slate-900 rounded-3xl overflow-hidden aspect-video shadow-2xl border border-white/10"
+        onClick={onPlayClick}
+        className="relative bg-gradient-to-br from-gray-900 to-slate-900 rounded-3xl overflow-hidden aspect-video shadow-2xl border border-white/10 cursor-pointer group"
       >
-        {/* Placeholder content */}
+        {/* Video thumbnail/preview */}
+        <video
+          src="https://lndingpageassets.s3.ap-south-1.amazonaws.com/hero.mp4"
+          className="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity"
+          muted
+          playsInline
+          preload="metadata"
+        />
+        
+        {/* Play button overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -374,6 +386,7 @@ const VideoShowcase = () => (
 
 export default function FeaturesPage() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const features = [
     {
@@ -634,7 +647,7 @@ export default function FeaturesPage() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <motion.button
+            <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="relative group"
@@ -647,16 +660,20 @@ export default function FeaturesPage() {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl blur-lg opacity-70"
               />
-              <div className="relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-xl">
+              <Link
+                href="/auth"
+                className="relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-xl"
+              >
                 <Sparkles className="w-5 h-5" />
                 <span>Start Free Trial</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </motion.button>
+              </Link>
+            </motion.div>
 
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => setShowVideoModal(true)}
               className="px-8 py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
             >
               <Play className="w-5 h-5" />
@@ -673,7 +690,7 @@ export default function FeaturesPage() {
 
       {/* Features Grid */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 items-stretch">
           {features.map((feature, index) => (
             <PremiumFeatureCard
               key={index}
@@ -688,7 +705,7 @@ export default function FeaturesPage() {
 
       {/* Video showcase */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <VideoShowcase />
+        <VideoShowcase onPlayClick={() => setShowVideoModal(true)} />
       </div>
 
       {/* Bottom CTA Section */}
@@ -750,31 +767,72 @@ export default function FeaturesPage() {
                 className="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl blur-xl opacity-70"
               />
 
-              <button className="relative px-10 py-5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white rounded-2xl font-bold text-lg flex items-center gap-3 shadow-2xl">
+              <Link
+                href="/auth"
+                className="relative px-10 py-5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white rounded-2xl font-bold text-lg flex items-center gap-3 shadow-2xl"
+              >
                 <Sparkles className="w-6 h-6" />
                 <span>Get Started Free</span>
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </Link>
             </motion.div>
 
             {/* Trust indicators */}
             <div className="relative flex items-center justify-center gap-8 mt-10 text-sm text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-2">
                 <Lock className="w-4 h-4" />
-                <span>SOC 2 Certified</span>
+                <span>SOC 2 Certified.</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                <span>GDPR Compliant</span>
+                <span>GDPR Compliant.</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
-                <span>99.9% Uptime</span>
+                <span>99.9% Uptime.</span>
               </div>
             </div>
           </div>
         </motion.div>
       </div>
+
+      {/* Video Modal */}
+      {showVideoModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowVideoModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", damping: 25 }}
+            className="relative w-full max-w-6xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowVideoModal(false)}
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors group z-10"
+            >
+              <X className="w-5 h-5 text-white group-hover:rotate-90 transition-transform duration-300" />
+            </button>
+
+            {/* Video Container */}
+            <div className="relative bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+              <video
+                src="https://lndingpageassets.s3.ap-south-1.amazonaws.com/hero.mp4"
+                controls
+                autoPlay
+                className="w-full aspect-video"
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }

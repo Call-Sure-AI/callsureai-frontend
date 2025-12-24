@@ -1,7 +1,7 @@
-// app/dashboard/sentiment-analysis/page.tsx
+// app/dashboard/sentiment-analysis/page.tsx - Complete with WebSocket
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,8 @@ import {
   RefreshCw,
   Loader2,
   X,
-  ArrowUpRight
+  ArrowUpRight,
+  WifiOff
 } from "lucide-react";
 import {
   Table,
@@ -55,6 +56,89 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useDashboardMetrics, defaults } from '@/contexts/dashboard-metrics-context';
+
+// Mock data moved outside component to prevent re-creation on each render
+const MOCK_SENTIMENT_RECORDS: SentimentRecord[] = [
+  {
+    id: 'CS001',
+    date: '2025-04-11',
+    time: '14:30',
+    caller: '+1 (555) 123-4567',
+    callerName: 'John Smith',
+    agent: 'AI Agent 1',
+    duration: '4m 12s',
+    sentiment: 'Positive',
+    score: 0.85,
+    keywords: ['helpful', 'friendly', 'efficient'],
+    summary: 'Customer was very satisfied with quick resolution of billing inquiry.'
+  },
+  {
+    id: 'CS002',
+    date: '2025-04-11',
+    time: '12:15',
+    caller: '+1 (555) 234-5678',
+    callerName: 'Sarah Johnson',
+    agent: 'AI Agent 2',
+    duration: '6m 45s',
+    sentiment: 'Neutral',
+    score: 0.52,
+    keywords: ['informative', 'standard', 'adequate'],
+    summary: 'Standard product information request, customer received needed details.'
+  },
+  {
+    id: 'CS003',
+    date: '2025-04-10',
+    time: '15:20',
+    caller: '+1 (555) 345-6789',
+    callerName: 'Mike Wilson',
+    agent: 'AI Agent 1',
+    duration: '8m 32s',
+    sentiment: 'Negative',
+    score: 0.25,
+    keywords: ['confused', 'frustrated', 'long wait'],
+    summary: 'Customer experienced frustration with technical issue. Escalated to specialist.'
+  },
+  {
+    id: 'CS004',
+    date: '2025-04-10',
+    time: '09:45',
+    caller: '+1 (555) 456-7890',
+    callerName: 'Emily Davis',
+    agent: 'AI Agent 3',
+    duration: '3m 50s',
+    sentiment: 'Positive',
+    score: 0.95,
+    keywords: ['excellent', 'quick', 'knowledgeable'],
+    summary: 'Exceptional service delivery, customer praised AI assistant capabilities.'
+  },
+  {
+    id: 'CS005',
+    date: '2025-04-09',
+    time: '16:30',
+    caller: '+1 (555) 567-8901',
+    callerName: 'Robert Brown',
+    agent: 'AI Agent 2',
+    duration: '5m 15s',
+    sentiment: 'Positive',
+    score: 0.78,
+    keywords: ['resolved', 'clear', 'professional'],
+    summary: 'Account update completed smoothly with clear explanations.'
+  },
+  {
+    id: 'CS006',
+    date: '2025-04-09',
+    time: '11:00',
+    caller: '+1 (555) 678-9012',
+    callerName: 'Lisa Anderson',
+    agent: 'AI Agent 1',
+    duration: '7m 20s',
+    sentiment: 'Neutral',
+    score: 0.48,
+    keywords: ['routine', 'average', 'okay'],
+    summary: 'General inquiry handled with standard procedures.'
+  },
+];
 
 interface SentimentRecord {
   id: string;
@@ -78,7 +162,46 @@ interface SentimentTrend {
   total: number;
 }
 
+// Connection Status Component
+const ConnectionStatus = ({ status, lastUpdate }: { status: string; lastUpdate: Date | null }) => {
+    const isConnected = status === 'connected';
+    
+    return (
+        <div className="flex items-center gap-2 text-xs">
+            {isConnected ? (
+                <>
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span className="text-green-600 dark:text-green-400 font-medium">Live</span>
+                </>
+            ) : status === 'connecting' || status === 'reconnecting' ? (
+                <>
+                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                    <span className="text-amber-600 dark:text-amber-400">Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <WifiOff className="w-3 h-3 text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">Offline</span>
+                </>
+            )}
+        </div>
+    );
+};
+
 const SentimentAnalysisDashboard = () => {
+  // 🔥 Get real-time data from WebSocket
+  const { 
+    sentiment, 
+    sentimentStatus, 
+    lastUpdate,
+    refreshAll,
+    period,
+    setPeriod
+  } = useDashboardMetrics();
+
   const [timeFrame, setTimeFrame] = useState('last7Days');
   const [selectedAgent, setSelectedAgent] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,8 +209,11 @@ const SentimentAnalysisDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Mock data for sentiment trends
-  const sentimentTrends: SentimentTrend[] = [
+  // Use real data or fallback to defaults/mock
+  const wsData = sentiment || defaults.sentiment;
+
+  // Mock data for sentiment trends (fallback when no WebSocket data)
+  const sentimentTrends: SentimentTrend[] = wsData.trends.length > 0 ? wsData.trends : [
     { date: 'Mon', positive: 65, neutral: 20, negative: 15, total: 156 },
     { date: 'Tue', positive: 55, neutral: 30, negative: 15, total: 142 },
     { date: 'Wed', positive: 60, neutral: 25, negative: 15, total: 168 },
@@ -97,87 +223,11 @@ const SentimentAnalysisDashboard = () => {
     { date: 'Sun', positive: 72, neutral: 18, negative: 10, total: 98 },
   ];
 
-  // Mock data for call sentiment records
-  const sentimentRecords: SentimentRecord[] = [
-    {
-      id: 'CS001',
-      date: '2025-04-11',
-      time: '14:30',
-      caller: '+1 (555) 123-4567',
-      callerName: 'John Smith',
-      agent: 'AI Agent 1',
-      duration: '4m 12s',
-      sentiment: 'Positive',
-      score: 0.85,
-      keywords: ['helpful', 'friendly', 'efficient'],
-      summary: 'Customer was very satisfied with quick resolution of billing inquiry.'
-    },
-    {
-      id: 'CS002',
-      date: '2025-04-11',
-      time: '12:15',
-      caller: '+1 (555) 234-5678',
-      callerName: 'Sarah Johnson',
-      agent: 'AI Agent 2',
-      duration: '6m 45s',
-      sentiment: 'Neutral',
-      score: 0.52,
-      keywords: ['informative', 'standard', 'adequate'],
-      summary: 'Standard product information request, customer received needed details.'
-    },
-    {
-      id: 'CS003',
-      date: '2025-04-10',
-      time: '15:20',
-      caller: '+1 (555) 345-6789',
-      callerName: 'Mike Wilson',
-      agent: 'AI Agent 1',
-      duration: '8m 32s',
-      sentiment: 'Negative',
-      score: 0.25,
-      keywords: ['confused', 'frustrated', 'long wait'],
-      summary: 'Customer experienced frustration with technical issue. Escalated to specialist.'
-    },
-    {
-      id: 'CS004',
-      date: '2025-04-10',
-      time: '09:45',
-      caller: '+1 (555) 456-7890',
-      callerName: 'Emily Davis',
-      agent: 'AI Agent 3',
-      duration: '3m 50s',
-      sentiment: 'Positive',
-      score: 0.95,
-      keywords: ['excellent', 'quick', 'knowledgeable'],
-      summary: 'Exceptional service delivery, customer praised AI assistant capabilities.'
-    },
-    {
-      id: 'CS005',
-      date: '2025-04-09',
-      time: '16:30',
-      caller: '+1 (555) 567-8901',
-      callerName: 'Robert Brown',
-      agent: 'AI Agent 2',
-      duration: '5m 15s',
-      sentiment: 'Positive',
-      score: 0.78,
-      keywords: ['resolved', 'clear', 'professional'],
-      summary: 'Account update completed smoothly with clear explanations.'
-    },
-    {
-      id: 'CS006',
-      date: '2025-04-09',
-      time: '11:00',
-      caller: '+1 (555) 678-9012',
-      callerName: 'Lisa Anderson',
-      agent: 'AI Agent 1',
-      duration: '7m 20s',
-      sentiment: 'Neutral',
-      score: 0.48,
-      keywords: ['routine', 'average', 'okay'],
-      summary: 'General inquiry handled with standard procedures.'
-    },
-  ];
+  // Mock data for call sentiment records - use constant to avoid recreating on each render
+  const sentimentRecords = useMemo(() => {
+    const records = sentiment?.records || defaults.sentiment.records;
+    return records.length > 0 ? records : MOCK_SENTIMENT_RECORDS;
+  }, [sentiment?.records]);
 
   const getSentimentConfig = (sentiment: string) => {
     switch (sentiment.toLowerCase()) {
@@ -233,17 +283,19 @@ const SentimentAnalysisDashboard = () => {
   };
 
   // Filter records
-  const filteredRecords = sentimentRecords.filter(record => {
-    const matchesSearch = 
-      record.caller.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.callerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesAgent = selectedAgent === 'all' || record.agent.toLowerCase().includes(selectedAgent);
-    const matchesSentiment = selectedSentiment === 'all' || record.sentiment.toLowerCase() === selectedSentiment;
-    
-    return matchesSearch && matchesAgent && matchesSentiment;
-  });
+  const filteredRecords = useMemo(() => {
+    return sentimentRecords.filter(record => {
+      const matchesSearch = 
+        record.caller.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.callerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesAgent = selectedAgent === 'all' || record.agent.toLowerCase().includes(selectedAgent);
+      const matchesSentiment = selectedSentiment === 'all' || record.sentiment.toLowerCase() === selectedSentiment;
+      
+      return matchesSearch && matchesAgent && matchesSentiment;
+    });
+  }, [sentimentRecords, searchQuery, selectedAgent, selectedSentiment]);
 
   // Pagination
   const itemsPerPage = 5;
@@ -263,14 +315,14 @@ const SentimentAnalysisDashboard = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // Stats calculations
+  // Stats calculations - use WebSocket data or fallback
   const stats = {
-    positive: 68,
-    neutral: 22,
-    negative: 10,
-    avgScore: 7.2,
-    totalAnalyzed: 1088,
-    improvement: 5,
+    positive: wsData.stats.positive || 68,
+    neutral: wsData.stats.neutral || 22,
+    negative: wsData.stats.negative || 10,
+    avgScore: wsData.stats.avgScore || 7.2,
+    totalAnalyzed: wsData.stats.totalAnalyzed || 1088,
+    improvement: wsData.stats.improvement || 5,
   };
 
   // Sentiment Score Bar Component
@@ -372,9 +424,11 @@ const SentimentAnalysisDashboard = () => {
             </div>
             
             <div className="flex items-center gap-3">
+              <ConnectionStatus status={sentimentStatus} lastUpdate={lastUpdate} />
               <Button
                 variant="outline"
                 className="border-gray-200 dark:border-slate-700"
+                onClick={refreshAll}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh

@@ -1,3 +1,4 @@
+// app\(pages)\layout.tsx
 import { ModernNavbar } from "@/components/modern/modern-navbar";
 import { ModernFooter } from "@/components/modern/modern-footer";
 

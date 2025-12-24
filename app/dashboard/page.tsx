@@ -1,10 +1,26 @@
-// app\dashboard\page.tsx
+// app/dashboard/page.tsx - Updated with WebSocket integration
 "use client";
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { PlusCircleIcon, TrendingUpIcon, TrendingDownIcon, MinusIcon, AlertTriangle, Phone, CheckCircle, Percent, Calendar, Wallet, ArrowRight, Sparkles } from "lucide-react";
-import { useMemo, memo } from 'react';
+import { 
+    PlusCircleIcon, 
+    TrendingUpIcon, 
+    TrendingDownIcon, 
+    MinusIcon, 
+    AlertTriangle, 
+    Phone, 
+    CheckCircle, 
+    Percent, 
+    Calendar, 
+    Wallet, 
+    ArrowRight, 
+    Sparkles,
+    RefreshCw,
+    Wifi,
+    WifiOff
+} from "lucide-react";
+import { useMemo, memo, useCallback } from 'react';
 
 import { Button } from "@/components/ui/button";
 import { AgentSection } from '@/components/agent/agent-section';
@@ -13,7 +29,10 @@ import AgentPerformanceChart from '@/components/charts/agent-performance-chat';
 
 import { useAgents } from '@/contexts/agent-context';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useDashboardMetrics, defaults } from '@/contexts/dashboard-metrics-context';
 import AccessDenied from '@/components/dashboard/access-denied';
+
+// ============== Loading Component ==============
 
 const LoadingSpinner = memo(() => (
     <div className="flex items-center justify-center h-32 lg:h-48">
@@ -25,6 +44,59 @@ const LoadingSpinner = memo(() => (
 ));
 
 LoadingSpinner.displayName = 'LoadingSpinner';
+
+// ============== Connection Status Indicator ==============
+
+const ConnectionStatus = memo(({ status, lastUpdate }: { status: string; lastUpdate: Date | null }) => {
+    const isConnected = status === 'connected';
+    
+    return (
+        <div className="flex items-center gap-2 text-xs">
+            {isConnected ? (
+                <>
+                    <Wifi className="w-3 h-3 text-emerald-500" />
+                    <span className="text-emerald-600 dark:text-emerald-400">Live</span>
+                </>
+            ) : status === 'connecting' || status === 'reconnecting' ? (
+                <>
+                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                    <span className="text-amber-600 dark:text-amber-400">Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <WifiOff className="w-3 h-3 text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">Offline</span>
+                </>
+            )}
+            {lastUpdate && (
+                <span className="text-gray-400 dark:text-gray-500">
+                    • Updated {formatTimeAgo(lastUpdate)}
+                </span>
+            )}
+        </div>
+    );
+});
+
+ConnectionStatus.displayName = 'ConnectionStatus';
+
+// ============== Helper Functions ==============
+
+function formatTimeAgo(date: Date): string {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+}
+
+function formatNumber(num: number): string {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toLocaleString();
+}
+
+// ============== Stat Icons & Colors ==============
 
 const statIcons: Record<string, React.ReactNode> = {
     'Total Calls': <Phone className="w-4 h-4 lg:w-5 lg:h-5" />,
@@ -41,6 +113,8 @@ const statColors: Record<string, { gradient: string; icon: string; glow: string 
     'Total Bookings': { gradient: 'from-orange-500 to-amber-600', icon: 'text-orange-500', glow: 'shadow-orange-500/20' },
     'Credit Balance': { gradient: 'from-pink-500 to-rose-600', icon: 'text-pink-500', glow: 'shadow-pink-500/20' },
 };
+
+// ============== Stat Card Component ==============
 
 const StatCard = memo(({ stat, index }: { stat: any; index: number }) => {
     const colors = statColors[stat.label] || statColors['Total Calls'];
@@ -98,6 +172,8 @@ const StatCard = memo(({ stat, index }: { stat: any; index: number }) => {
 
 StatCard.displayName = 'StatCard';
 
+// ============== Agent Creation Card ==============
+
 const AgentCreationCard = memo(() => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -106,10 +182,8 @@ const AgentCreationCard = memo(() => (
         className="group"
     >
         <div className="relative bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 dark:from-cyan-500/5 dark:via-blue-500/5 dark:to-purple-500/5 backdrop-blur-xl rounded-xl border border-cyan-500/20 dark:border-cyan-500/10 p-3 lg:p-4 overflow-hidden">
-            {/* Animated gradient border */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
             
-            {/* Floating sparkles */}
             <div className="absolute top-2 right-2 lg:top-3 lg:right-3 opacity-50">
                 <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-cyan-500 animate-pulse" />
             </div>
@@ -137,19 +211,67 @@ const AgentCreationCard = memo(() => (
 
 AgentCreationCard.displayName = 'AgentCreationCard';
 
+// ============== Main Dashboard Page ==============
+
 const DashboardPage = () => {
-    const { agents, loading } = useAgents();
-    const { user, loading: isLoading } = useCurrentUser();
+    const { agents, loading: agentsLoading } = useAgents();
+    const { user, loading: userLoading } = useCurrentUser();
+    
+    // 🔥 NEW: Get real-time metrics from WebSocket
+    const { 
+        companyMetrics, 
+        companyMetricsStatus, 
+        lastUpdate,
+        refreshAll,
+        isLoading: metricsLoading 
+    } = useDashboardMetrics();
 
+    // Use real data or fallback to defaults
+    const metrics = companyMetrics || defaults.companyMetrics;
+
+    // Build stats cards from real-time data
     const statsCards = useMemo(() => [
-        { label: 'Total Calls', value: '14,894', stat: "40% increase", trend: "up" },
-        { label: 'Completed Calls', value: '13,999', stat: "400 active calls", trend: "up" },
-        { label: 'Resolution Rate', value: '94%', stat: "+2.5% increase", trend: "up" },
-        { label: 'Total Bookings', value: '8,999', stat: "32.0% increase", trend: "up" },
-        { label: 'Credit Balance', value: '$1,444', stat: "Can be recharged", trend: "info" },
-    ], []);
+        { 
+            label: 'Total Calls', 
+            value: formatNumber(metrics.totalCalls), 
+            stat: `${metrics.trends.calls >= 0 ? '+' : ''}${metrics.trends.calls}% this week`, 
+            trend: metrics.trends.calls >= 0 ? 'up' : 'down' 
+        },
+        { 
+            label: 'Completed Calls', 
+            value: formatNumber(metrics.completedCalls), 
+            stat: `${metrics.activeCalls} active now`, 
+            trend: 'up' 
+        },
+        { 
+            label: 'Resolution Rate', 
+            value: `${metrics.resolutionRate}%`, 
+            stat: `${metrics.trends.resolution >= 0 ? '+' : ''}${metrics.trends.resolution}% change`, 
+            trend: metrics.trends.resolution >= 0 ? 'up' : 'down' 
+        },
+        { 
+            label: 'Total Bookings', 
+            value: formatNumber(metrics.totalBookings), 
+            stat: `${metrics.trends.bookings >= 0 ? '+' : ''}${metrics.trends.bookings}% increase`, 
+            trend: metrics.trends.bookings >= 0 ? 'up' : 'down' 
+        },
+        { 
+            label: 'Credit Balance', 
+            value: `$${formatNumber(metrics.creditBalance)}`, 
+            stat: 'Can be recharged', 
+            trend: 'info' 
+        },
+    ], [metrics]);
 
-    if (!user && !isLoading) {
+    // Refresh handler
+    const handleRefresh = useCallback(() => {
+        refreshAll();
+    }, [refreshAll]);
+
+    // Loading states
+    const isLoading = userLoading || metricsLoading;
+
+    if (!user && !userLoading) {
         return <AccessDenied redirectPath='/auth' />;
     }
 
@@ -169,6 +291,20 @@ const DashboardPage = () => {
         <ProtectedRoute>
             <div className="w-full">
                 <div className="max-w-7xl mx-auto">
+                    {/* Header with Connection Status */}
+                    <div className="flex items-center justify-between mb-4">
+                        <ConnectionStatus status={companyMetricsStatus} lastUpdate={lastUpdate} />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRefresh}
+                            className="text-gray-500 hover:text-cyan-600 dark:hover:text-cyan-400"
+                        >
+                            <RefreshCw className="w-4 h-4 mr-1" />
+                            Refresh
+                        </Button>
+                    </div>
+
                     {/* Stats Grid - 2 cols on mobile, 3 on tablet, 5 on desktop */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-3 xl:gap-4 mb-4 lg:mb-6">
                         {statsCards.map((stat, index) => (
@@ -197,7 +333,7 @@ const DashboardPage = () => {
                             >
                                 <h3 className="text-sm lg:text-base font-semibold text-gray-900 dark:text-white mb-2 lg:mb-3">Quick Actions</h3>
                                 <div className="grid grid-cols-2 gap-2 lg:gap-3">
-                                    <Link href="/call-reports">
+                                    <Link href="/dashboard/call-reports">
                                         <motion.div 
                                             whileHover={{ scale: 1.02, y: -2 }}
                                             className="p-2.5 lg:p-3 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-200/50 dark:border-cyan-500/20 cursor-pointer group"
@@ -207,7 +343,7 @@ const DashboardPage = () => {
                                             <p className="text-[10px] lg:text-xs text-gray-500 dark:text-gray-400">View call history</p>
                                         </motion.div>
                                     </Link>
-                                    <Link href="/analytics-dashboard">
+                                    <Link href="/dashboard/analytics-dashboard">
                                         <motion.div 
                                             whileHover={{ scale: 1.02, y: -2 }}
                                             className="p-2.5 lg:p-3 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-500/10 dark:to-indigo-500/10 border border-purple-200/50 dark:border-purple-500/20 cursor-pointer group"
@@ -270,7 +406,6 @@ const DashboardPage = () => {
                                     )}
                                 </div>
 
-                                {/* Agents List - fixed max height with scroll */}
                                 <div 
                                     className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-slate-800/50 p-3 lg:p-4 shadow-lg overflow-y-auto max-h-[537px]"
                                 >
@@ -281,7 +416,7 @@ const DashboardPage = () => {
                                             scrollbarColor: 'rgba(100, 116, 139, 0.3) transparent'
                                         }}
                                     >
-                                        {loading ? (
+                                        {agentsLoading ? (
                                             <LoadingSpinner />
                                         ) : (
                                             <AgentSection agents={agents} />
