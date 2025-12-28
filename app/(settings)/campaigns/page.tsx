@@ -26,15 +26,16 @@ import {
     Zap,
     Search,
     Bot,
-    Loader2
+    Loader2,
+    ChevronLeft,
+    ChevronRight,
+    Database
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-// import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-// import { Badge } from "@/components/ui/badge"
 import {
     Table,
     TableBody,
@@ -47,7 +48,6 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
@@ -58,12 +58,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -82,6 +76,19 @@ import { CampaignEdit } from "@/components/campaigns/campaign-edit"
 import * as CampaignService from "@/services/campaign-service"
 import { logCampaignActivity } from "@/services/activity-service"
 
+// ============================================
+// WIZARD STEPS CONFIGURATION
+// ============================================
+const WIZARD_STEPS = [
+    { id: 'basics', title: 'Basics', icon: Target, description: 'Campaign name, agent & leads' },
+    { id: 'data', title: 'Data Mapping', icon: Database, description: 'Map CSV columns to fields' },
+    { id: 'booking', title: 'Booking', icon: Calendar, description: 'Calendar & meeting settings' },
+    { id: 'automation', title: 'Automation', icon: Zap, description: 'Email & call automation' }
+]
+
+// ============================================
+// HELPER COMPONENTS
+// ============================================
 const LoadingSpinner = () => (
     <div className="flex items-center justify-center py-16">
         <div className="relative">
@@ -118,7 +125,7 @@ const EmptyState = ({ onCreateClick }: { onCreateClick: () => void }) => (
 )
 
 const StatCard = ({ icon: Icon, label, value, color, delay = 0 }: { 
-    icon: any
+    icon: React.ElementType
     label: string
     value: string | number
     color: string
@@ -178,6 +185,9 @@ const getStatusConfig = (status: string) => {
     }
 }
 
+// ============================================
+// MAIN CAMPAIGNS PAGE COMPONENT
+// ============================================
 export default function CampaignsPage() {
     const router = useRouter()
     const { token } = useIsAuthenticated()
@@ -185,6 +195,7 @@ export default function CampaignsPage() {
     const { agents } = useAgents()
     const { refreshActivities } = useActivities()
 
+    // UI State
     const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showSettingsDialog, setShowSettingsDialog] = useState(false)
@@ -194,7 +205,11 @@ export default function CampaignsPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
+    
+    // Wizard State
+    const [currentStep, setCurrentStep] = useState(0)
 
+    // Form State
     const [formData, setFormData] = useState<CampaignFormState>({
         campaign_name: '',
         description: '',
@@ -208,7 +223,7 @@ export default function CampaignsPage() {
         csv_data: []
     })
 
-    // Auto-refresh campaigns when component mounts to get latest status
+    // Auto-refresh campaigns when component mounts
     useEffect(() => {
         if (token) {
             console.log('Campaigns page mounted, refreshing campaigns...')
@@ -217,11 +232,15 @@ export default function CampaignsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token])
 
+    // Filter campaigns based on search query
     const filteredCampaigns = campaigns.filter(campaign =>
         campaign.campaign_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         campaign.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
+    // ============================================
+    // CSV FILE HANDLING
+    // ============================================
     const parseCSVFile = (file: File) => {
         const reader = new FileReader()
         reader.onload = (e) => {
@@ -229,9 +248,9 @@ export default function CampaignsPage() {
             const rows = text.split('\n').map(row => row.split(','))
             const headers = rows[0].map(h => h.trim())
             const data = rows.slice(1).map(row => {
-                const obj: any = {}
+                const obj: Record<string, string> = {}
                 headers.forEach((header, index) => {
-                    obj[header] = row[index]?.trim()
+                    obj[header] = row[index]?.trim() || ''
                 })
                 return obj
             }).filter(row => Object.values(row).some(v => v))
@@ -251,6 +270,91 @@ export default function CampaignsPage() {
         toast({ title: "CSV Uploaded", description: `Loaded ${file.name}` })
     }
 
+    // ============================================
+    // WIZARD NAVIGATION & VALIDATION
+    // ============================================
+    const validateCurrentStep = (): boolean => {
+        const errors: FormValidationErrors = {}
+
+        switch (currentStep) {
+            case 0: // Basics
+                if (!formData.campaign_name.trim()) {
+                    errors.campaign_name = 'Campaign name is required'
+                }
+                if (!formData.agent_id) {
+                    errors.agent_id = 'Please select an agent'
+                }
+                if (!formData.csv_file) {
+                    errors.csv_file = 'CSV file is required'
+                }
+                break
+            case 1: // Data Mapping
+                const requiredMappings = formData.data_mapping.filter(m => m.required)
+                const mappedRequired = requiredMappings.filter(m => m.csv_column)
+                if (mappedRequired.length !== requiredMappings.length) {
+                    errors.data_mapping = 'Please map all required fields'
+                }
+                break
+            case 2: // Booking - optional, no required validation
+                if (formData.booking_enabled) {
+                    if (formData.booking_config.send_invite_to_team &&
+                        formData.booking_config.team_email_addresses.length === 0) {
+                        errors.booking_config = 'Team email addresses are required when team invites are enabled'
+                    }
+                }
+                break
+            case 3: // Automation
+                if (!formData.automation_config.email_template.trim()) {
+                    errors.automation_config = 'Email template is required'
+                }
+                if (!formData.automation_config.call_script.trim()) {
+                    errors.automation_config = 'Call script is required'
+                }
+                break
+        }
+
+        setFormErrors(errors)
+        return Object.keys(errors).length === 0
+    }
+
+    const handleNextStep = () => {
+        if (validateCurrentStep()) {
+            setCurrentStep(prev => Math.min(prev + 1, WIZARD_STEPS.length - 1))
+            setFormErrors({})
+        } else {
+            toast({ 
+                title: "Please complete required fields", 
+                description: "Fix the errors before proceeding", 
+                variant: "destructive" 
+            })
+        }
+    }
+
+    const handlePrevStep = () => {
+        setFormErrors({})
+        setCurrentStep(prev => Math.max(prev - 1, 0))
+    }
+
+    const resetWizard = () => {
+        setCurrentStep(0)
+        setFormErrors({})
+        setFormData({
+            campaign_name: '',
+            description: '',
+            agent_id: '',
+            data_mapping: defaultDataMapping,
+            booking_enabled: false,
+            booking_config: defaultBookingConfig,
+            automation_config: defaultAutomationConfig,
+            csv_file: null,
+            csv_headers: [],
+            csv_data: []
+        })
+    }
+
+    // ============================================
+    // CAMPAIGN ACTIONS
+    // ============================================
     const handleRefresh = async () => {
         setIsRefreshing(true)
         await refreshCampaigns()
@@ -262,6 +366,7 @@ export default function CampaignsPage() {
             setIsSubmitting(true)
             setFormErrors({})
 
+            // Final validation
             const errors = validateForm(formData)
             if (Object.keys(errors).length > 0) {
                 setFormErrors(errors)
@@ -273,34 +378,23 @@ export default function CampaignsPage() {
 
             if (success) {
                 setShowCreateDialog(false)
-                setFormData({
-                    campaign_name: '',
-                    description: '',
-                    agent_id: '',
-                    data_mapping: defaultDataMapping,
-                    booking_enabled: false,
-                    booking_config: defaultBookingConfig,
-                    automation_config: defaultAutomationConfig,
-                    csv_file: null,
-                    csv_headers: [],
-                    csv_data: []
-                })
+                resetWizard()
+                toast({ title: "Success", description: "Campaign created successfully!" })
             }
         } catch (error) {
             console.error('Error creating campaign:', error)
+            toast({ title: "Error", description: "Failed to create campaign", variant: "destructive" })
         } finally {
             setIsSubmitting(false)
         }
     }
 
-    // Start Campaign - calls API and refreshes list
     const handleStartCampaign = async (campaignId: string) => {
         if (!token) {
             toast({ title: "Error", description: "Please login first", variant: "destructive" })
             return
         }
         
-        // Find campaign name for activity logging
         const campaign = campaigns.find(c => c.id === campaignId)
         const campaignName = campaign?.campaign_name || 'Unknown Campaign'
         
@@ -309,12 +403,11 @@ export default function CampaignsPage() {
             console.log('Starting campaign:', campaignId)
             await CampaignService.startCampaign(campaignId, token)
             
-            // Log activity
             await logCampaignActivity(token, campaignName, campaignId, 'started')
                 .catch(err => console.error('Failed to log activity:', err))
             
-            await refreshCampaigns() // Refresh the list to get updated status
-            await refreshActivities() // Refresh activity feed
+            await refreshCampaigns()
+            await refreshActivities()
             toast({ title: "Success", description: "Campaign started successfully!" })
         } catch (error: any) {
             console.error('Failed to start campaign:', error)
@@ -324,14 +417,12 @@ export default function CampaignsPage() {
         }
     }
 
-    // Pause Campaign - calls API and refreshes list
     const handlePauseCampaign = async (campaignId: string) => {
         if (!token) {
             toast({ title: "Error", description: "Please login first", variant: "destructive" })
             return
         }
         
-        // Find campaign name for activity logging
         const campaign = campaigns.find(c => c.id === campaignId)
         const campaignName = campaign?.campaign_name || 'Unknown Campaign'
         
@@ -340,12 +431,11 @@ export default function CampaignsPage() {
             console.log('Pausing campaign:', campaignId)
             await CampaignService.pauseCampaign(campaignId, token)
             
-            // Log activity
             await logCampaignActivity(token, campaignName, campaignId, 'paused')
                 .catch(err => console.error('Failed to log activity:', err))
             
-            await refreshCampaigns() // Refresh the list to get updated status
-            await refreshActivities() // Refresh activity feed
+            await refreshCampaigns()
+            await refreshActivities()
             toast({ title: "Success", description: "Campaign paused" })
         } catch (error: any) {
             console.error('Failed to pause campaign:', error)
@@ -355,14 +445,12 @@ export default function CampaignsPage() {
         }
     }
 
-    // Resume Campaign - calls API and refreshes list
     const handleResumeCampaign = async (campaignId: string) => {
         if (!token) {
             toast({ title: "Error", description: "Please login first", variant: "destructive" })
             return
         }
         
-        // Find campaign name for activity logging
         const campaign = campaigns.find(c => c.id === campaignId)
         const campaignName = campaign?.campaign_name || 'Unknown Campaign'
         
@@ -371,12 +459,11 @@ export default function CampaignsPage() {
             console.log('Resuming campaign:', campaignId)
             await CampaignService.resumeCampaign(campaignId, token)
             
-            // Log activity
             await logCampaignActivity(token, campaignName, campaignId, 'resumed')
                 .catch(err => console.error('Failed to log activity:', err))
             
-            await refreshCampaigns() // Refresh the list to get updated status
-            await refreshActivities() // Refresh activity feed
+            await refreshCampaigns()
+            await refreshActivities()
             toast({ title: "Success", description: "Campaign resumed" })
         } catch (error: any) {
             console.error('Failed to resume campaign:', error)
@@ -390,7 +477,9 @@ export default function CampaignsPage() {
         router.push(`/campaigns/${campaignId}`)
     }
 
-    // Mobile Campaign Card Component
+    // ============================================
+    // MOBILE CAMPAIGN CARD COMPONENT
+    // ============================================
     const CampaignCard = ({ campaign, index }: { campaign: any; index: number }) => {
         const statusConfig = getStatusConfig(campaign.status)
         const isStartLoading = actionLoading === `start-${campaign.id}`
@@ -463,6 +552,7 @@ export default function CampaignsPage() {
                     </DropdownMenu>
                 </div>
 
+                {/* Metrics Grid */}
                 <div className="grid grid-cols-4 gap-2 p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg">
                     <div className="text-center">
                         <p className="text-lg font-bold text-gray-900 dark:text-white">{campaign.metrics?.total_leads || 0}</p>
@@ -482,6 +572,7 @@ export default function CampaignsPage() {
                     </div>
                 </div>
 
+                {/* Action Buttons */}
                 <div className="flex gap-2 mt-4">
                     <Button
                         variant="outline"
@@ -492,7 +583,6 @@ export default function CampaignsPage() {
                         <Eye className="w-4 h-4 mr-1.5" />View
                     </Button>
                     
-                    {/* Queued -> Start Button */}
                     {campaign.status === 'queued' && (
                         <Button
                             size="sm"
@@ -505,7 +595,6 @@ export default function CampaignsPage() {
                         </Button>
                     )}
                     
-                    {/* Active -> Pause Button */}
                     {campaign.status === 'active' && (
                         <Button
                             size="sm"
@@ -519,7 +608,6 @@ export default function CampaignsPage() {
                         </Button>
                     )}
                     
-                    {/* Paused -> Resume Button */}
                     {campaign.status === 'paused' && (
                         <Button
                             size="sm"
@@ -536,9 +624,14 @@ export default function CampaignsPage() {
         )
     }
 
+    // ============================================
+    // RENDER
+    // ============================================
     return (
         <div className="p-4 lg:p-6 max-w-[1600px] mx-auto space-y-6">
-            {/* Header */}
+            {/* ============================================ */}
+            {/* PAGE HEADER */}
+            {/* ============================================ */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
                     <h1 className="text-2xl lg:text-3xl font-bold">
@@ -559,7 +652,9 @@ export default function CampaignsPage() {
                 </motion.div>
             </div>
 
-            {/* Stats */}
+            {/* ============================================ */}
+            {/* STATS CARDS */}
+            {/* ============================================ */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
                 <StatCard icon={Target} label="Total Campaigns" value={campaigns.length} color="from-cyan-500 to-blue-600" delay={0} />
                 <StatCard icon={Zap} label="Active" value={campaigns.filter(c => c.status === 'active').length} color="from-emerald-500 to-green-600" delay={0.1} />
@@ -567,7 +662,9 @@ export default function CampaignsPage() {
                 <StatCard icon={CalendarCheck} label="Bookings" value={campaigns.reduce((acc, c) => acc + (c.metrics?.booked || 0), 0)} color="from-amber-500 to-orange-600" delay={0.3} />
             </div>
 
-            {/* Campaigns List */}
+            {/* ============================================ */}
+            {/* CAMPAIGNS LIST */}
+            {/* ============================================ */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-slate-800/50 shadow-xl overflow-hidden">
                 {/* Card Header */}
                 <div className="p-4 lg:p-6 border-b border-gray-200/50 dark:border-slate-800/50">
@@ -674,7 +771,6 @@ export default function CampaignsPage() {
                                                                 <Eye className="w-4 h-4 mr-1.5" />View
                                                             </Button>
                                                             
-                                                            {/* Queued -> Start */}
                                                             {campaign.status === 'queued' && (
                                                                 <Button 
                                                                     size="sm" 
@@ -687,7 +783,6 @@ export default function CampaignsPage() {
                                                                 </Button>
                                                             )}
                                                             
-                                                            {/* Active -> Pause */}
                                                             {campaign.status === 'active' && (
                                                                 <Button 
                                                                     size="sm" 
@@ -701,7 +796,6 @@ export default function CampaignsPage() {
                                                                 </Button>
                                                             )}
                                                             
-                                                            {/* Paused -> Resume */}
                                                             {campaign.status === 'paused' && (
                                                                 <Button 
                                                                     size="sm" 
@@ -739,108 +833,303 @@ export default function CampaignsPage() {
                 </div>
             </motion.div>
 
-            {/* Create Campaign Dialog */}
-            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            {/* ============================================ */}
+            {/* CREATE CAMPAIGN WIZARD DIALOG */}
+            {/* ============================================ */}
+            <Dialog open={showCreateDialog} onOpenChange={(open) => {
+                if (!open) {
+                    resetWizard()
+                }
+                setShowCreateDialog(open)
+            }}>
                 <DialogContent className="max-w-[95vw] sm:max-w-lg lg:max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-gray-200/50 dark:border-slate-700/50 rounded-2xl">
+                    {/* Gradient Top Bar */}
                     <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500" />
-                    <div className="p-6">
-                        <DialogHeader className="mb-4">
+                    
+                    {/* Header Section */}
+                    <div className="p-6 pb-0">
+                        <DialogHeader className="mb-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
                                     <Target className="w-5 h-5 text-white" />
                                 </div>
                                 <div>
                                     <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Create New Campaign</DialogTitle>
-                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">Set up your automated sales campaign</DialogDescription>
+                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+                                        Step {currentStep + 1} of {WIZARD_STEPS.length} — {WIZARD_STEPS[currentStep].title}
+                                    </DialogDescription>
                                 </div>
                             </div>
                         </DialogHeader>
 
-                        <Tabs defaultValue="basics" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-gray-100 dark:bg-slate-800 rounded-xl p-1">
-                                <TabsTrigger value="basics" className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Basics</TabsTrigger>
-                                <TabsTrigger value="data" className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Data</TabsTrigger>
-                                <TabsTrigger value="booking" className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Booking</TabsTrigger>
-                                <TabsTrigger value="automation" className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Automation</TabsTrigger>
-                            </TabsList>
-
-                            <div className="mt-6 max-h-[50vh] overflow-y-auto pr-2">
-                                <TabsContent value="basics" className="space-y-5 mt-0">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                            <Target className="w-4 h-4 text-cyan-500" />Campaign Name
-                                        </Label>
-                                        <Input placeholder="e.g., Q1 Sales Outreach" value={formData.campaign_name} onChange={(e) => setFormData({ ...formData, campaign_name: e.target.value })} className="h-11 bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl" />
-                                        {formErrors.campaign_name && <p className="text-sm text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{formErrors.campaign_name}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                            <Sparkles className="w-4 h-4 text-purple-500" />Description
-                                        </Label>
-                                        <Textarea placeholder="Describe your campaign goals..." value={formData.description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })} rows={3} className="bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl resize-none" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                            <Bot className="w-4 h-4 text-blue-500" />Select Agent
-                                        </Label>
-                                        <Select value={formData.agent_id} onValueChange={(value) => setFormData({ ...formData, agent_id: value })}>
-                                            <SelectTrigger className="h-11 bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl"><SelectValue placeholder="Select an agent" /></SelectTrigger>
-                                            <SelectContent>
-                                                {agents.map((agent) => (<SelectItem key={agent.id} value={agent.id || ''}>{agent.name || 'Unnamed Agent'}</SelectItem>))}
-                                            </SelectContent>
-                                        </Select>
-                                        {formErrors.agent_id && <p className="text-sm text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{formErrors.agent_id}</p>}
-                                    </div>
-                                    <FileUploadComponent onFileSelect={handleFileSelect} selectedFile={formData.csv_file} error={formErrors.csv_file} />
-                                </TabsContent>
-                                <TabsContent value="data" className="mt-0">
-                                    <DataMappingComponent csvHeaders={formData.csv_headers} dataMapping={formData.data_mapping} onMappingChange={(mapping) => setFormData({ ...formData, data_mapping: mapping })} error={formErrors.data_mapping} />
-                                </TabsContent>
-                                <TabsContent value="booking" className="space-y-5 mt-0">
-                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-500/20 rounded-xl">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"><Calendar className="w-5 h-5 text-white" /></div>
-                                            <div>
-                                                <Label className="text-sm font-medium text-gray-900 dark:text-white">Enable Booking</Label>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Allow leads to book appointments</p>
-                                            </div>
-                                        </div>
-                                        <Switch checked={formData.booking_enabled} onCheckedChange={(checked: boolean) => setFormData({ ...formData, booking_enabled: checked })} className="data-[state=checked]:bg-cyan-500" />
-                                    </div>
-                                    <AnimatePresence>
-                                        {formData.booking_enabled && (
-                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                                                <BookingConfigComponent bookingConfig={formData.booking_config} onConfigChange={(config) => setFormData({ ...formData, booking_config: config })} error={formErrors.booking_config} />
+                        {/* Step Progress Indicator */}
+                        <div className="relative mb-6">
+                            {/* Step Indicators Container */}
+                            <div className="relative flex justify-between">
+                                {/* Progress Bar Background - positioned between icon centers */}
+                                <div 
+                                    className="absolute top-4 h-1 bg-gray-200 dark:bg-slate-700 rounded-full"
+                                    style={{ left: '16px', right: '16px' }}
+                                />
+                                
+                                {/* Progress Bar Fill - animated width based on current step */}
+                                <motion.div 
+                                    className="absolute top-4 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
+                                    style={{ left: '16px' }}
+                                    initial={{ width: 0 }}
+                                    animate={{ 
+                                        width: currentStep === 0 
+                                            ? 0 
+                                            : `calc((100% - 32px) * ${currentStep / (WIZARD_STEPS.length - 1)})` 
+                                    }}
+                                    transition={{ duration: 0.3 }}
+                                />
+                                {WIZARD_STEPS.map((step, index) => {
+                                    const StepIcon = step.icon
+                                    const isCompleted = index < currentStep
+                                    const isCurrent = index === currentStep
+                                    
+                                    return (
+                                        <div key={step.id} className="flex flex-col items-center">
+                                            <motion.div
+                                                initial={false}
+                                                animate={{ scale: isCurrent ? 1.1 : 1 }}
+                                                className={`
+                                                    w-8 h-8 rounded-lg flex items-center justify-center z-10 transition-all duration-300
+                                                    ${isCompleted ? 'bg-cyan-500 shadow-lg shadow-cyan-500/30' : ''}
+                                                    ${isCurrent ? 'bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30 ring-4 ring-cyan-500/20' : ''}
+                                                    ${!isCompleted && !isCurrent ? 'bg-gray-200 dark:bg-slate-700' : ''}
+                                                `}
+                                            >
+                                                {isCompleted ? (
+                                                    <CheckCircle className="w-4 h-4 text-white" />
+                                                ) : (
+                                                    <StepIcon className={`w-4 h-4 ${isCurrent ? 'text-white' : 'text-gray-400 dark:text-gray-500'}`} />
+                                                )}
                                             </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </TabsContent>
-                                <TabsContent value="automation" className="mt-0">
-                                    <AutomationConfigComponent automationConfig={formData.automation_config} onConfigChange={(config) => setFormData({ ...formData, automation_config: config })} error={formErrors.automation_config} />
-                                </TabsContent>
+                                            <p className={`text-[10px] mt-2 font-medium hidden sm:block ${isCurrent ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                                                {step.title}
+                                            </p>
+                                        </div>
+                                    )
+                                })}
                             </div>
-                        </Tabs>
+                        </div>
                     </div>
-                    <DialogFooter className="p-6 pt-4 border-t border-gray-200/50 dark:border-slate-700/50 flex-col sm:flex-row gap-2">
-                        <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="w-full sm:w-auto rounded-xl">Cancel</Button>
-                        <Button onClick={handleCreateCampaign} disabled={isSubmitting} className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25">
-                            {isSubmitting ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</>) : (<><CheckCircle className="w-4 h-4 mr-2" />Create Campaign</>)}
-                        </Button>
-                    </DialogFooter>
+
+                    {/* Step Content */}
+                    <div className="px-6 overflow-y-auto max-h-[45vh]">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentStep}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {/* Step 1: Basics */}
+                                {currentStep === 0 && (
+                                    <div className="space-y-5">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                <Target className="w-4 h-4 text-cyan-500" />Campaign Name <span className="text-red-500">*</span>
+                                            </Label>
+                                            <Input 
+                                                placeholder="e.g., Q1 Sales Outreach" 
+                                                value={formData.campaign_name} 
+                                                onChange={(e) => setFormData({ ...formData, campaign_name: e.target.value })} 
+                                                className={`h-11 bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl ${formErrors.campaign_name ? 'border-red-500 focus:ring-red-500' : ''}`} 
+                                            />
+                                            {formErrors.campaign_name && (
+                                                <p className="text-sm text-red-600 flex items-center gap-1">
+                                                    <AlertCircle className="w-3.5 h-3.5" />{formErrors.campaign_name}
+                                                </p>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                <Sparkles className="w-4 h-4 text-purple-500" />Description
+                                            </Label>
+                                            <Textarea 
+                                                placeholder="Describe your campaign goals..." 
+                                                value={formData.description} 
+                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })} 
+                                                rows={3} 
+                                                className="bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl resize-none" 
+                                            />
+                                        </div>
+                                        
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                <Bot className="w-4 h-4 text-blue-500" />Select Agent <span className="text-red-500">*</span>
+                                            </Label>
+                                            <Select value={formData.agent_id} onValueChange={(value) => setFormData({ ...formData, agent_id: value })}>
+                                                <SelectTrigger className={`h-11 bg-gray-50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 rounded-xl ${formErrors.agent_id ? 'border-red-500' : ''}`}>
+                                                    <SelectValue placeholder="Select an agent" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {agents.map((agent) => (
+                                                        <SelectItem key={agent.id} value={agent.id || ''}>
+                                                            {agent.name || 'Unnamed Agent'}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {formErrors.agent_id && (
+                                                <p className="text-sm text-red-600 flex items-center gap-1">
+                                                    <AlertCircle className="w-3.5 h-3.5" />{formErrors.agent_id}
+                                                </p>
+                                            )}
+                                        </div>
+                                        
+                                        <FileUploadComponent 
+                                            onFileSelect={handleFileSelect} 
+                                            selectedFile={formData.csv_file} 
+                                            error={formErrors.csv_file} 
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Step 2: Data Mapping */}
+                                {currentStep === 1 && (
+                                    <DataMappingComponent 
+                                        csvHeaders={formData.csv_headers} 
+                                        dataMapping={formData.data_mapping} 
+                                        onMappingChange={(mapping) => setFormData({ ...formData, data_mapping: mapping })} 
+                                        error={formErrors.data_mapping} 
+                                    />
+                                )}
+
+                                {/* Step 3: Booking */}
+                                {currentStep === 2 && (
+                                    <div className="space-y-5">
+                                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-500/20 rounded-xl">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                                    <Calendar className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-sm font-medium text-gray-900 dark:text-white">Enable Booking</Label>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Allow leads to book appointments</p>
+                                                </div>
+                                            </div>
+                                            <Switch 
+                                                checked={formData.booking_enabled} 
+                                                onCheckedChange={(checked: boolean) => setFormData({ ...formData, booking_enabled: checked })} 
+                                                className="data-[state=checked]:bg-cyan-500" 
+                                            />
+                                        </div>
+                                        
+                                        <AnimatePresence>
+                                            {formData.booking_enabled && (
+                                                <motion.div 
+                                                    initial={{ opacity: 0, height: 0 }} 
+                                                    animate={{ opacity: 1, height: 'auto' }} 
+                                                    exit={{ opacity: 0, height: 0 }}
+                                                >
+                                                    <BookingConfigComponent 
+                                                        bookingConfig={formData.booking_config} 
+                                                        onConfigChange={(config) => setFormData({ ...formData, booking_config: config })} 
+                                                        error={formErrors.booking_config} 
+                                                    />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                        
+                                        {!formData.booking_enabled && (
+                                            <div className="text-center py-8 px-6 bg-gray-50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-gray-200 dark:border-slate-700">
+                                                <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">Booking is disabled. Enable it above to configure calendar settings.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Step 4: Automation */}
+                                {currentStep === 3 && (
+                                    <AutomationConfigComponent 
+                                        automationConfig={formData.automation_config} 
+                                        onConfigChange={(config) => setFormData({ ...formData, automation_config: config })} 
+                                        error={formErrors.automation_config} 
+                                    />
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Footer with Navigation */}
+                    <div className="p-6 pt-6 border-t border-gray-200/50 dark:border-slate-700/50 mt-4">
+                        <div className="flex items-center justify-between">
+                            {/* Back / Cancel Button */}
+                            <Button
+                                variant="outline"
+                                onClick={currentStep === 0 ? () => setShowCreateDialog(false) : handlePrevStep}
+                                className="rounded-xl px-5"
+                            >
+                                {currentStep === 0 ? 'Cancel' : (
+                                    <>
+                                        <ChevronLeft className="w-4 h-4 mr-1" />
+                                        Back
+                                    </>
+                                )}
+                            </Button>
+
+                            {/* Step Counter (mobile) */}
+                            <span className="text-sm text-gray-500 dark:text-gray-400 sm:hidden">
+                                {currentStep + 1} / {WIZARD_STEPS.length}
+                            </span>
+
+                            {/* Next / Create Button */}
+                            {currentStep < WIZARD_STEPS.length - 1 ? (
+                                <Button
+                                    onClick={handleNextStep}
+                                    className="rounded-xl px-6 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
+                                >
+                                    Next
+                                    <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            ) : (
+                                <Button 
+                                    onClick={handleCreateCampaign} 
+                                    disabled={isSubmitting} 
+                                    className="rounded-xl px-6 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-lg shadow-emerald-500/25"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle className="w-4 h-4 mr-2" />
+                                            Create Campaign
+                                        </>
+                                    )}
+                                </Button>
+                            )}
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
 
-            {/* View Leads Dialog */}
+            {/* ============================================ */}
+            {/* VIEW LEADS DIALOG */}
+            {/* ============================================ */}
             <Dialog open={showLeadsDialog} onOpenChange={setShowLeadsDialog}>
                 <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-5xl max-h-[85vh] p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-gray-200/50 dark:border-slate-700/50 rounded-2xl overflow-hidden">
                     <div className="h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500" />
                     <div className="p-6">
                         <DialogHeader className="mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/25"><Users className="w-5 h-5 text-white" /></div>
+                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                                    <Users className="w-5 h-5 text-white" />
+                                </div>
                                 <div>
                                     <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Campaign Leads</DialogTitle>
-                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">{selectedCampaign?.campaign_name}   {selectedCampaign?.metrics?.total_leads || 0} leads</DialogDescription>
+                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+                                        {selectedCampaign?.campaign_name} • {selectedCampaign?.metrics?.total_leads || 0} leads
+                                    </DialogDescription>
                                 </div>
                             </div>
                         </DialogHeader>
@@ -850,19 +1139,42 @@ export default function CampaignsPage() {
                                     {selectedCampaign?.leads?.map((lead: any, index: number) => {
                                         const statusConfig = getStatusConfig(lead.status)
                                         return (
-                                            <motion.div key={lead.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }} className="p-4 bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-cyan-500/30 transition-all">
+                                            <motion.div 
+                                                key={lead.id} 
+                                                initial={{ opacity: 0, y: 10 }} 
+                                                animate={{ opacity: 1, y: 0 }} 
+                                                transition={{ delay: index * 0.03 }} 
+                                                className="p-4 bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-cyan-500/30 transition-all"
+                                            >
                                                 <div className="flex justify-between items-start mb-3">
-                                                    <div><p className="font-semibold text-gray-900 dark:text-white">{lead.name}</p><p className="text-sm text-gray-500 dark:text-gray-400">{lead.email}</p></div>
-                                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${statusConfig.color}`}>{lead.status}</div>
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900 dark:text-white">{lead.name}</p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">{lead.email}</p>
+                                                    </div>
+                                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${statusConfig.color}`}>
+                                                        {lead.status}
+                                                    </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                                                    <div><p className="text-gray-500 dark:text-gray-400 text-xs">Phone</p><p className="text-gray-900 dark:text-white">{lead.phone || '-'}</p></div>
-                                                    <div><p className="text-gray-500 dark:text-gray-400 text-xs">Company</p><p className="text-gray-900 dark:text-white">{lead.company || '-'}</p></div>
+                                                    <div>
+                                                        <p className="text-gray-500 dark:text-gray-400 text-xs">Phone</p>
+                                                        <p className="text-gray-900 dark:text-white">{lead.phone || '-'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500 dark:text-gray-400 text-xs">Company</p>
+                                                        <p className="text-gray-900 dark:text-white">{lead.company || '-'}</p>
+                                                    </div>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs"><Phone className="w-3 h-3 mr-1" />Call</Button>
-                                                    <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs"><Mail className="w-3 h-3 mr-1" />Email</Button>
-                                                    <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs"><Calendar className="w-3 h-3 mr-1" />Schedule</Button>
+                                                    <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs">
+                                                        <Phone className="w-3 h-3 mr-1" />Call
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs">
+                                                        <Mail className="w-3 h-3 mr-1" />Email
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" className="flex-1 rounded-lg text-xs">
+                                                        <Calendar className="w-3 h-3 mr-1" />Schedule
+                                                    </Button>
                                                 </div>
                                             </motion.div>
                                         )
@@ -870,7 +1182,9 @@ export default function CampaignsPage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-12">
-                                    <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4"><Users className="w-8 h-8 text-gray-400" /></div>
+                                    <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                                        <Users className="w-8 h-8 text-gray-400" />
+                                    </div>
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No leads yet</h3>
                                     <p className="text-gray-500 dark:text-gray-400">Leads will appear here once the campaign starts</p>
                                 </div>
@@ -880,28 +1194,38 @@ export default function CampaignsPage() {
                 </DialogContent>
             </Dialog>
 
-            {/* Settings Dialog */}
+            {/* ============================================ */}
+            {/* SETTINGS DIALOG */}
+            {/* ============================================ */}
             <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
                 <DialogContent className="max-w-[95vw] sm:max-w-md p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-gray-200/50 dark:border-slate-700/50 rounded-2xl overflow-hidden">
                     <div className="h-1.5 bg-gradient-to-r from-gray-500 via-slate-500 to-gray-600" />
                     <div className="p-6">
                         <DialogHeader className="mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-500 to-slate-600 flex items-center justify-center shadow-lg"><Settings className="w-5 h-5 text-white" /></div>
+                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-500 to-slate-600 flex items-center justify-center shadow-lg">
+                                    <Settings className="w-5 h-5 text-white" />
+                                </div>
                                 <div>
                                     <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Campaign Settings</DialogTitle>
-                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">{selectedCampaign?.campaign_name}</DialogDescription>
+                                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+                                        {selectedCampaign?.campaign_name}
+                                    </DialogDescription>
                                 </div>
                             </div>
                         </DialogHeader>
                         <div className="py-8 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4"><Settings className="w-8 h-8 text-gray-400" /></div>
+                            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                                <Settings className="w-8 h-8 text-gray-400" />
+                            </div>
                             <p className="text-gray-500 dark:text-gray-400">Campaign settings coming soon</p>
                         </div>
                     </div>
-                    <DialogFooter className="p-6 pt-0">
-                        <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="w-full rounded-xl">Close</Button>
-                    </DialogFooter>
+                    <div className="p-6 pt-0">
+                        <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="w-full rounded-xl">
+                            Close
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

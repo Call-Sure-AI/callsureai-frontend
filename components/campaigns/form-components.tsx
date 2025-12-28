@@ -190,7 +190,7 @@ export const DataMappingComponent: React.FC<DataMappingComponentProps> = ({
     onMappingChange,
     error
 }) => {
-    const updateMapping = (index: number, field: keyof DataMapping, value: any) => {
+    const updateMapping = (index: number, field: keyof DataMapping, value: string | boolean) => {
         const newMapping = [...dataMapping];
         newMapping[index] = { ...newMapping[index], [field]: value };
         onMappingChange(newMapping);
@@ -326,7 +326,7 @@ export const BookingConfigComponent: React.FC<BookingConfigComponentProps> = ({
     onConfigChange,
     error
 }) => {
-    const updateConfig = (field: keyof BookingConfig, value: any) => {
+    const updateConfig = <K extends keyof BookingConfig>(field: K, value: BookingConfig[K]) => {
         onConfigChange({ ...bookingConfig, [field]: value });
     };
 
@@ -404,7 +404,7 @@ export const BookingConfigComponent: React.FC<BookingConfigComponentProps> = ({
                         <Input
                             type="number"
                             value={bookingConfig.meeting_duration_minutes}
-                            onChange={(e) => updateConfig('meeting_duration_minutes', parseInt(e.target.value))}
+                            onChange={(e) => updateConfig('meeting_duration_minutes', parseInt(e.target.value) || 30)}
                             min="15"
                             max="120"
                             className="bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-lg pr-16"
@@ -426,7 +426,7 @@ export const BookingConfigComponent: React.FC<BookingConfigComponentProps> = ({
                         <Input
                             type="number"
                             value={bookingConfig.buffer_time_minutes}
-                            onChange={(e) => updateConfig('buffer_time_minutes', parseInt(e.target.value))}
+                            onChange={(e) => updateConfig('buffer_time_minutes', parseInt(e.target.value) || 0)}
                             min="0"
                             max="60"
                             className="bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-lg pr-16"
@@ -523,7 +523,7 @@ export const AutomationConfigComponent: React.FC<AutomationConfigComponentProps>
     onConfigChange,
     error
 }) => {
-    const updateConfig = (field: keyof AutomationConfig, value: any) => {
+    const updateConfig = <K extends keyof AutomationConfig>(field: K, value: AutomationConfig[K]) => {
         onConfigChange({ ...automationConfig, [field]: value });
     };
 
@@ -605,7 +605,7 @@ export const AutomationConfigComponent: React.FC<AutomationConfigComponentProps>
                     <Input
                         type="number"
                         value={automationConfig.max_call_attempts}
-                        onChange={(e) => updateConfig('max_call_attempts', parseInt(e.target.value))}
+                        onChange={(e) => updateConfig('max_call_attempts', parseInt(e.target.value) || 3)}
                         min="1"
                         max="10"
                         className="bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-lg"
@@ -623,7 +623,7 @@ export const AutomationConfigComponent: React.FC<AutomationConfigComponentProps>
                         <Input
                             type="number"
                             value={automationConfig.call_interval_hours}
-                            onChange={(e) => updateConfig('call_interval_hours', parseInt(e.target.value))}
+                            onChange={(e) => updateConfig('call_interval_hours', parseInt(e.target.value) || 24)}
                             min="1"
                             max="168"
                             className="bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-lg pr-14"
@@ -645,7 +645,7 @@ export const AutomationConfigComponent: React.FC<AutomationConfigComponentProps>
                         <Input
                             type="number"
                             value={automationConfig.delay_between_calls}
-                            onChange={(e) => updateConfig('delay_between_calls', parseInt(e.target.value))}
+                            onChange={(e) => updateConfig('delay_between_calls', parseInt(e.target.value) || 30)}
                             min="1"
                             max="300"
                             className="bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-lg pr-12"
@@ -669,7 +669,7 @@ export const AutomationConfigComponent: React.FC<AutomationConfigComponentProps>
                     <Input
                         type="number"
                         value={automationConfig.max_concurrent_calls}
-                        onChange={(e) => updateConfig('max_concurrent_calls', parseInt(e.target.value))}
+                        onChange={(e) => updateConfig('max_concurrent_calls', parseInt(e.target.value) || 1)}
                         min="1"
                         max="10"
                         className="bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 rounded-lg"
