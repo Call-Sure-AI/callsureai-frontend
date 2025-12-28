@@ -158,9 +158,10 @@ const getStatusConfig = (status: string) => {
                 dotColor: 'bg-emerald-500'
             }
         case 'paused':
+        case 'inactive':
             return { 
-                color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-                dotColor: 'bg-amber-500'
+                color: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+                dotColor: 'bg-red-500'
             }
         case 'completed':
             return { 
@@ -179,8 +180,8 @@ const getStatusConfig = (status: string) => {
             }
         default:
             return { 
-                color: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
-                dotColor: 'bg-red-500'
+                color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20',
+                dotColor: 'bg-gray-500'
             }
     }
 }
@@ -525,7 +526,7 @@ export default function CampaignsPage() {
                                     <Pause className="w-4 h-4 mr-2" />Pause Campaign
                                 </DropdownMenuItem>
                             )}
-                            {campaign.status === 'paused' && (
+                            {(campaign.status === 'paused' || campaign.status === 'inactive') && (
                                 <DropdownMenuItem onClick={() => handleResumeCampaign(campaign.id)} className="text-cyan-600 dark:text-cyan-400">
                                     <Play className="w-4 h-4 mr-2" />Resume Campaign
                                 </DropdownMenuItem>
@@ -608,7 +609,7 @@ export default function CampaignsPage() {
                         </Button>
                     )}
                     
-                    {campaign.status === 'paused' && (
+                    {(campaign.status === 'paused' || campaign.status === 'inactive') && (
                         <Button
                             size="sm"
                             className="flex-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
@@ -796,7 +797,7 @@ export default function CampaignsPage() {
                                                                 </Button>
                                                             )}
                                                             
-                                                            {campaign.status === 'paused' && (
+                                                            {(campaign.status === 'paused' || campaign.status === 'inactive') && (
                                                                 <Button 
                                                                     size="sm" 
                                                                     onClick={(e) => { e.stopPropagation(); handleResumeCampaign(campaign.id) }} 
