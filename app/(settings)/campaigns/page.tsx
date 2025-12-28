@@ -526,7 +526,7 @@ export default function CampaignsPage() {
                                     <Pause className="w-4 h-4 mr-2" />Pause Campaign
                                 </DropdownMenuItem>
                             )}
-                            {(campaign.status === 'paused' || campaign.status === 'inactive') && (
+                            {(campaign.status === 'paused' || (campaign.status as string) === 'inactive') && (
                                 <DropdownMenuItem onClick={() => handleResumeCampaign(campaign.id)} className="text-cyan-600 dark:text-cyan-400">
                                     <Play className="w-4 h-4 mr-2" />Resume Campaign
                                 </DropdownMenuItem>
@@ -609,7 +609,7 @@ export default function CampaignsPage() {
                         </Button>
                     )}
                     
-                    {(campaign.status === 'paused' || campaign.status === 'inactive') && (
+                    {(campaign.status === 'paused' || (campaign.status as string) === 'inactive') && (
                         <Button
                             size="sm"
                             className="flex-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25"
@@ -797,7 +797,7 @@ export default function CampaignsPage() {
                                                                 </Button>
                                                             )}
                                                             
-                                                            {(campaign.status === 'paused' || campaign.status === 'inactive') && (
+                                                            {(campaign.status === 'paused' || (campaign.status as string) === 'inactive') && (
                                                                 <Button 
                                                                     size="sm" 
                                                                     onClick={(e) => { e.stopPropagation(); handleResumeCampaign(campaign.id) }} 
