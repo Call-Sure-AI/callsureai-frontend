@@ -1,6 +1,6 @@
 // services/activity-service.ts
 
-const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || 'https://beta.callsure.ai';
 
 export const getAllActivities = async (token: string) => {
     try {

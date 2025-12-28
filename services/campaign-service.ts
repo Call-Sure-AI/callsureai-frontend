@@ -1,7 +1,7 @@
 // services/campaign-service.ts
 import { CampaignFormData, CampaignResponse, defaultBookingConfig, DataMapping } from '@/types/campaign';
 
-const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
+const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL || 'https://beta.callsure.ai';
 
 // ============================================
 // CAMPAIGN CRUD OPERATIONS
@@ -107,11 +107,12 @@ export const getCampaignById = async (id: string, token: string): Promise<Campai
 };
 
 /**
- * Updates campaign details (name, description, etc.)
+ * Updates campaign details (name, description, status, etc.)
+ * Uses PUT /api/campaigns/{id} with JSON body
  */
 export const updateCampaignDetails = async (
     id: string, 
-    formData: { campaign_name?: string; description?: string }, 
+    formData: { campaign_name?: string; description?: string; status?: string }, 
     token: string
 ): Promise<CampaignResponse> => {
     const response = await fetch(`${getApiUrl()}/api/campaigns/${id}`, {
@@ -132,15 +133,16 @@ export const updateCampaignDetails = async (
 };
 
 /**
- * Updates campaign status
+ * Updates campaign status using PUT /api/campaigns/{id}
+ * Status can be: 'active' | 'inactive'
  */
 export const updateCampaignStatus = async (
     id: string, 
-    status: 'active' | 'paused' | 'stopped' | 'queued' | 'completed', 
+    status: 'active' | 'inactive', 
     token: string
 ): Promise<CampaignResponse> => {
-    const response = await fetch(`${getApiUrl()}/api/campaigns/${id}/status`, {
-        method: 'PATCH',
+    const response = await fetch(`${getApiUrl()}/api/campaigns/${id}`, {
+        method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -161,112 +163,31 @@ export const updateCampaignStatus = async (
 // ============================================
 
 /**
- * Starts a campaign
+ * Starts a campaign (sets status to 'active')
  */
-export const startCampaign = async (campaignId: string, token: string): Promise<any> => {
-    // Try the /start endpoint first
-    try {
-        const response = await fetch(`${getApiUrl()}/api/campaigns/${campaignId}/start`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            return await response.json();
-        }
-        
-        // If /start fails, try updating status directly
-        console.log('Start endpoint failed, trying status update...');
-    } catch (e) {
-        console.log('Start endpoint error, trying status update...');
-    }
-
-    // Fallback: Update status to 'active'
+export const startCampaign = async (campaignId: string, token: string): Promise<CampaignResponse> => {
     return await updateCampaignStatus(campaignId, 'active', token);
 };
 
 /**
- * Pauses a campaign
+ * Pauses a campaign (sets status to 'inactive')
  */
-export const pauseCampaign = async (campaignId: string, token: string): Promise<any> => {
-    // Try the /pause endpoint first
-    try {
-        const response = await fetch(`${getApiUrl()}/api/campaigns/${campaignId}/pause`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            return await response.json();
-        }
-        
-        console.log('Pause endpoint failed, trying status update...');
-    } catch (e) {
-        console.log('Pause endpoint error, trying status update...');
-    }
-
-    // Fallback: Update status to 'paused'
-    return await updateCampaignStatus(campaignId, 'paused', token);
+export const pauseCampaign = async (campaignId: string, token: string): Promise<CampaignResponse> => {
+    return await updateCampaignStatus(campaignId, 'inactive', token);
 };
 
 /**
- * Resumes a paused campaign
+ * Resumes a paused campaign (sets status to 'active')
  */
-export const resumeCampaign = async (campaignId: string, token: string): Promise<any> => {
-    // Try the /resume endpoint first
-    try {
-        const response = await fetch(`${getApiUrl()}/api/campaigns/${campaignId}/resume`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            return await response.json();
-        }
-        
-        console.log('Resume endpoint failed, trying status update...');
-    } catch (e) {
-        console.log('Resume endpoint error, trying status update...');
-    }
-
-    // Fallback: Update status to 'active'
+export const resumeCampaign = async (campaignId: string, token: string): Promise<CampaignResponse> => {
     return await updateCampaignStatus(campaignId, 'active', token);
 };
 
 /**
- * Completes/stops a campaign
+ * Completes/stops a campaign (sets status to 'inactive')
  */
-export const completeCampaign = async (campaignId: string, token: string): Promise<any> => {
-    // Try the /complete endpoint first
-    try {
-        const response = await fetch(`${getApiUrl()}/api/campaigns/${campaignId}/complete`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            return await response.json();
-        }
-        
-        console.log('Complete endpoint failed, trying status update...');
-    } catch (e) {
-        console.log('Complete endpoint error, trying status update...');
-    }
-
-    // Fallback: Update status to 'completed'
-    return await updateCampaignStatus(campaignId, 'completed', token);
+export const completeCampaign = async (campaignId: string, token: string): Promise<CampaignResponse> => {
+    return await updateCampaignStatus(campaignId, 'inactive', token);
 };
 
 /**
