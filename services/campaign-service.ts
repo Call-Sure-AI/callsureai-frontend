@@ -134,20 +134,24 @@ export const updateCampaignDetails = async (
 
 /**
  * Updates campaign status using PUT /api/campaigns/{id}
- * Status can be: 'active' | 'inactive'
+ * Maps various status values to API's accepted values: 'active' | 'inactive'
  */
 export const updateCampaignStatus = async (
     id: string, 
-    status: 'active' | 'inactive', 
+    status: 'active' | 'inactive' | 'paused' | 'stopped' | 'queued' | 'completed', 
     token: string
 ): Promise<CampaignResponse> => {
+    // Map status values to API accepted values
+    const apiStatus: 'active' | 'inactive' = 
+        status === 'active' ? 'active' : 'inactive';
+    
     const response = await fetch(`${getApiUrl()}/api/campaigns/${id}`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: apiStatus })
     });
 
     if (!response.ok) {
