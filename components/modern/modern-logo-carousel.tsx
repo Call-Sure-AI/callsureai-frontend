@@ -90,7 +90,7 @@ export const ModernLogoCarousel = () => {
               className="inline-block bg-gradient-to-r from-cyan-600 via-blue-500 to-cyan-600 dark:from-cyan-400 dark:via-blue-400 dark:to-cyan-400 bg-clip-text text-transparent"
               style={{ backgroundSize: "200% auto" }}
             >
-              10,000+
+              100+
             </motion.span>
             <span className="bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
               {" "}Happy Customers
