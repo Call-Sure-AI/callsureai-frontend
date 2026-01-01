@@ -229,8 +229,11 @@ const SentimentAnalysisDashboard = () => {
     return records.length > 0 ? records : MOCK_SENTIMENT_RECORDS;
   }, [sentiment?.records]);
 
-  const getSentimentConfig = (sentiment: string) => {
-    switch (sentiment.toLowerCase()) {
+  // ✅ UPDATED: Added defensive null check
+  const getSentimentConfig = (sentiment: string | undefined) => {
+    const safeSentiment = (sentiment || 'neutral').toLowerCase();
+    
+    switch (safeSentiment) {
       case 'positive': 
         return { 
           icon: Smile, 
@@ -265,20 +268,24 @@ const SentimentAnalysisDashboard = () => {
           bgColor: 'bg-gray-100 dark:bg-gray-500/20',
           barColor: 'bg-gray-500',
           gradient: 'from-gray-500 to-slate-500',
-          label: sentiment
+          label: sentiment || 'Unknown'
         };
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 0.7) return 'text-green-600 dark:text-green-400';
-    if (score >= 0.4) return 'text-blue-600 dark:text-blue-400';
+  // ✅ UPDATED: Added defensive null check
+  const getScoreColor = (score: number | undefined) => {
+    const safeScore = score ?? 0.5;
+    if (safeScore >= 0.7) return 'text-green-600 dark:text-green-400';
+    if (safeScore >= 0.4) return 'text-blue-600 dark:text-blue-400';
     return 'text-red-600 dark:text-red-400';
   };
 
-  const getScoreBarColor = (score: number) => {
-    if (score >= 0.7) return 'bg-gradient-to-r from-green-500 to-emerald-500';
-    if (score >= 0.4) return 'bg-gradient-to-r from-blue-500 to-cyan-500';
+  // ✅ UPDATED: Added defensive null check
+  const getScoreBarColor = (score: number | undefined) => {
+    const safeScore = score ?? 0.5;
+    if (safeScore >= 0.7) return 'bg-gradient-to-r from-green-500 to-emerald-500';
+    if (safeScore >= 0.4) return 'bg-gradient-to-r from-blue-500 to-cyan-500';
     return 'bg-gradient-to-r from-red-500 to-rose-500';
   };
 
@@ -325,22 +332,26 @@ const SentimentAnalysisDashboard = () => {
     improvement: wsData.stats.improvement || 5,
   };
 
-  // Sentiment Score Bar Component
-  const SentimentScoreBar = ({ score }: { score: number }) => (
-    <div className="flex items-center gap-2 w-full max-w-[120px]">
-      <div className="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: `${score * 100}%` }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`h-full rounded-full ${getScoreBarColor(score)}`}
-        />
+  // ✅ UPDATED: Added defensive null check
+  const SentimentScoreBar = ({ score }: { score: number | undefined }) => {
+    const safeScore = score ?? 0.5;
+    
+    return (
+      <div className="flex items-center gap-2 w-full max-w-[120px]">
+        <div className="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${safeScore * 100}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className={`h-full rounded-full ${getScoreBarColor(safeScore)}`}
+          />
+        </div>
+        <span className={`text-sm font-semibold min-w-[40px] ${getScoreColor(safeScore)}`}>
+          {(safeScore * 100).toFixed(0)}%
+        </span>
       </div>
-      <span className={`text-sm font-semibold min-w-[40px] ${getScoreColor(score)}`}>
-        {(score * 100).toFixed(0)}%
-      </span>
-    </div>
-  );
+    );
+  };
 
   // Trend Chart Bar Component
   const TrendBar = ({ data, maxHeight = 120 }: { data: SentimentTrend; maxHeight?: number }) => {

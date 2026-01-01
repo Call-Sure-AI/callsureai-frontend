@@ -246,8 +246,11 @@ const UrgencyDetectionDashboard = () => {
     { category: "Service Complaints", high: 65, medium: 25, low: 10, total: 42 }
   ];
 
-  const getUrgencyConfig = (level: string) => {
-    switch (level.toLowerCase()) {
+  const getUrgencyConfig = (level: string | undefined) => {
+    // Add safety check for undefined/null values
+    const safeLevel = (level || 'low').toLowerCase();
+    
+    switch (safeLevel) {
       case 'high':
         return {
           icon: AlertOctagon,
@@ -278,13 +281,16 @@ const UrgencyDetectionDashboard = () => {
           color: 'text-gray-600 dark:text-gray-400',
           bgColor: 'bg-gray-100 dark:bg-gray-500/20',
           gradient: 'from-gray-500 to-slate-500',
-          label: level
+          label: level || 'Unknown'
         };
     }
   };
 
-  const getStatusConfig = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusConfig = (status: string | undefined) => {
+    // Add safety check for undefined/null values
+    const safeStatus = (status || 'pending').toLowerCase();
+    
+    switch (safeStatus) {
       case 'resolved':
         return {
           icon: CheckCircle,

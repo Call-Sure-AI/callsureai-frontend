@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCompany } from '@/contexts/company-context';
 import { 
     useCompanyMetrics, 
     useAnalyticsWS, 
@@ -252,14 +253,31 @@ const DashboardMetricsContext = createContext<DashboardMetricsContextType | unde
 
 export function DashboardMetricsProvider({ children }: { children: React.ReactNode }) {
     const { user, loading: userLoading } = useCurrentUser();
+    const { company, isLoading: companyLoading } = useCompany();
     const [period, setPeriod] = useState('week');
     const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-    // Get company ID from user
+    // Get company ID from company context (primary) or user (fallback)
     const companyId = useMemo(() => {
-        if (!user) return null;
-        return (user as any).company_id || (user as any).companyId || null;
-    }, [user]);
+        if (company?.id) {
+            console.log('📊 Dashboard Metrics using company ID from company context:', company.id);
+            return company.id;
+        }
+        
+        if (user) {
+            const id = (user as any).company_id || (user as any).companyId || null;
+            if (id) {
+                console.log('📊 Dashboard Metrics using company ID from user:', id);
+            }
+            return id;
+        }
+        
+        // Only log warning if NOT in build mode
+        if (typeof window !== 'undefined') {  // ← Add this check
+            console.log('⚠️ Dashboard Metrics: No company ID available');
+        }
+        return null;
+    }, [company, user]);
 
     // ============== WebSocket Connections ==============
 
@@ -268,6 +286,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         data: rawCompanyMetrics,
         status: companyMetricsStatus,
         reconnect: reconnectCompanyMetrics,
+        lastUpdate: companyMetricsLastUpdate,
     } = useCompanyMetrics(companyId, period);
 
     // Analytics
@@ -275,6 +294,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         data: rawAnalytics,
         status: analyticsStatus,
         reconnect: reconnectAnalytics,
+        lastUpdate: analyticsLastUpdate,
     } = useAnalyticsWS(companyId);
 
     // Agent Stats
@@ -282,6 +302,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         data: rawAgentStats,
         status: agentStatsStatus,
         reconnect: reconnectAgentStats,
+        lastUpdate: agentStatsLastUpdate,
     } = useAgentStatsWS(companyId);
 
     // Call Reports
@@ -289,6 +310,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         data: rawCallReports,
         status: callReportsStatus,
         reconnect: reconnectCallReports,
+        lastUpdate: callReportsLastUpdate,
     } = useCallReportsWS(companyId, period);
 
     // Sentiment
@@ -296,6 +318,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         data: rawSentiment,
         status: sentimentStatus,
         reconnect: reconnectSentiment,
+        lastUpdate: sentimentLastUpdate,
     } = useSentimentWS(companyId, period);
 
     // Urgency
@@ -303,7 +326,23 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         data: rawUrgency,
         status: urgencyStatus,
         reconnect: reconnectUrgency,
+        lastUpdate: urgencyLastUpdate,
     } = useUrgencyWS(companyId, period);
+
+    // Debug logging for urgency connection
+    useEffect(() => {
+        if (companyId) {
+            console.log('🚨 Urgency WebSocket:', {
+                status: urgencyStatus,
+                companyId,
+                period,
+                hasData: !!rawUrgency,
+                recordCount: rawUrgency?.records?.length || 0,
+                lastUpdate: urgencyLastUpdate?.toISOString(),
+                endpoint: `/api/urgency-detection/ws/${companyId}/${period}`
+            });
+        }
+    }, [urgencyStatus, companyId, period, rawUrgency, urgencyLastUpdate]);
 
     // ============== Transform Raw Data ==============
 
@@ -384,26 +423,128 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         };
     }, [rawCallReports]);
 
+    // ✅ SENTIMENT TRANSFORMATION - UPDATED
     const sentiment = useMemo<SentimentData | null>(() => {
         if (!rawSentiment) return null;
+        
+        console.log('🔄 Transforming sentiment data:', {
+            hasRecords: !!(rawSentiment.recent_calls || rawSentiment.records),
+            recordCount: (rawSentiment.recent_calls || rawSentiment.records || []).length,
+            hasSummary: !!rawSentiment.summary,
+            hasTrend: !!rawSentiment.trend,
+            rawSample: (rawSentiment.recent_calls || rawSentiment.records)?.[0],
+        });
+        
+        // Helper to format duration from seconds to string
+        const formatDuration = (seconds: number): string => {
+            if (!seconds || seconds === 0) return '0m 0s';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}m ${secs}s`;
+        };
+        
+        // Helper to split datetime into date and time
+        const splitDateTime = (datetime: string) => {
+            const dt = new Date(datetime);
+            return {
+                date: dt.toISOString().split('T')[0], // "2025-12-30"
+                time: dt.toTimeString().slice(0, 5),   // "14:30"
+            };
+        };
+        
+        // Transform records (recent_calls → records)
+        const transformedRecords = (rawSentiment.recent_calls || rawSentiment.records || rawSentiment.data || []).map((record: any) => {
+            const { date, time } = splitDateTime(record.datetime || record.timestamp || new Date().toISOString());
+            
+            return {
+                id: record.id || `SEN${Math.random().toString(36).substr(2, 9)}`,
+                date,
+                time,
+                caller: record.caller || record.phone_number || '',
+                callerName: record.caller_name || record.callerName || undefined,
+                agent: record.agent || 'AI Agent',
+                duration: typeof record.duration === 'number' ? formatDuration(record.duration) : (record.duration || '0m 0s'),
+                sentiment: (record.sentiment || 'Neutral') as 'Positive' | 'Neutral' | 'Negative',
+                score: typeof record.score === 'number' ? (record.score / 10) : (record.score || 0.5), // Convert 0-10 to 0-1 scale
+                keywords: record.key_phrases || record.keywords || [],
+                summary: record.summary || undefined,
+            };
+        });
+        
+        // Transform trends (trend object → trends array)
+        let transformedTrends: any[] = [];
+        if (rawSentiment.trend && typeof rawSentiment.trend === 'object') {
+            transformedTrends = Object.entries(rawSentiment.trend).map(([date, values]: [string, any]) => ({
+                date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }), // "Mon"
+                positive: values.positive || 0,
+                neutral: values.neutral || 0,
+                negative: values.negative || 0,
+                total: values.total || 0,
+            }));
+        } else if (rawSentiment.trends) {
+            transformedTrends = rawSentiment.trends;
+        }
+        
+        // Transform stats (summary → stats)
+        const summary = rawSentiment.summary || rawSentiment.stats || {};
+        const transformedStats = {
+            positive: summary.positive_pct ?? summary.positive ?? 0,
+            neutral: summary.neutral_pct ?? summary.neutral ?? 0,
+            negative: summary.negative_pct ?? summary.negative ?? 0,
+            avgScore: summary.average_score ?? summary.avg_score ?? summary.avgScore ?? 0,
+            totalAnalyzed: summary.total_analyzed ?? summary.totalAnalyzed ?? transformedRecords.length,
+            improvement: summary.improvement ?? 0,
+        };
+        
+        console.log('✅ Transformed sentiment data:', {
+            recordCount: transformedRecords.length,
+            trendsCount: transformedTrends.length,
+            stats: transformedStats,
+            sampleTransformed: transformedRecords[0],
+        });
+        
         return {
-            records: rawSentiment.records ?? rawSentiment.data ?? [],
-            trends: rawSentiment.trends ?? [],
-            stats: {
-                positive: rawSentiment.stats?.positive ?? 0,
-                neutral: rawSentiment.stats?.neutral ?? 0,
-                negative: rawSentiment.stats?.negative ?? 0,
-                avgScore: rawSentiment.stats?.avg_score ?? rawSentiment.stats?.avgScore ?? 0,
-                totalAnalyzed: rawSentiment.stats?.total_analyzed ?? rawSentiment.stats?.totalAnalyzed ?? 0,
-                improvement: rawSentiment.stats?.improvement ?? 0,
-            },
+            records: transformedRecords,
+            trends: transformedTrends,
+            stats: transformedStats,
         };
     }, [rawSentiment]);
 
+    // ✅ URGENCY TRANSFORMATION - KEPT AS-IS (WORKING)
     const urgency = useMemo<UrgencyData | null>(() => {
         if (!rawUrgency) return null;
+        
+        console.log('🔄 Transforming urgency data:', {
+            hasRecords: !!rawUrgency.records,
+            recordCount: rawUrgency.records?.length || 0,
+            hasStats: !!rawUrgency.stats,
+            hasCategories: !!rawUrgency.categories,
+            rawSample: rawUrgency.records?.[0], // Log first record to see structure
+        });
+        
+        // Transform backend records to frontend format
+        const transformedRecords = (rawUrgency.records ?? rawUrgency.data ?? []).map((record: any) => ({
+            id: record.id || `URG${Math.random().toString(36).substr(2, 9)}`,
+            timestamp: record.datetime || record.timestamp || new Date().toISOString(),
+            caller: record.caller || '',
+            name: record.name || record.caller_name || 'Unknown',
+            duration: record.duration || '0m 0s',
+            urgencyLevel: record.urgency || record.urgencyLevel || record.urgency_level || 'Low',
+            triggerPhrases: record.trigger_phrases || record.triggerPhrases || [],
+            status: record.status || 'Pending',
+            agent: record.agent || 'AI Agent',
+            category: record.category || 'General Inquiry',
+            summary: record.summary || undefined,
+        }));
+        
+        console.log('✅ Transformed urgency records:', {
+            originalCount: rawUrgency.records?.length || 0,
+            transformedCount: transformedRecords.length,
+            sampleTransformed: transformedRecords[0],
+        });
+        
         return {
-            records: rawUrgency.records ?? rawUrgency.data ?? [],
+            records: transformedRecords,
             stats: rawUrgency.stats ?? defaultUrgency.stats,
             categories: rawUrgency.categories ?? [],
         };
@@ -420,6 +561,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
     // ============== Actions ==============
 
     const refreshAll = useCallback(() => {
+        console.log('🔄 Refreshing all WebSocket connections...');
         reconnectCompanyMetrics();
         reconnectAnalytics();
         reconnectAgentStats();
@@ -430,7 +572,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
 
     // ============== Loading State ==============
 
-    const isLoading = userLoading || (
+    const isLoading = userLoading || companyLoading || (
         companyId !== null && 
         companyMetricsStatus === 'connecting' &&
         analyticsStatus === 'connecting'
