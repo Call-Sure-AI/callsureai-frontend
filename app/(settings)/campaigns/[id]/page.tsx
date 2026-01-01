@@ -30,7 +30,9 @@ import {
     Bot,
     Loader2,
     ExternalLink,
-    RefreshCw
+    RefreshCw,
+    Wifi,
+    WifiOff
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -61,6 +63,7 @@ import { toast } from "@/hooks/use-toast"
 import { useIsAuthenticated } from "@/hooks/use-is-authenticated"
 import { useCampaigns } from "@/contexts/campaign-context"
 import * as CampaignService from "@/services/campaign-service"
+import { useCampaignMetricsWS } from "@/hooks/use-realtime-ws"
 
 const LoadingSpinner = () => (
     <div className="flex items-center justify-center py-16">
@@ -131,11 +134,17 @@ export default function CampaignDetailPage() {
     const { refreshCampaigns } = useCampaigns()
     const campaignId = params.id as string
 
+    // WebSocket for real-time metrics
+    const { 
+        data: wsMetrics, 
+        status: wsStatus, 
+        isConnected,
+        error: wsError,
+        reconnect 
+    } = useCampaignMetricsWS(campaignId)
+
     const [campaign, setCampaign] = useState<CampaignService.Campaign | null>(null)
-    const [metrics, setMetrics] = useState<CampaignService.CampaignMetrics | null>(null)
     const [leads, setLeads] = useState<CampaignService.Lead[]>([])
-    const [callLogs, setCallLogs] = useState<CampaignService.CallLog[]>([])
-    const [bookings, setBookings] = useState<CampaignService.Booking[]>([])
     const [settings, setSettings] = useState<CampaignService.CampaignSettings | null>(null)
     const [loading, setLoading] = useState(true)
     const [leadsLoading, setLeadsLoading] = useState(false)
@@ -144,16 +153,30 @@ export default function CampaignDetailPage() {
     const [showAddLeadDialog, setShowAddLeadDialog] = useState(false)
     const [newLead, setNewLead] = useState({ first_name: '', last_name: '', email: '', phone: '', company: '' })
 
+    // Parse WebSocket metrics
+    const metrics = wsMetrics?.metrics || null
+    const callLogs = wsMetrics?.calls || []
+    const bookings = wsMetrics?.bookings || []
+
+    // Helper to parse percentage strings
+    const parsePercentage = (str: string | number): number => {
+        if (typeof str === 'number') return str
+        return parseFloat(String(str).replace('%', '')) || 0
+    }
+
+    // Helper to parse duration strings
+    const parseDuration = (str: string): number => {
+        if (!str) return 0
+        const match = String(str).match(/(\d+)s/)
+        return match ? parseInt(match[1]) : 0
+    }
+
     const fetchCampaignData = useCallback(async () => {
         if (!token || !campaignId) return
         try {
             setLoading(true)
-            const [campaignData, metricsData] = await Promise.all([
-                CampaignService.getCampaignById(campaignId, token),
-                CampaignService.getCampaignMetrics(campaignId, token).catch(() => null)
-            ])
+            const campaignData = await CampaignService.getCampaignById(campaignId, token)
             setCampaign(campaignData)
-            setMetrics(metricsData)
         } catch (error) {
             console.error('Error fetching campaign:', error)
             toast({ title: "Error", description: "Failed to load campaign", variant: "destructive" })
@@ -180,26 +203,6 @@ export default function CampaignDetailPage() {
         }
     }, [token, campaignId])
 
-    const fetchCallLogs = useCallback(async () => {
-        if (!token || !campaignId) return
-        try {
-            const logs = await CampaignService.getCampaignCallLogs(campaignId, token, 100)
-            setCallLogs(Array.isArray(logs) ? logs : [])
-        } catch (error) { 
-            console.error('Error fetching call logs:', error) 
-        }
-    }, [token, campaignId])
-
-    const fetchBookings = useCallback(async () => {
-        if (!token || !campaignId) return
-        try {
-            const data = await CampaignService.getCampaignBookings(campaignId, token)
-            setBookings(Array.isArray(data) ? data : [])
-        } catch (error) { 
-            console.error('Error fetching bookings:', error) 
-        }
-    }, [token, campaignId])
-
     const fetchSettings = useCallback(async () => {
         if (!token || !campaignId) return
         try {
@@ -219,14 +222,10 @@ export default function CampaignDetailPage() {
         
         if (activeTab === 'leads') {
             fetchLeads()
-        } else if (activeTab === 'calls') {
-            fetchCallLogs()
-        } else if (activeTab === 'bookings') {
-            fetchBookings()
         } else if (activeTab === 'settings') {
             fetchSettings()
         }
-    }, [activeTab, token, campaignId, fetchLeads, fetchCallLogs, fetchBookings, fetchSettings])
+    }, [activeTab, token, campaignId, fetchLeads, fetchSettings])
 
     const handleStartCampaign = async () => {
         if (!token) {
@@ -381,12 +380,44 @@ export default function CampaignDetailPage() {
                         <div className="flex items-center gap-3 mb-1">
                             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{campaign.campaign_name}</h1>
                             <StatusBadge status={campaign.status} />
+                            
+                            {/* WebSocket Connection Status */}
+                            <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${
+                                isConnected 
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                                    : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                            }`}>
+                                {isConnected ? (
+                                    <>
+                                        <Wifi className="w-3 h-3" />
+                                        Live
+                                    </>
+                                ) : (
+                                    <>
+                                        <WifiOff className="w-3 h-3" />
+                                        Offline
+                                    </>
+                                )}
+                            </div>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{campaign.description}</p>
                     </div>
                 </div>
                 
                 <div className="flex items-center gap-2 flex-wrap">
+                    {/* Reconnect button if disconnected */}
+                    {!isConnected && (
+                        <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={reconnect}
+                            className="rounded-xl border-cyan-500/30"
+                        >
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reconnect
+                        </Button>
+                    )}
+                    
                     {campaign.status === 'queued' && (
                         <Button 
                             onClick={handleStartCampaign} 
@@ -444,14 +475,46 @@ export default function CampaignDetailPage() {
                 </div>
             </div>
 
-            {/* Metrics */}
+            {/* Metrics - Real-time from WebSocket */}
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 lg:gap-4">
-                <StatCard icon={Users} label="Total Leads" value={metrics?.total_leads || campaign.metrics?.total_leads || leads.length || 0} color="from-cyan-500 to-blue-600" />
-                <StatCard icon={Phone} label="Contacted" value={metrics?.contacted || campaign.metrics?.contacted || 0} subValue={`${metrics?.response_rate || 0}% response`} color="from-purple-500 to-indigo-600" />
-                <StatCard icon={MessageSquare} label="Responded" value={metrics?.responded || 0} color="from-emerald-500 to-green-600" />
-                <StatCard icon={CalendarCheck} label="Booked" value={metrics?.booked || campaign.metrics?.booked || 0} color="from-amber-500 to-orange-600" />
-                <StatCard icon={CheckCircle} label="Converted" value={metrics?.converted || 0} subValue={`${metrics?.conversion_rate || 0}% rate`} color="from-pink-500 to-rose-600" />
-                <StatCard icon={Clock} label="Avg Call Duration" value={`${Math.round(metrics?.avg_call_duration || 0)}s`} color="from-gray-500 to-slate-600" />
+                <StatCard 
+                    icon={Users} 
+                    label="Total Leads" 
+                    value={campaign.metrics?.total_leads || leads.length || 0} 
+                    color="from-cyan-500 to-blue-600" 
+                />
+                <StatCard 
+                    icon={Phone} 
+                    label="Contacted" 
+                    value={metrics?.contacted || 0} 
+                    subValue={metrics?.response_rate || '0%'} 
+                    color="from-purple-500 to-indigo-600" 
+                />
+                <StatCard 
+                    icon={MessageSquare} 
+                    label="Responded" 
+                    value={metrics?.responded || 0} 
+                    color="from-emerald-500 to-green-600" 
+                />
+                <StatCard 
+                    icon={CalendarCheck} 
+                    label="Booked" 
+                    value={metrics?.booked || 0} 
+                    color="from-amber-500 to-orange-600" 
+                />
+                <StatCard 
+                    icon={CheckCircle} 
+                    label="Converted" 
+                    value={metrics?.converted || 0} 
+                    subValue={metrics?.conversion_rate || '0%'} 
+                    color="from-pink-500 to-rose-600" 
+                />
+                <StatCard 
+                    icon={Clock} 
+                    label="Avg Call Duration" 
+                    value={metrics?.avg_call_duration || '0s'} 
+                    color="from-gray-500 to-slate-600" 
+                />
             </div>
 
             {/* Tabs */}
@@ -572,7 +635,7 @@ export default function CampaignDetailPage() {
                     </motion.div>
                 </TabsContent>
 
-                {/* Call Logs Tab */}
+                {/* Call Logs Tab - Real-time from WebSocket */}
                 <TabsContent value="calls" className="mt-6">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-slate-800/50 shadow-lg">
                         <div className="p-4 lg:p-6 border-b border-gray-200/50 dark:border-slate-800/50">
@@ -588,13 +651,13 @@ export default function CampaignDetailPage() {
                             ) : (
                                 <div className="space-y-3">
                                     {callLogs.map((log, idx) => (
-                                        <motion.div key={log.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
+                                        <motion.div key={log.id || idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${log.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : log.status === 'failed' ? 'bg-red-500/10 text-red-500' : 'bg-gray-500/10 text-gray-500'}`}><Phone className="w-4 h-4" /></div>
-                                                    <div><p className="font-medium text-gray-900 dark:text-white">{log.lead_name}</p><p className="text-sm text-gray-500">{log.phone}</p></div>
+                                                    <div><p className="font-medium text-gray-900 dark:text-white">{log.to_number}</p><p className="text-sm text-gray-500">{log.from_number}</p></div>
                                                 </div>
-                                                <div className="text-right"><p className="text-sm font-medium text-gray-900 dark:text-white">{log.duration}s</p><p className="text-xs text-gray-500">{new Date(log.started_at).toLocaleTimeString()}</p></div>
+                                                <div className="text-right"><p className="text-sm font-medium text-gray-900 dark:text-white">{log.duration || 0}s</p><p className="text-xs text-gray-500">{log.created_at ? new Date(log.created_at).toLocaleTimeString() : '-'}</p></div>
                                             </div>
                                             {log.recording_url && <Button variant="ghost" size="sm" className="mt-2 text-cyan-600"><Mic className="w-4 h-4 mr-1" />Play Recording</Button>}
                                         </motion.div>
@@ -605,7 +668,7 @@ export default function CampaignDetailPage() {
                     </motion.div>
                 </TabsContent>
 
-                {/* Bookings Tab */}
+                {/* Bookings Tab - Real-time from WebSocket */}
                 <TabsContent value="bookings" className="mt-6">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-slate-800/50 shadow-lg">
                         <div className="p-4 lg:p-6 border-b border-gray-200/50 dark:border-slate-800/50">
@@ -621,13 +684,13 @@ export default function CampaignDetailPage() {
                             ) : (
                                 <div className="space-y-3">
                                     {bookings.map((booking, idx) => (
-                                        <motion.div key={booking.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
+                                        <motion.div key={booking.id || idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white"><Calendar className="w-5 h-5" /></div>
-                                                    <div><p className="font-medium text-gray-900 dark:text-white">{booking.lead_name}</p><p className="text-sm text-gray-500">{booking.email}</p></div>
+                                                    <div><p className="font-medium text-gray-900 dark:text-white">{booking.customer_name || 'Customer'}</p><p className="text-sm text-gray-500">{booking.customer_phone || booking.customer_email || 'No contact'}</p></div>
                                                 </div>
-                                                <div className="text-right"><p className="font-medium text-gray-900 dark:text-white">{new Date(booking.scheduled_at).toLocaleDateString()}</p><p className="text-sm text-gray-500">{new Date(booking.scheduled_at).toLocaleTimeString()} • {booking.duration_minutes}min</p></div>
+                                                <div className="text-right"><p className="font-medium text-gray-900 dark:text-white">{booking.slot_start ? new Date(booking.slot_start).toLocaleDateString() : '-'}</p><p className="text-sm text-gray-500">{booking.slot_start ? new Date(booking.slot_start).toLocaleTimeString() : '-'}</p></div>
                                             </div>
                                             {booking.meeting_link && <Button variant="ghost" size="sm" className="mt-3 text-cyan-600" asChild><a href={booking.meeting_link} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4 mr-1" />Join Meeting</a></Button>}
                                         </motion.div>

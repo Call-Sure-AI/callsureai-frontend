@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'wss://beta.callsure.ai';
+const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://beta.callsure.ai';
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error' | 'reconnecting';
 
@@ -311,11 +311,11 @@ export function useAgentStatsWS(companyId: string | null) {
 
 /**
  * Hook for campaign metrics WebSocket
- * Endpoint: /api/campaigns/ws/{campaign_id}/metrics
+ * Endpoint: /campaigns/ws/{campaign_id}/metrics
  */
 export function useCampaignMetricsWS(campaignId: string | null) {
     return useRealtimeWS({
-        endpoint: campaignId ? `/api/campaigns/ws/${campaignId}/metrics` : '',
+        endpoint: campaignId ? `/api/campaigns/ws/${campaignId}/metrics` : '',  // ← ADD /api
         autoConnect: !!campaignId,
     });
 }
