@@ -142,6 +142,32 @@ export interface UrgencyData {
     }[];
 }
 
+export interface AgentPerformance {
+    stats: {
+        overallSuccessRate: number;
+        averageHandleTime: string;
+        firstCallResolution: number;
+        qualityScore: number;
+    };
+    performanceData: {
+        date: string;
+        aiSuccess: number;
+        humanSuccess: number;
+    }[];
+    agentEfficiency: {
+        agentId: string;
+        name: string;
+        callsHandled: number;
+        resolutionRate: number;
+    }[];
+    qaScores: {
+        scriptAdherence: number;
+        accuracy: number;
+        compliance: number;
+        customerSatisfaction: number;
+    };
+}
+
 export interface DashboardMetricsContextType {
     // Company Metrics (Main Dashboard)
     companyMetrics: CompanyMetrics | null;
@@ -166,6 +192,10 @@ export interface DashboardMetricsContextType {
     // Urgency Detection
     urgency: UrgencyData | null;
     urgencyStatus: ConnectionStatus;
+    
+    // Agent Performance
+    agentPerformance: AgentPerformance | null;
+    agentPerformanceStatus: ConnectionStatus;
     
     // Period controls
     period: string;
@@ -245,6 +275,23 @@ const defaultUrgency: UrgencyData = {
     categories: [],
 };
 
+const defaultAgentPerformance: AgentPerformance = {
+    stats: {
+        overallSuccessRate: 0,
+        averageHandleTime: '0m 0s',
+        firstCallResolution: 0,
+        qualityScore: 0,
+    },
+    performanceData: [],
+    agentEfficiency: [],
+    qaScores: {
+        scriptAdherence: 0,
+        accuracy: 0,
+        compliance: 0,
+        customerSatisfaction: 0,
+    },
+};
+
 // ============== Context ==============
 
 const DashboardMetricsContext = createContext<DashboardMetricsContextType | undefined>(undefined);
@@ -273,7 +320,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         }
         
         // Only log warning if NOT in build mode
-        if (typeof window !== 'undefined') {  // ← Add this check
+        if (typeof window !== 'undefined') {
             console.log('⚠️ Dashboard Metrics: No company ID available');
         }
         return null;
@@ -328,6 +375,14 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         reconnect: reconnectUrgency,
         lastUpdate: urgencyLastUpdate,
     } = useUrgencyWS(companyId, period);
+
+    // Agent Performance (reuses Company Metrics WebSocket)
+    const {
+        data: rawAgentPerformance,
+        status: agentPerformanceStatus,
+        reconnect: reconnectAgentPerformance,
+        lastUpdate: agentPerformanceLastUpdate,
+    } = useCompanyMetrics(companyId, period);
 
     // Debug logging for urgency connection
     useEffect(() => {
@@ -395,35 +450,81 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         };
     }, [rawAgentStats]);
 
+    // ✅ CALL REPORTS TRANSFORMATION
     const callReports = useMemo<CallReportsData | null>(() => {
         if (!rawCallReports) return null;
+        
+        console.log('📞 Transforming call reports data:', {
+            hasCalls: !!(rawCallReports.calls || rawCallReports.reports),
+            callCount: (rawCallReports.calls || rawCallReports.reports || []).length,
+            hasSummary: !!rawCallReports.summary,
+            rawSample: (rawCallReports.calls || rawCallReports.reports)?.[0],
+        });
+        
+        // Helper to format duration from seconds to string
+        const formatDuration = (seconds: number): string => {
+            if (!seconds || seconds === 0) return '0m 0s';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}m ${secs}s`;
+        };
+        
+        // Helper to split datetime into date and time
+        const splitDateTime = (datetime: string) => {
+            const dt = new Date(datetime);
+            return {
+                date: dt.toISOString().split('T')[0], // "2025-12-30"
+                time: dt.toTimeString().slice(0, 5),   // "21:34"
+            };
+        };
+        
+        // Transform call records (calls → reports)
+        const transformedReports = (rawCallReports.calls || rawCallReports.reports || rawCallReports.data || []).map((call: any) => {
+            const { date, time } = splitDateTime(call.datetime || call.timestamp || new Date().toISOString());
+            const durationSeconds = typeof call.duration === 'number' ? call.duration : 0;
+            
+            return {
+                id: call.id || `CALL${Math.random().toString(36).substr(2, 9)}`,
+                date,
+                time,
+                caller: call.caller_phone || call.caller || call.phone_number || '',
+                callerName: call.caller_name || call.callerName || undefined,
+                duration: formatDuration(durationSeconds),
+                durationSeconds,
+                callType: (call.type || call.call_type || call.callType || 'Inbound') as 'Inbound' | 'Outbound',
+                agent: call.agent || call.agent_name || 'AI Agent',
+                outcome: call.outcome || call.status || 'Resolved',
+                sentiment: (call.sentiment || 'Neutral') as 'Positive' | 'Neutral' | 'Negative',
+                tags: call.tags || [],
+            };
+        });
+        
+        // Transform stats (summary → stats)
+        const summary = rawCallReports.summary || rawCallReports.stats || {};
+        const transformedStats = {
+            totalCalls: summary.total_calls ?? summary.totalCalls ?? transformedReports.length,
+            avgDuration: typeof summary.avg_duration === 'number' 
+                ? formatDuration(summary.avg_duration) 
+                : (summary.avg_duration || summary.avgDuration || '0m 0s'),
+            resolutionRate: summary.resolution_rate ?? summary.resolutionRate ?? 0,
+            sentimentScore: summary.sentiment_score ?? summary.sentimentScore ?? 0,
+            inboundCalls: summary.inbound ?? summary.inbound_calls ?? summary.inboundCalls ?? 0,
+            outboundCalls: summary.outbound ?? summary.outbound_calls ?? summary.outboundCalls ?? 0,
+        };
+        
+        console.log('✅ Transformed call reports:', {
+            reportCount: transformedReports.length,
+            stats: transformedStats,
+            sampleTransformed: transformedReports[0],
+        });
+        
         return {
-            reports: (rawCallReports.reports ?? rawCallReports.data ?? []).map((report: any) => ({
-                id: report.id,
-                date: report.date,
-                time: report.time,
-                caller: report.caller ?? report.phone_number,
-                callerName: report.caller_name ?? report.callerName,
-                duration: report.duration,
-                durationSeconds: report.duration_seconds ?? report.durationSeconds ?? 0,
-                callType: report.call_type ?? report.callType ?? 'Inbound',
-                agent: report.agent ?? report.agent_name,
-                outcome: report.outcome ?? report.status,
-                sentiment: report.sentiment ?? 'Neutral',
-                tags: report.tags ?? [],
-            })),
-            stats: {
-                totalCalls: rawCallReports.stats?.total_calls ?? rawCallReports.stats?.totalCalls ?? 0,
-                avgDuration: rawCallReports.stats?.avg_duration ?? rawCallReports.stats?.avgDuration ?? '0m 0s',
-                resolutionRate: rawCallReports.stats?.resolution_rate ?? rawCallReports.stats?.resolutionRate ?? 0,
-                sentimentScore: rawCallReports.stats?.sentiment_score ?? rawCallReports.stats?.sentimentScore ?? 0,
-                inboundCalls: rawCallReports.stats?.inbound_calls ?? rawCallReports.stats?.inboundCalls ?? 0,
-                outboundCalls: rawCallReports.stats?.outbound_calls ?? rawCallReports.stats?.outboundCalls ?? 0,
-            },
+            reports: transformedReports,
+            stats: transformedStats,
         };
     }, [rawCallReports]);
 
-    // ✅ SENTIMENT TRANSFORMATION - UPDATED
+    // ✅ SENTIMENT TRANSFORMATION
     const sentiment = useMemo<SentimentData | null>(() => {
         if (!rawSentiment) return null;
         
@@ -510,7 +611,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         };
     }, [rawSentiment]);
 
-    // ✅ URGENCY TRANSFORMATION - KEPT AS-IS (WORKING)
+    // ✅ URGENCY TRANSFORMATION
     const urgency = useMemo<UrgencyData | null>(() => {
         if (!rawUrgency) return null;
         
@@ -519,7 +620,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
             recordCount: rawUrgency.records?.length || 0,
             hasStats: !!rawUrgency.stats,
             hasCategories: !!rawUrgency.categories,
-            rawSample: rawUrgency.records?.[0], // Log first record to see structure
+            rawSample: rawUrgency.records?.[0],
         });
         
         // Transform backend records to frontend format
@@ -550,13 +651,85 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         };
     }, [rawUrgency]);
 
+    // ✅ AGENT PERFORMANCE TRANSFORMATION
+    const agentPerformance = useMemo<AgentPerformance | null>(() => {
+        if (!rawAgentPerformance) return null;
+        
+        console.log('📊 Transforming agent performance data:', {
+            hasData: !!rawAgentPerformance,
+            hasSuccessRate: !!rawAgentPerformance.ai_vs_human_success_rate,
+            hasEfficiency: !!rawAgentPerformance.agent_efficiency,
+            rawSample: rawAgentPerformance,
+        });
+        
+        // Helper to format duration from seconds to string
+        const formatDuration = (seconds: number): string => {
+            if (!seconds || seconds === 0) return '0m 0s';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}m ${secs}s`;
+        };
+        
+        // Helper to format date for chart
+        const formatChartDate = (dateStr: string) => {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        };
+        
+        // Transform performance data (ai_vs_human_success_rate → performanceData)
+        const transformedPerformanceData = (rawAgentPerformance.ai_vs_human_success_rate || []).map((item: any) => ({
+            date: formatChartDate(item.date),
+            aiSuccess: item.ai || 0,
+            humanSuccess: item.human || 0,
+        }));
+        
+        // Transform agent efficiency (agent_efficiency → agentEfficiency)
+        const transformedAgentEfficiency = (rawAgentPerformance.agent_efficiency || []).map((agent: any, index: number) => ({
+            agentId: agent.agent_id || `agent-${index}`,
+            name: agent.name || agent.agent_name || `AI Agent ${index + 1}`,
+            callsHandled: agent.calls_handled || agent.callsHandled || 0,
+            resolutionRate: agent.resolution_rate || agent.resolutionRate || 0,
+        }));
+        
+        // Transform QA scores
+        const qaScores = rawAgentPerformance.qa_scores || {};
+        const transformedQAScores = {
+            scriptAdherence: qaScores.script_adherence ?? qaScores.scriptAdherence ?? 0,
+            accuracy: qaScores.accuracy ?? 0,
+            compliance: qaScores.compliance ?? 0,
+            customerSatisfaction: qaScores.customer_satisfaction ?? qaScores.customerSatisfaction ?? 0,
+        };
+        
+        // Transform stats
+        const transformedStats = {
+            overallSuccessRate: rawAgentPerformance.overall_success_rate ?? rawAgentPerformance.overallSuccessRate ?? 0,
+            averageHandleTime: formatDuration(rawAgentPerformance.average_handle_time ?? rawAgentPerformance.averageHandleTime ?? 0),
+            firstCallResolution: rawAgentPerformance.first_call_resolution ?? rawAgentPerformance.firstCallResolution ?? 0,
+            qualityScore: rawAgentPerformance.quality_score ?? rawAgentPerformance.qualityScore ?? 0,
+        };
+        
+        console.log('✅ Transformed agent performance:', {
+            performanceDataCount: transformedPerformanceData.length,
+            agentEfficiencyCount: transformedAgentEfficiency.length,
+            stats: transformedStats,
+            qaScores: transformedQAScores,
+        });
+        
+        return {
+            stats: transformedStats,
+            performanceData: transformedPerformanceData,
+            agentEfficiency: transformedAgentEfficiency,
+            qaScores: transformedQAScores,
+        };
+    }, [rawAgentPerformance]);
+
     // ============== Update timestamp ==============
 
     useEffect(() => {
-        if (rawCompanyMetrics || rawAnalytics || rawAgentStats || rawCallReports || rawSentiment || rawUrgency) {
+        if (rawCompanyMetrics || rawAnalytics || rawAgentStats || rawCallReports || rawSentiment || rawUrgency || rawAgentPerformance) {
             setLastUpdate(new Date());
         }
-    }, [rawCompanyMetrics, rawAnalytics, rawAgentStats, rawCallReports, rawSentiment, rawUrgency]);
+    }, [rawCompanyMetrics, rawAnalytics, rawAgentStats, rawCallReports, rawSentiment, rawUrgency, rawAgentPerformance]);
 
     // ============== Actions ==============
 
@@ -568,7 +741,8 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         reconnectCallReports();
         reconnectSentiment();
         reconnectUrgency();
-    }, [reconnectCompanyMetrics, reconnectAnalytics, reconnectAgentStats, reconnectCallReports, reconnectSentiment, reconnectUrgency]);
+        reconnectAgentPerformance();
+    }, [reconnectCompanyMetrics, reconnectAnalytics, reconnectAgentStats, reconnectCallReports, reconnectSentiment, reconnectUrgency, reconnectAgentPerformance]);
 
     // ============== Loading State ==============
 
@@ -593,6 +767,8 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         sentimentStatus,
         urgency,
         urgencyStatus,
+        agentPerformance,
+        agentPerformanceStatus,
         period,
         setPeriod,
         companyId,
@@ -606,6 +782,7 @@ export function DashboardMetricsProvider({ children }: { children: React.ReactNo
         callReports, callReportsStatus,
         sentiment, sentimentStatus,
         urgency, urgencyStatus,
+        agentPerformance, agentPerformanceStatus,
         period, companyId, isLoading, lastUpdate, refreshAll
     ]);
 
@@ -634,6 +811,7 @@ export const defaults = {
     callReports: defaultCallReports,
     sentiment: defaultSentiment,
     urgency: defaultUrgency,
+    agentPerformance: defaultAgentPerformance,
 };
 
 export default DashboardMetricsContext;

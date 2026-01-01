@@ -1,7 +1,7 @@
-// app\dashboard\agent-performance\page.tsx
+// app/dashboard/agent-performance/page.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -17,7 +17,9 @@ import {
   TrendingUp,
   TrendingDown,
   Bot,
-  Users
+  Users,
+  RefreshCw,
+  WifiOff
 } from "lucide-react";
 import {
   LineChart,
@@ -37,17 +39,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { useDashboardMetrics, defaults } from '@/contexts/dashboard-metrics-context';
 
-// Mock data for the charts
-const performanceData = [
-  { date: 'Jan', aiSuccess: 85, humanSuccess: 90 },
-  { date: 'Feb', aiSuccess: 87, humanSuccess: 89 },
-  { date: 'Mar', aiSuccess: 89, humanSuccess: 88 },
-  { date: 'Apr', aiSuccess: 91, humanSuccess: 87 },
-  { date: 'May', aiSuccess: 92, humanSuccess: 88 },
-  { date: 'Jun', aiSuccess: 93, humanSuccess: 89 },
-];
-
+// Mock data for charts not yet supported by backend
 const issueResolutionData = [
   { name: 'Technical', ai: 245, human: 123 },
   { name: 'Billing', ai: 178, human: 156 },
@@ -56,22 +50,36 @@ const issueResolutionData = [
   { name: 'Other', ai: 160, human: 130 },
 ];
 
-const agentEfficiencyData = [
-  { name: 'AI Agent 1', calls: 523, resolution: 92 },
-  { name: 'AI Agent 2', calls: 489, resolution: 88 },
-  { name: 'AI Agent 3', calls: 510, resolution: 90 },
-  { name: 'AI Agent 4', calls: 470, resolution: 85 },
-  { name: 'AI Agent 5', calls: 505, resolution: 91 },
-];
-
-const qualityScoresData = [
-  { name: 'Script Adherence', value: 92 },
-  { name: 'Accuracy', value: 88 },
-  { name: 'Compliance', value: 95 },
-  { name: 'Customer Satisfaction', value: 87 },
-];
-
 const COLORS = ['#06b6d4', '#3b82f6', '#8b5cf6', '#f59e0b'];
+
+// Connection Status Component
+const ConnectionStatus = ({ status, lastUpdate }: { status: string; lastUpdate: Date | null }) => {
+    const isConnected = status === 'connected';
+    
+    return (
+        <div className="flex items-center gap-2 text-xs">
+            {isConnected ? (
+                <>
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span className="text-green-600 dark:text-green-400 font-medium">Live</span>
+                </>
+            ) : status === 'connecting' || status === 'reconnecting' ? (
+                <>
+                    <RefreshCw className="w-3 h-3 text-amber-500 animate-spin" />
+                    <span className="text-amber-600 dark:text-amber-400">Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <WifiOff className="w-3 h-3 text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">Offline</span>
+                </>
+            )}
+        </div>
+    );
+};
 
 // Stat Card Component
 const StatCard = ({ title, value, change, icon: Icon, iconColor, iconBg }: {
@@ -88,7 +96,6 @@ const StatCard = ({ title, value, change, icon: Icon, iconColor, iconBg }: {
     className="group"
   >
     <Card className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-slate-800/50 hover:border-cyan-500/30 shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 overflow-hidden">
-      {/* Background gradient on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
@@ -139,8 +146,43 @@ const ChartCard = ({ title, children }: { title: string; children: React.ReactNo
 );
 
 const AgentPerformanceDashboard: React.FC = () => {
+  // 🔥 Get real-time data from WebSocket
+  const { 
+    agentPerformance, 
+    agentPerformanceStatus, 
+    lastUpdate,
+    refreshAll,
+    period,
+    setPeriod
+  } = useDashboardMetrics();
+
   const [timeRange, setTimeRange] = useState('month');
   const [agentFilter, setAgentFilter] = useState('all');
+  
+  // Use WebSocket data or fallback to defaults
+  const wsData = agentPerformance || defaults.agentPerformance;
+  
+  // Prepare chart data
+  const performanceData = useMemo(() => {
+    return wsData.performanceData.length > 0 ? wsData.performanceData : [];
+  }, [wsData.performanceData]);
+  
+  const agentEfficiencyData = useMemo(() => {
+    return wsData.agentEfficiency.map((agent, index) => ({
+      name: agent.name,
+      calls: agent.callsHandled,
+      resolution: agent.resolutionRate,
+    }));
+  }, [wsData.agentEfficiency]);
+  
+  const qualityScoresData = useMemo(() => {
+    return [
+      { name: 'Script Adherence', value: wsData.qaScores.scriptAdherence },
+      { name: 'Accuracy', value: wsData.qaScores.accuracy },
+      { name: 'Compliance', value: wsData.qaScores.compliance },
+      { name: 'Customer Satisfaction', value: wsData.qaScores.customerSatisfaction },
+    ];
+  }, [wsData.qaScores]);
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -186,6 +228,8 @@ const AgentPerformanceDashboard: React.FC = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3">
+          <ConnectionStatus status={agentPerformanceStatus} lastUpdate={lastUpdate} />
+          
           <div className="flex items-center gap-2">
             <Select value={timeRange} onValueChange={setTimeRange}>
               <SelectTrigger className="w-[150px] bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-gray-200 dark:border-slate-700 focus:border-cyan-500 focus:ring-cyan-500/20">
@@ -210,6 +254,15 @@ const AgentPerformanceDashboard: React.FC = () => {
                 <SelectItem value="human">Human Agents Only</SelectItem>
               </SelectContent>
             </Select>
+            
+            <Button
+              variant="outline"
+              onClick={refreshAll}
+              className="bg-white/80 dark:bg-slate-800/80 border-gray-200 dark:border-slate-700"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
           
           <div className="relative group">
@@ -230,7 +283,7 @@ const AgentPerformanceDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <StatCard
             title="Overall Success Rate"
-            value="91.5%"
+            value={`${wsData.stats.overallSuccessRate.toFixed(1)}%`}
             change="+2.3% from last month"
             icon={CheckCircle2}
             iconColor="text-white"
@@ -241,7 +294,7 @@ const AgentPerformanceDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <StatCard
             title="Average Handle Time"
-            value="3m 24s"
+            value={wsData.stats.averageHandleTime}
             change="-18s from target"
             icon={Clock}
             iconColor="text-white"
@@ -252,7 +305,7 @@ const AgentPerformanceDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <StatCard
             title="First-Call Resolution"
-            value="1,144"
+            value={wsData.stats.firstCallResolution.toLocaleString()}
             change="+5.1% from last month"
             icon={Sparkles}
             iconColor="text-white"
@@ -263,7 +316,7 @@ const AgentPerformanceDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <StatCard
             title="Quality Score"
-            value="4.8/5.0"
+            value={`${(wsData.stats.qualityScore / 20).toFixed(1)}/5.0`} 
             change="+0.3 from last month"
             icon={UserCheck}
             iconColor="text-white"
@@ -277,41 +330,47 @@ const AgentPerformanceDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <ChartCard title="AI vs Human Success Rate">
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
-                  <XAxis dataKey="date" stroke="#9ca3af" />
-                  <YAxis domain={[70, 100]} tickFormatter={(value) => `${value}%`} stroke="#9ca3af" />
-                  <Tooltip 
-                    formatter={(value) => [`${value}%`, '']}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(255,255,255,0.95)', 
-                      borderRadius: '12px',
-                      border: '1px solid #e5e7eb',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="aiSuccess"
-                    name="AI Success"
-                    stroke="#06b6d4"
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: '#06b6d4' }}
-                    activeDot={{ r: 6, fill: '#06b6d4' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="humanSuccess"
-                    name="Human Success"
-                    stroke="#8b5cf6"
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: '#8b5cf6' }}
-                    activeDot={{ r: 6, fill: '#8b5cf6' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {performanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
+                    <XAxis dataKey="date" stroke="#9ca3af" />
+                    <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} stroke="#9ca3af" />
+                    <Tooltip 
+                      formatter={(value) => [`${value}%`, '']}
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255,255,255,0.95)', 
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="aiSuccess"
+                      name="AI Success"
+                      stroke="#06b6d4"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: '#06b6d4' }}
+                      activeDot={{ r: 6, fill: '#06b6d4' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="humanSuccess"
+                      name="Human Success"
+                      stroke="#8b5cf6"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: '#8b5cf6' }}
+                      activeDot={{ r: 6, fill: '#8b5cf6' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-400">
+                  No performance data available
+                </div>
+              )}
             </div>
           </ChartCard>
         </motion.div>
@@ -347,24 +406,30 @@ const AgentPerformanceDashboard: React.FC = () => {
         <motion.div variants={itemVariants}>
           <ChartCard title="Agent Efficiency Metrics">
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart data={agentEfficiencyData} barSize={20} barGap={8} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
-                  <XAxis type="number" stroke="#9ca3af" />
-                  <YAxis type="category" dataKey="name" width={100} stroke="#9ca3af" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(255,255,255,0.95)', 
-                      borderRadius: '12px',
-                      border: '1px solid #e5e7eb',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="calls" name="Calls Handled" fill="#06b6d4" radius={[0, 4, 4, 0]} />
-                  <Bar dataKey="resolution" name="Resolution Rate (%)" fill="#10b981" radius={[0, 4, 4, 0]} />
-                </RechartsBarChart>
-              </ResponsiveContainer>
+              {agentEfficiencyData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={agentEfficiencyData} barSize={20} barGap={8} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
+                    <XAxis type="number" stroke="#9ca3af" />
+                    <YAxis type="category" dataKey="name" width={100} stroke="#9ca3af" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255,255,255,0.95)', 
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="calls" name="Calls Handled" fill="#06b6d4" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="resolution" name="Resolution Rate (%)" fill="#10b981" radius={[0, 4, 4, 0]} />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-400">
+                  No agent efficiency data available
+                </div>
+              )}
             </div>
           </ChartCard>
         </motion.div>
@@ -433,22 +498,14 @@ const AgentPerformanceDashboard: React.FC = () => {
                     <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Agent Name</th>
                     <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Type</th>
                     <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Calls Handled</th>
-                    <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Avg. Handle Time</th>
                     <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Resolution Rate</th>
-                    <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Quality Score</th>
                     <th className="py-4 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">Trend</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    { name: 'AI Agent 1', type: 'AI', calls: 523, time: '2m 45s', resolution: '92%', quality: 4.8, trend: 'up' },
-                    { name: 'AI Agent 2', type: 'AI', calls: 489, time: '3m 12s', resolution: '88%', quality: 4.5, trend: 'up' },
-                    { name: 'Human Agent 1', type: 'Human', calls: 312, time: '4m 32s', resolution: '90%', quality: 4.7, trend: 'down' },
-                    { name: 'AI Agent 3', type: 'AI', calls: 510, time: '2m 58s', resolution: '90%', quality: 4.6, trend: 'up' },
-                    { name: 'Human Agent 2', type: 'Human', calls: 289, time: '4m 15s', resolution: '91%', quality: 4.9, trend: 'up' },
-                  ].map((agent, i) => (
+                  {wsData.agentEfficiency.map((agent, i) => (
                     <motion.tr 
-                      key={i} 
+                      key={agent.agentId} 
                       className="border-b border-gray-100 dark:border-slate-800 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -456,51 +513,38 @@ const AgentPerformanceDashboard: React.FC = () => {
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${agent.type === 'AI' ? 'bg-gradient-to-br from-cyan-500 to-blue-600' : 'bg-gradient-to-br from-purple-500 to-indigo-600'}`}>
-                            {agent.type === 'AI' ? <Bot className="w-4 h-4 text-white" /> : <Users className="w-4 h-4 text-white" />}
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600">
+                            <Bot className="w-4 h-4 text-white" />
                           </div>
                           <span className="font-medium text-gray-900 dark:text-white">{agent.name}</span>
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          agent.type === 'AI' 
-                            ? 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400' 
-                            : 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400'
-                        }`}>
-                          {agent.type}
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400">
+                          AI
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-gray-700 dark:text-gray-300 font-medium">{agent.calls}</td>
-                      <td className="py-4 px-4 text-gray-700 dark:text-gray-300">{agent.time}</td>
+                      <td className="py-4 px-4 text-gray-700 dark:text-gray-300 font-medium">{agent.callsHandled}</td>
                       <td className="py-4 px-4">
-                        <span className="text-gray-900 dark:text-white font-semibold">{agent.resolution}</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">{agent.resolutionRate.toFixed(1)}%</span>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="flex items-center gap-1">
-                          <span className="text-gray-900 dark:text-white font-semibold">{agent.quality}</span>
-                          <span className="text-gray-500 dark:text-gray-400">/5.0</span>
+                        <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                          <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                            <TrendingUp className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="font-medium text-sm">Improving</span>
                         </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        {agent.trend === 'up' ? (
-                          <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                            <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                              <TrendingUp className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="font-medium text-sm">Improving</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
-                            <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
-                              <TrendingDown className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="font-medium text-sm">Declining</span>
-                          </div>
-                        )}
                       </td>
                     </motion.tr>
                   ))}
+                  {wsData.agentEfficiency.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-gray-400">
+                        No agent data available
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
