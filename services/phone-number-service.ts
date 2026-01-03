@@ -227,7 +227,7 @@ export const updatePhoneNumberAgent = async (
     if (!token) throw new Error('Authentication required. Please log in.');
 
     const response = await fetch(`${API_BASE_URL}/api/agent-numbers/${numberId}`, {
-        method: 'PATCH',
+        method: 'PUT',  // ✅ Changed from PATCH
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -246,15 +246,12 @@ export const updatePhoneNumberAgent = async (
     return response.json();
 };
 
-/**
- * Unlink agent from phone number
- */
 export const unlinkAgent = async (numberId: string): Promise<PhoneNumber> => {
     const token = getAuthToken();
     if (!token) throw new Error('Authentication required. Please log in.');
 
     const response = await fetch(`${API_BASE_URL}/api/agent-numbers/${numberId}`, {
-        method: 'PATCH',
+        method: 'PUT',  // ✅ Changed from PATCH
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

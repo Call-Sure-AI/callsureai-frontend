@@ -740,7 +740,7 @@ export default function PhoneNumbersPage() {
             const agent = agents.find(a => a.id === editAgentId);
 
             const response = await fetch(`${API_BASE_URL}/api/agent-numbers/${selectedPhoneNumber.id}`, {
-                method: "PATCH",
+                method: "PUT",  // ✅ Changed from PATCH
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
