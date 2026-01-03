@@ -345,23 +345,51 @@ export default function PhoneNumbersPage() {
             const token = getAuthToken();
             const companyId = getCompanyId();
 
-            if (token && companyId) {
-                // Fetch phone numbers
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/agent-numbers/company/${companyId}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setPhoneNumbers(Array.isArray(data) ? data : data.phone_numbers || []);
-                    }
-                } catch (err) {
-                    console.log("No phone numbers found:", err);
+            // ✅ ADD: Better validation with user feedback
+            if (!token) {
+                console.error("No auth token found");
+                toast({ 
+                    title: "Authentication Error", 
+                    description: "Please log in again", 
+                    variant: "destructive" 
+                });
+                setPhoneNumbers([]);
+                return;
+            }
+
+            if (!companyId) {
+                console.error("No company ID found - user data:", localStorage.getItem("user"));
+                toast({ 
+                    title: "Error", 
+                    description: "Company information missing. Please log out and log in again.", 
+                    variant: "destructive" 
+                });
+                setPhoneNumbers([]);
+                return;
+            }
+
+            // Fetch phone numbers
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/agent-numbers/company/${companyId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const numbers = Array.isArray(data) ? data : data.agent_numbers || [];
+                    setPhoneNumbers(numbers);
+                    console.log("✅ Fetched phone numbers:", numbers.length);
+                } else {
+                    console.error("Failed to fetch phone numbers:", response.status);
                     setPhoneNumbers([]);
                 }
+            } catch (err) {
+                console.error("Error fetching phone numbers:", err);
+                setPhoneNumbers([]);
             }
         } catch (err) {
-            console.error("Error fetching data:", err);
+            console.error("Error in fetchPhoneNumbers:", err);
+            setPhoneNumbers([]);
         } finally {
             setLoading(false);
         }
@@ -383,6 +411,13 @@ export default function PhoneNumbersPage() {
             const token = getAuthToken();
             const companyId = getCompanyId();
 
+            // ✅ ADD: Check for null before making API call
+            if (!token || !companyId) {
+                console.log("Skipping address fetch - missing token or company_id");
+                setSavedAddresses([]);
+                return;
+            }
+
             const response = await fetch(`${API_BASE_URL}/api/regulatory/addresses?company_id=${companyId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -390,9 +425,13 @@ export default function PhoneNumbersPage() {
             if (response.ok) {
                 const data = await response.json();
                 setSavedAddresses(Array.isArray(data) ? data : data.addresses || []);
+                console.log("✅ Fetched addresses:", (Array.isArray(data) ? data : data.addresses || []).length);
+            } else {
+                console.error("Failed to fetch addresses:", response.status);
+                setSavedAddresses([]);
             }
         } catch (err) {
-            console.log("No saved addresses found:", err);
+            console.error("Error fetching addresses:", err);
             setSavedAddresses([]);
         } finally {
             setLoadingAddresses(false);

@@ -83,6 +83,20 @@ export const SocialLogin = ({ isSignup = false }) => {
                 }
             );
 
+            // ✅ ADD: Debug logging
+            console.log('🟢 Google Login Response:', data);
+            console.log('🟢 User object:', data.user);
+            console.log('🟢 Company ID:', data.user?.company_id || data.user?.companyId);
+
+            // ✅ ADD: Validate company_id exists
+            if (!data.user?.company_id && !data.user?.companyId) {
+                console.error('❌ No company_id in user object!', data.user);
+                toast({
+                    title: 'Setup Required',
+                    description: 'Please complete your profile setup',
+                });
+            }
+
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
 
