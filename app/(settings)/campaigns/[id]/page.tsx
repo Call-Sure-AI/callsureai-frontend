@@ -650,7 +650,7 @@ export default function CampaignDetailPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {callLogs.map((log, idx) => (
+                                    {callLogs.map((log: any, idx: number) => (
                                         <motion.div key={log.id || idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-3">
@@ -683,7 +683,7 @@ export default function CampaignDetailPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {bookings.map((booking, idx) => (
+                                    {bookings.map((booking: any, idx: number) => (
                                         <motion.div key={booking.id || idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
