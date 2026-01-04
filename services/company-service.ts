@@ -121,7 +121,7 @@ const createOrUpdateCompany = async (formData: any, token: string) => {
                 email: formData.email,
                 phone_number: formattedPhone, // Use the formatted phone number
                 address: address,
-                user_id: formData.userId,
+                user_id: formData.user_id,
                 logo: formData.logo,
                 // Add properly formatted website (if provided)
                 website: formattedWebsite,
@@ -275,12 +275,12 @@ const getCompanyById = async (id: string, token: string) => {
 
 /**
  * Get companies by user ID
- * @param userId User ID
+ * @param user_id User ID
  * @param token Authentication token
  */
-const getCompanyByUserId = async (userId: string, token: string) => {
+const getCompanyByuser_id = async (user_id: string, token: string) => {
     try {
-        if (!userId) {
+        if (!user_id) {
             throw new Error('User ID is required');
         }
 
@@ -289,7 +289,7 @@ const getCompanyByUserId = async (userId: string, token: string) => {
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
-        const response = await fetch(`${apiUrl}/api/company/user?user_id=${userId}`, {
+        const response = await fetch(`${apiUrl}/api/company/user?user_id=${user_id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -320,7 +320,7 @@ const getCompanyByUserId = async (userId: string, token: string) => {
             throw new Error('Network error. Please check your internet connection.');
         }
         
-        console.error('Error in getCompanyByUserId:', error);
+        console.error('Error in getCompanyByuser_id:', error);
         throw error;
     }
 };
@@ -517,7 +517,7 @@ export {
     createOrUpdateCompany,
     getAllCompanies,
     getCompanyById,
-    getCompanyByUserId,
+    getCompanyByuser_id,
     updateCompany,
     deleteCompany,
     uploadCompanyLogo,

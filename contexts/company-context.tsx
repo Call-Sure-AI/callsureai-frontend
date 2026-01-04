@@ -17,7 +17,7 @@ export interface CompanyData {
     address: string;
     logo?: string;
     api_key?: string;
-    userId?: string;
+    user_id?: string;
 }
 
 export interface ProcessedCompanyData {
@@ -33,7 +33,7 @@ export interface ProcessedCompanyData {
     zip_code: string;
     logo?: string;
     api_key?: string;
-    userId?: string;
+    user_id?: string;
 }
 
 interface CompanyContextType {
@@ -99,7 +99,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             state: '',
             zip_code: '',
             logo: user?.image || '',
-            userId: user?.id || ''
+            user_id: user?.id || ''
         };
     };
 
@@ -121,7 +121,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
             zip_code: addressParts[3]?.trim() || '',
             logo: data.logo || userImage || '',
             api_key: data.api_key || '',
-            userId: data.userId || user?.id || ''
+            user_id: data.user_id || user?.id || ''
         };
     };
 
@@ -269,7 +269,7 @@ export const CompanyProvider = ({ children }: CompanyProviderProps) => {
                 phone_number: typeof data.phone === 'string' ? data.phone : '',
                 address: `${address}, ${city}, ${state}, ${zipCode}`.trim(),
                 logo: typeof data.logo === 'string' ? data.logo : '',
-                userId: data.userId || user?.id
+                user_id: data.user_id || user?.id
             };
 
             try {

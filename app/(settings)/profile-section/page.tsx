@@ -186,7 +186,7 @@ const ProfileSection = () => {
                 state: formData.state,
                 zip_code: formData.zip_code,
                 logo: formData.logo,
-                userId: user?.id,
+                user_id: user?.id,
             });
 
             if (success) {

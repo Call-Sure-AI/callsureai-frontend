@@ -24,7 +24,7 @@ export interface AnalyticMetric {
 
 export interface TransactionRecord {
     id: string;
-    userId: string;
+    user_id: string;
     amount: number;
     date: string;
     status: 'completed' | 'pending' | 'failed';

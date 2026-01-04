@@ -139,17 +139,17 @@ const AccessManagerDashboard: React.FC = () => {
     { name: "Custom Projects Access", icon: FolderKey, description: "Limited access to specific projects" },
   ];
 
-  const toggleDropdown = (userId: string): void => {
-    setOpenDropdownId(openDropdownId === userId ? null : userId);
+  const toggleDropdown = (user_id: string): void => {
+    setOpenDropdownId(openDropdownId === user_id ? null : user_id);
   };
 
   const handleAccessSelect = (
-    userId: string,
+    user_id: string,
     accessName: AccessLevelName,
   ): void => {
     setSelectedAccess((prev) => ({
       ...prev,
-      [userId]: accessName,
+      [user_id]: accessName,
     }));
     setOpenDropdownId(null);
   };
@@ -225,9 +225,9 @@ const AccessManagerDashboard: React.FC = () => {
     }
   };
 
-  const handleRemoveUser = async (userId: string): Promise<void> => {
-    if (userId.startsWith("invitation-")) {
-      const invitationId = userId.replace("invitation-", "");
+  const handleRemoveUser = async (user_id: string): Promise<void> => {
+    if (user_id.startsWith("invitation-")) {
+      const invitationId = user_id.replace("invitation-", "");
 
       try {
         setIsLoading(true);
@@ -261,9 +261,9 @@ const AccessManagerDashboard: React.FC = () => {
       }
     }
 
-    setUsers((prev) => prev.filter((user) => user.id !== userId));
+    setUsers((prev) => prev.filter((user) => user.id !== user_id));
     const newSelectedAccess = { ...selectedAccess };
-    delete newSelectedAccess[userId];
+    delete newSelectedAccess[user_id];
     setSelectedAccess(newSelectedAccess);
   };
 

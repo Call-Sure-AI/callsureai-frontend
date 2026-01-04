@@ -171,10 +171,10 @@ export const getAllAgents = async (token: string) => {
     }
 };
 
-export const getAgentsByUserId = async (userId: string, token: string) => {
+export const getAgentsByuser_id = async (user_id: string, token: string) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.callsure.ai';
-        const response = await fetch(`${apiUrl}/api/agent/user?user_id=${userId}`, {
+        const response = await fetch(`${apiUrl}/api/agent/user?user_id=${user_id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -189,7 +189,7 @@ export const getAgentsByUserId = async (userId: string, token: string) => {
 
         return await response.json();
     } catch (error) {
-        console.error('Error in getAgentsByUserId:', error);
+        console.error('Error in getAgentsByuser_id:', error);
         throw error;
     }
 };
